@@ -18,3 +18,28 @@ prototype-vintage-backup/node_modules/
 
 # Railway 配置
 .railway/
+
+# Obsidian 配置
+.obsidian/
+
+# Trae IDE 配置
+.trae/
+
+# 归档工作区（不需要部署）
+_archive_workspace/
+
+# 文档目录（不需要部署）
+文档/
+
+# 调试日志
+debug.log
+
+# 环境变量文件
+.env
+.env.example
+prototype/.env
+prototype/.env.example
+
+# Python 环境
+sitecustomize.py
+conftest.py

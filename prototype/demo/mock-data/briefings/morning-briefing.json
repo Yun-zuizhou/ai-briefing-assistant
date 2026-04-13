@@ -1,0 +1,86 @@
+{
+  "id": 1,
+  "user_id": 1,
+  "briefing_date": "2026-03-12",
+  "briefing_type": "morning",
+  "info_tracking": {
+    "hot_topics": [
+      {
+        "id": 1,
+        "title": "OpenAI发布GPT-5技术预览版",
+        "summary": "OpenAI正式发布GPT-5技术预览版，新版本在推理能力、多模态理解和代码生成方面有显著提升。",
+        "source": "OpenAI官方博客",
+        "source_url": "https://openai.com/blog/gpt-5-preview",
+        "categories": ["AI", "技术", "大模型"]
+      },
+      {
+        "id": 2,
+        "title": "国内首个AI生成内容版权保护条例出台",
+        "summary": "国家版权局发布《人工智能生成内容版权保护条例》，明确AI生成内容的版权归属和使用规范。",
+        "source": "新华社",
+        "source_url": "https://news.xinhua.com/ai-copyright-2026",
+        "categories": ["政策", "AI", "法律"]
+      },
+      {
+        "id": 3,
+        "title": "远程办公成为科技行业新常态",
+        "summary": "调研显示，超过70%的科技公司已采用混合办公模式，远程办公工具市场规模同比增长45%。",
+        "source": "36氪",
+        "source_url": "https://36kr.com/p/remote-work-2026",
+        "categories": ["职场", "远程工作", "科技"]
+      }
+    ],
+    "opportunities": [
+      {
+        "id": 1,
+        "title": "远程运营专员（AI产品方向）",
+        "summary": "负责AI产品的日常运营工作，支持远程办公，弹性工作时间。",
+        "reward": "200-300元/天",
+        "deadline": "2026-03-20",
+        "type": "parttime"
+      },
+      {
+        "id": 2,
+        "title": "技术博客征稿 | AI前沿技术",
+        "summary": "面向AI领域技术博主征稿，主题包括大模型应用、AI工具评测等。",
+        "reward": "500-2000元/篇",
+        "deadline": "2026-03-31",
+        "type": "submission"
+      }
+    ],
+    "learning_resources": [
+      {
+        "id": 1,
+        "title": "Prompt Engineering完全指南",
+        "summary": "从零开始学习Prompt Engineering，涵盖基础概念、高级技巧和实战案例。",
+        "duration": "2小时",
+        "difficulty": "beginner"
+      }
+    ]
+  },
+  "todo_reminders": [
+    {
+      "id": 1,
+      "content": "投递简历（远程运营岗位）",
+      "deadline": "2026-03-13",
+      "priority": "high",
+      "related_title": "远程运营专员（AI产品方向）"
+    }
+  ],
+  "personal_narrative": {
+    "summary": "昨天你关注了3条AI资讯，记录了2条想法。",
+    "highlights": [
+      "你连续阅读简报7天了，保持得很好！",
+      "你对AI技术的关注度持续上升"
+    ]
+  },
+  "behavior_stats": {
+    "topics_read": 3,
+    "thoughts_recorded": 2,
+    "todos_completed": 0,
+    "favorites_added": 1
+  },
+  "streak_days": 7,
+  "is_read": false,
+  "created_at": "2026-03-12T08:00:00"
+}

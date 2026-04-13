@@ -1,0 +1,29 @@
+{
+  "name": "ai-briefing-assistant-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dev:backend": "node scripts/run-backend.mjs",
+    "dev:frontend": "node scripts/run-frontend.mjs",
+    "build": "node scripts/build-frontend.mjs",
+    "lint": "node scripts/lint-frontend.mjs",
+    "test:api-mainline": "node scripts/test-api-mainline.mjs",
+    "demo:sync": "python scripts/demo_sync.py",
+    "db:init": "node scripts/init-local-db.mjs",
+    "db:d1:prepare": "node scripts/prepare-d1.mjs",
+    "db:d1:bootstrap": "python scripts/bootstrap_d1_credentials.py",
+    "db:d1:apply": "python scripts/apply_d1_remote.py",
+    "db:d1:apply-seed": "python scripts/apply_d1_remote.py --with-seed",
+    "db:d1:apply-seed-master": "python scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope master",
+    "db:d1:apply-seed-content": "python scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content",
+    "db:d1:apply-seed-rss-sources": "python scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-rss-sources",
+    "db:d1:apply-seed-rss-articles": "python scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-rss-articles",
+    "db:d1:apply-seed-hot-topics": "python scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-hot-topics",
+    "db:d1:apply-seed-opportunities": "python scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-opportunities",
+    "db:d1:apply-seed-derived": "python scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-derived",
+    "db:d1:verify-mainline": "python scripts/verify_d1_behavior_mainline.py",
+    "check": "node scripts/check.mjs"
+  }
+}

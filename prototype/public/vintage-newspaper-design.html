@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI简报 - 复古报纸风格设计稿</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper-cream: #F4EFE4;
+      --paper-aged: #E8E0D0;
+      --paper-dark: #D4C8B0;
+      --ink-black: #1A1612;
+      --ink-dark: #2C2620;
+      --ink-medium: #4A4238;
+      --ink-light: #6B6258;
+      --accent-red: #8B2500;
+      --accent-blue: #1E3A5F;
+      --accent-gold: #8B6914;
+      --accent-burgundy: #6B1E3A;
+      
+      --font-display: 'Playfair Display', 'Noto Serif SC', serif;
+      --font-serif-cn: 'Noto Serif SC', 'Source Serif 4', serif;
+      --font-body: 'Source Serif 4', 'Noto Serif SC', serif;
+      --font-vintage: 'IM Fell English', 'Noto Serif SC', serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: linear-gradient(135deg, #2C2416 0%, #3D3425 50%, #4A3F2C 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 60px;
+    }
+
+    .design-title {
+      color: #D4C8B0;
+      font-family: var(--font-display);
+      font-size: 14px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: -40px;
+    }
+
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: linear-gradient(145deg, #1A1A1A 0%, #2C2C2C 100%);
+      border-radius: 44px;
+      padding: 12px;
+      box-shadow: 
+        0 0 0 1px rgba(255,255,255,0.05),
+        0 25px 50px -12px rgba(0, 0, 0, 0.6),
+        0 0 80px rgba(139, 37, 0, 0.1);
+      position: relative;
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 28px;
+      background: linear-gradient(180deg, #0f0f0f 0%, #1A1A1A 100%);
+      border-radius: 0 0 18px 18px;
+      z-index: 10;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 36px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .newspaper-page {
+      width: 100%;
+      height: 100%;
+      background: var(--paper-cream);
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .newspaper-page::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"),
+        linear-gradient(180deg, rgba(0,0,0,0.02) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.03) 100%);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .newspaper-page::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0,0,0,0.01) 2px,
+          rgba(0,0,0,0.01) 4px
+        );
+      pointer-events: none;
+      z-index: 101;
+    }
+
+    .paper-edge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 8px solid transparent;
+      border-image: linear-gradient(135deg, 
+        rgba(0,0,0,0.1) 0%, 
+        transparent 10%,
+        transparent 90%,
+        rgba(0,0,0,0.08) 100%
+      ) 1;
+      pointer-events: none;
+      z-index: 102;
+    }
+
+    .fold-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(0,0,0,0.03) 20%,
+        rgba(0,0,0,0.05) 50%,
+        rgba(0,0,0,0.03) 80%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 103;
+    }
+
+    .masthead {
+      background: linear-gradient(180deg, var(--paper-cream) 0%, var(--paper-aged) 100%);
+      padding: 16px 12px 12px;
+      border-bottom: 3px double var(--ink-black);
+      position: relative;
+    }
+
+    .masthead::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--ink-black);
+    }
+
+    .masthead-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .masthead-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--ink-medium), transparent);
+    }
+
+    .masthead-label {
+      font-family: var(--font-vintage);
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      color: var(--ink-medium);
+      text-transform: uppercase;
+    }
+
+    .masthead-title {
+      text-align: center;
+      margin: 8px 0;
+    }
+
+    .masthead-title h1 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      color: var(--ink-black);
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+      position: relative;
+      display: inline-block;
+    }
+
+    .masthead-title h1::before,
+    .masthead-title h1::after {
+      content: '❧';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: var(--accent-burgundy);
+    }
+
+    .masthead-title h1::before {
+      left: -28px;
+    }
+
+    .masthead-title h1::after {
+      right: -28px;
+    }
+
+    .masthead-tagline {
+      font-family: var(--font-serif-cn);
+      font-size: 10px;
+      color: var(--ink-medium);
+      letter-spacing: 0.15em;
+      margin-top: 4px;
+    }
+
+    .date-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      margin-top: 10px;
+      border-top: 1px solid var(--ink-black);
+      border-bottom: 1px solid var(--ink-black);
+      font-family: var(--font-serif-cn);
+      font-size: 10px;
+      color: var(--ink-dark);
+      letter-spacing: 0.05em;
+    }
+
+    .date-banner .issue {
+      font-weight: 600;
+    }
+
+    .date-banner .date {
+      font-weight: 700;
+    }
+
+    .content-area {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .interest-banner {
+      background: linear-gradient(135deg, var(--paper-aged) 0%, var(--paper-cream) 100%);
+      border: 2px solid var(--ink-black);
+      padding: 10px 12px;
+      position: relative;
+      box-shadow: 
+        2px 2px 0 rgba(0,0,0,0.1),
+        inset 0 0 20px rgba(0,0,0,0.02);
+    }
+
+    .interest-banner::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border: 1px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    .interest-banner p {
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      color: var(--ink-dark);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .interest-banner .pin {
+      color: var(--accent-burgundy);
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: var(--paper-cream);
+      border: 2px solid var(--ink-black);
+      padding: 10px 12px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      border: 1px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    .action-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+    }
+
+    .action-btn-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .action-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--accent-blue);
+    }
+
+    .action-btn-text {
+      font-family: var(--font-serif-cn);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-black);
+    }
+
+    .action-btn-arrow {
+      width: 14px;
+      height: 14px;
+      color: var(--ink-light);
+    }
+
+    .report-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .report-btn {
+      padding: 10px 12px;
+      border: 2px solid var(--ink-black);
+      cursor: pointer;
+      text-align: center;
+      position: relative;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .report-btn::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      border: 1px solid rgba(255,255,255,0.3);
+      pointer-events: none;
+    }
+
+    .report-btn.weekly {
+      background: linear-gradient(135deg, var(--accent-gold) 0%, #A07818 100%);
+    }
+
+    .report-btn.monthly {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #2A4A6F 100%);
+    }
+
+    .report-btn-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .report-btn-icon {
+      width: 16px;
+      height: 16px;
+      color: white;
+    }
+
+    .report-btn-text {
+      font-family: var(--font-serif-cn);
+      font-size: 12px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.1em;
+    }
+
+    .topic-card {
+      background: var(--paper-cream);
+      border: 2px solid var(--ink-black);
+      position: relative;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .topic-card::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border: 1px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    .topic-header {
+      padding: 8px 12px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .topic-header.tech {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #2A4A6F 100%);
+    }
+
+    .topic-header.culture {
+      background: linear-gradient(135deg, var(--accent-burgundy) 0%, #8B2A4A 100%);
+    }
+
+    .topic-header.life {
+      background: linear-gradient(135deg, #2D5A27 0%, #3D6A37 100%);
+    }
+
+    .topic-icon {
+      font-size: 16px;
+    }
+
+    .topic-title {
+      flex: 1;
+      font-family: var(--font-serif-cn);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .topic-count {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .topic-summary {
+      padding: 12px;
+      border-bottom: 1px dashed var(--paper-dark);
+    }
+
+    .summary-label {
+      font-family: var(--font-vintage);
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--ink-medium);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .summary-text {
+      font-family: var(--font-serif-cn);
+      font-size: 12px;
+      color: var(--ink-dark);
+      line-height: 1.8;
+    }
+
+    .topic-insights {
+      padding: 10px 12px;
+      background: linear-gradient(180deg, var(--paper-aged) 0%, var(--paper-cream) 100%);
+      border-bottom: 1px dashed var(--paper-dark);
+    }
+
+    .insights-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .insights-list li {
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      color: var(--ink-medium);
+      line-height: 1.7;
+      padding-left: 12px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .insights-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--accent-burgundy);
+      font-weight: bold;
+    }
+
+    .topic-contents {
+      padding: 10px 12px;
+    }
+
+    .content-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--paper-dark);
+    }
+
+    .content-item:last-child {
+      border-bottom: none;
+    }
+
+    .content-title {
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      color: var(--ink-dark);
+      flex: 1;
+    }
+
+    .content-link {
+      font-family: var(--font-vintage);
+      font-size: 9px;
+      color: var(--accent-blue);
+      text-decoration: underline;
+      font-style: italic;
+    }
+
+    .topic-actions {
+      display: flex;
+      gap: 6px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--paper-dark);
+    }
+
+    .action-small-btn {
+      padding: 5px 10px;
+      background: var(--paper-cream);
+      border: 1px solid var(--ink-black);
+      font-family: var(--font-serif-cn);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-small-btn:hover {
+      background: var(--ink-black);
+      color: white;
+    }
+
+    .action-small-btn.primary {
+      background: var(--accent-burgundy);
+      border-color: var(--accent-burgundy);
+      color: white;
+    }
+
+    .alert-section {
+      background: var(--paper-cream);
+      border: 2px solid var(--ink-black);
+      position: relative;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .alert-section::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border: 1px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    .alert-header {
+      background: linear-gradient(135deg, var(--accent-red) 0%, #A02830 100%);
+      color: white;
+      padding: 8px 12px;
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-content {
+      padding: 12px;
+    }
+
+    .alert-item {
+      padding: 10px;
+      background: linear-gradient(180deg, var(--paper-aged) 0%, var(--paper-cream) 100%);
+      border-left: 3px solid var(--accent-red);
+      margin-bottom: 8px;
+    }
+
+    .alert-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .alert-item-title {
+      font-family: var(--font-serif-cn);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-black);
+      margin-bottom: 4px;
+    }
+
+    .alert-item-text {
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      color: var(--ink-medium);
+      line-height: 1.6;
+    }
+
+    .story-section {
+      background: var(--paper-cream);
+      border: 2px solid var(--ink-black);
+      position: relative;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .story-section::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border: 1px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    .story-header-section {
+      background: linear-gradient(135deg, var(--accent-blue) 0%, #2A4A6F 100%);
+      color: white;
+      padding: 8px 12px;
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .story-content {
+      padding: 12px;
+    }
+
+    .story-narrative {
+      background: linear-gradient(180deg, var(--paper-aged) 0%, var(--paper-cream) 100%);
+      border-left: 4px solid var(--accent-burgundy);
+      padding: 12px;
+      font-family: var(--font-serif-cn);
+      font-size: 12px;
+      font-style: italic;
+      color: var(--ink-medium);
+      line-height: 1.8;
+    }
+
+    .story-narrative strong {
+      color: var(--accent-burgundy);
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .streak-badge-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--ink-black);
+      color: white;
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    }
+
+    .stats-section {
+      background: var(--paper-cream);
+      border: 2px solid var(--ink-black);
+      position: relative;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .stats-section::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      border: 1px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    .stats-header {
+      background: var(--ink-black);
+      color: white;
+      padding: 8px 12px;
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 2px solid var(--ink-black);
+      margin: 12px;
+    }
+
+    .stats-item {
+      padding: 14px 8px;
+      text-align: center;
+      border-right: 1px solid var(--ink-black);
+      background: linear-gradient(180deg, var(--paper-cream) 0%, var(--paper-aged) 100%);
+    }
+
+    .stats-item:last-child {
+      border-right: none;
+    }
+
+    .stats-value {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--accent-burgundy);
+      line-height: 1;
+    }
+
+    .stats-label {
+      font-family: var(--font-serif-cn);
+      font-size: 10px;
+      color: var(--ink-medium);
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .bottom-hint {
+      background: var(--paper-cream);
+      border: 2px solid var(--ink-black);
+      padding: 10px 12px;
+      text-align: center;
+      position: relative;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .bottom-hint::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      border: 1px solid var(--ink-medium);
+      pointer-events: none;
+    }
+
+    .bottom-hint p {
+      font-family: var(--font-serif-cn);
+      font-size: 11px;
+      color: var(--ink-medium);
+      margin: 0;
+    }
+
+    .tabbar {
+      position: sticky;
+      bottom: 0;
+      background: var(--paper-cream);
+      border-top: 2px solid var(--ink-black);
+      display: flex;
+      padding: 8px 0;
+    }
+
+    .tabbar::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--ink-medium);
+    }
+
+    .tabbar-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 0;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      color: var(--ink-medium);
+    }
+
+    .tabbar-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background: var(--accent-burgundy);
+      transition: width 0.2s ease;
+    }
+
+    .tabbar-item.active {
+      color: var(--ink-black);
+    }
+
+    .tabbar-item.active::before {
+      width: 28px;
+    }
+
+    .tabbar-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .tabbar-label {
+      font-family: var(--font-serif-cn);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .decorative-corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--ink-medium);
+      opacity: 0.3;
+    }
+
+    .decorative-corner.top-left {
+      top: 4px;
+      left: 4px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .decorative-corner.top-right {
+      top: 4px;
+      right: 4px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .decorative-corner.bottom-left {
+      bottom: 4px;
+      left: 4px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .decorative-corner.bottom-right {
+      bottom: 4px;
+      right: 4px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .ornament {
+      text-align: center;
+      font-size: 14px;
+      color: var(--ink-light);
+      margin: 8px 0;
+      letter-spacing: 0.5em;
+    }
+
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+
+    .section-divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--ink-medium), transparent);
+    }
+
+    .section-divider-icon {
+      font-size: 10px;
+      color: var(--ink-light);
+    }
+
+    .page-label {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 4px 12px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      font-family: var(--font-serif-cn);
+      z-index: 200;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <p class="design-title">复古报纸风格设计稿 · VINTAGE NEWSPAPER DESIGN</p>
+
+  <div class="phone-frame">
+    <div class="phone-screen">
+      <div class="newspaper-page">
+        <div class="paper-edge"></div>
+        <div class="fold-line"></div>
+        <div class="decorative-corner top-left"></div>
+        <div class="decorative-corner top-right"></div>
+        <div class="decorative-corner bottom-left"></div>
+        <div class="decorative-corner bottom-right"></div>
+        
+        <span class="page-label">首页 · HOME</span>
+
+        <header class="masthead">
+          <div class="masthead-top">
+            <div class="masthead-line"></div>
+            <span class="masthead-label">AI Powered Daily Brief</span>
+            <div class="masthead-line"></div>
+          </div>
+          <div class="masthead-title">
+            <h1>AI 简 报</h1>
+            <p class="masthead-tagline">每日信息精选 · 智能收集 · 记录成长</p>
+          </div>
+          <div class="date-banner">
+            <span class="issue">第 365 期</span>
+            <span class="date">2026年3月13日 星期五</span>
+            <span>推送: 08:00</span>
+          </div>
+        </header>
+
+        <div class="content-area">
+          <div class="interest-banner">
+            <p><span class="pin">📌</span> 当前关注：人工智能、科技前沿、阅读写作</p>
+          </div>
+
+          <div class="quick-actions">
+            <button class="action-btn">
+              <div class="action-btn-content">
+                <div class="action-btn-left">
+                  <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  <span class="action-btn-text">收藏 12</span>
+                </div>
+                <svg class="action-btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+            </button>
+            <button class="action-btn">
+              <div class="action-btn-content">
+                <div class="action-btn-left">
+                  <svg class="action-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span class="action-btn-text">历史简报</span>
+                </div>
+                <svg class="action-btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+            </button>
+          </div>
+
+          <div class="report-buttons">
+            <button class="report-btn weekly">
+              <div class="report-btn-content">
+                <svg class="report-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                </svg>
+                <span class="report-btn-text">周 报</span>
+              </div>
+            </button>
+            <button class="report-btn monthly">
+              <div class="report-btn-content">
+                <svg class="report-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                </svg>
+                <span class="report-btn-text">月 报</span>
+              </div>
+            </button>
+          </div>
+
+          <div class="ornament">❦ ❦ ❦</div>
+
+          <div class="topic-card">
+            <div class="topic-header tech">
+              <span class="topic-icon">💻</span>
+              <span class="topic-title">科技前沿 · TECH</span>
+              <span class="topic-count">5</span>
+            </div>
+            <div class="topic-summary">
+              <p class="summary-label">今日摘要</p>
+              <p class="summary-text">OpenAI发布GPT-5，推理能力提升300%；苹果Vision Pro 2曝光，重量减轻40%；量子计算突破，IBM实现1000量子比特...</p>
+            </div>
+            <div class="topic-insights">
+              <p class="summary-label">关键洞察</p>
+              <ul class="insights-list">
+                <li>GPT-5在复杂推理任务上首次超越人类基准</li>
+                <li>量子计算商业化进程加速，预计2028年实用化</li>
+                <li>AI监管框架在全球范围内逐步完善</li>
+              </ul>
+            </div>
+            <div class="topic-contents">
+              <p class="summary-label">相关内容</p>
+              <div class="content-item">
+                <span class="content-title">OpenAI GPT-5 技术白皮书解读</span>
+                <span class="content-link">阅读 →</span>
+              </div>
+              <div class="content-item">
+                <span class="content-title">量子计算：从实验室到商业应用</span>
+                <span class="content-link">阅读 →</span>
+              </div>
+            </div>
+            <div class="topic-actions">
+              <button class="action-small-btn primary">记录想法</button>
+              <button class="action-small-btn">收藏</button>
+              <button class="action-small-btn">分享</button>
+            </div>
+          </div>
+
+          <div class="topic-card">
+            <div class="topic-header culture">
+              <span class="topic-icon">📚</span>
+              <span class="topic-title">阅读写作 · READ</span>
+              <span class="topic-count">3</span>
+            </div>
+            <div class="topic-summary">
+              <p class="summary-label">今日摘要</p>
+              <p class="summary-text">村上春树新作《城市与不确定的墙》中文版上市；《纽约客》年度最佳书单发布；AI写作工具对比评测...</p>
+            </div>
+            <div class="topic-actions">
+              <button class="action-small-btn primary">记录想法</button>
+              <button class="action-small-btn">收藏</button>
+            </div>
+          </div>
+
+          <div class="alert-section">
+            <div class="alert-header">
+              <span>🔔</span>
+              重要提醒 · ALERT
+            </div>
+            <div class="alert-content">
+              <div class="alert-item">
+                <p class="alert-item-title">《AI简报》年度订阅即将到期</p>
+                <p class="alert-item-text">您的订阅将于3月20日到期，续订可享受8折优惠。</p>
+              </div>
+              <div class="alert-item">
+                <p class="alert-item-title">本周阅读目标还差2篇</p>
+                <p class="alert-item-text">继续保持，完成本周目标可获得「阅读达人」徽章。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="story-section">
+            <div class="story-header-section">
+              <span>📖</span>
+              个人叙事 · STORY
+            </div>
+            <div class="story-content">
+              <p class="story-narrative">
+                "今天你关注了<strong>8</strong>条内容，涵盖<strong>2</strong>个主题。
+                你正在持续追踪多个领域，保持这种好奇心！"
+              </p>
+              <div class="streak-badge">
+                <span class="streak-badge-inner">🔥 连续打卡 7 天</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-section">
+            <div class="stats-header">
+              <span>📊</span>
+              数据统计 · STATISTICS
+            </div>
+            <div class="stats-grid">
+              <div class="stats-item">
+                <div class="stats-value">8</div>
+                <div class="stats-label">今日关注</div>
+              </div>
+              <div class="stats-item">
+                <div class="stats-value" style="color: var(--accent-blue);">3</div>
+                <div class="stats-label">完成待办</div>
+              </div>
+              <div class="stats-item">
+                <div class="stats-value" style="color: #2D5A27;">7</div>
+                <div class="stats-label">连续打卡</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bottom-hint">
+            <p>💬 点击右上角折角，与AI对话</p>
+          </div>
+        </div>
+
+        <nav class="tabbar">
+          <button class="tabbar-item active">
+            <svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span class="tabbar-label">首页</span>
+          </button>
+          <button class="tabbar-item">
+            <svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <span class="tabbar-label">待办</span>
+          </button>
+          <button class="tabbar-item">
+            <svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span class="tabbar-label">设置</span>
+          </button>
+          <button class="tabbar-item">
+            <svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="tabbar-label">我的</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

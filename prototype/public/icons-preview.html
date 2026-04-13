@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图标设计 - AI简报</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F5F1E8;
+      --bg-paper: #FBF8F1;
+      --fg: #1A1612;
+      --muted: #6B6358;
+      --accent: #8B2500;
+      --gold: #B8860B;
+      --topic-ai: #1E3A5F;
+      --topic-work: #2D5A27;
+      --topic-life: #8B4513;
+      --border: #D4CFC2;
+      --border-dark: #A69F8F;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background: linear-gradient(160deg, #2C2416 0%, #3D3425 50%, #4A3F2C 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--bg);
+      border-radius: 4px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 8px; left: 8px; right: 8px; bottom: 8px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      text-align: center;
+      margin-bottom: 8px;
+      color: var(--fg);
+      letter-spacing: 0.15em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .subtitle::before, .subtitle::after {
+      content: '◆';
+      color: var(--gold);
+      font-size: 8px;
+    }
+
+    .section { margin-bottom: 36px; }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      color: var(--fg);
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--gold);
+      display: inline-block;
+      letter-spacing: 0.1em;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .icons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 16px;
+    }
+
+    .icon-card {
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      padding: 16px 12px;
+      text-align: center;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .icon-card::before {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px; right: 3px; bottom: 3px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    .icon-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .icon-wrapper {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .semantic-note {
+      font-size: 9px;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .topic-section {
+      background: linear-gradient(135deg, #FDF8F4 0%, #F7F2E8 100%);
+      padding: 20px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .topic-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .topic-row:last-child { margin-bottom: 0; }
+
+    .topic-label {
+      width: 80px;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--fg);
+    }
+
+    .topic-icons {
+      display: flex;
+      gap: 12px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .topic-icon-box {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .topic-icon-box::before {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px; right: 2px; bottom: 2px;
+      border: 1px solid var(--border);
+    }
+
+    .semantic-hint {
+      font-size: 10px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .style-spec {
+      background: var(--bg-paper);
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-top: 32px;
+    }
+
+    .style-spec h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      color: var(--fg);
+      margin-bottom: 12px;
+      letter-spacing: 0.1em;
+    }
+
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 6px 0;
+      border-bottom: 1px dotted var(--border);
+    }
+
+    .spec-key { color: var(--muted); }
+    .spec-value { color: var(--fg); font-weight: 500; }
+
+    .color-swatches {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .color-swatch {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Icon Set</h1>
+    <p class="subtitle">语义化图标设计 · Semantic Icon Design</p>
+
+    <!-- 主题图标 -->
+    <section class="section">
+      <h2 class="section-title">主题图标</h2>
+      <p class="section-desc">用于标识不同信息主题，符号语义必须清晰明确</p>
+      
+      <div class="topic-section">
+        <div class="topic-row">
+          <span class="topic-label">人工智能</span>
+          <div class="topic-icons">
+            <div class="topic-icon-box" style="border-color: var(--topic-ai);">
+              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+                <rect x="9" y="9" width="14" height="14" rx="1.5" stroke="#1E3A5F" stroke-width="1.5" fill="none"/>
+                <rect x="12" y="6" width="8" height="3" stroke="#1E3A5F" stroke-width="1.5" fill="none"/>
+                <rect x="12" y="23" width="8" height="3" stroke="#1E3A5F" stroke-width="1.5" fill="none"/>
+                <rect x="6" y="12" width="3" height="8" stroke="#1E3A5F" stroke-width="1.5" fill="none"/>
+                <rect x="23" y="12" width="3" height="8" stroke="#1E3A5F" stroke-width="1.5" fill="none"/>
+                <circle cx="16" cy="16" r="2" fill="#1E3A5F"/>
+              </svg>
+            </div>
+            <span class="semantic-hint">芯片(CPU) = 科技/智能</span>
+          </div>
+        </div>
+        <div class="topic-row">
+          <span class="topic-label">远程工作</span>
+          <div class="topic-icons">
+            <div class="topic-icon-box" style="border-color: var(--topic-work);">
+              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+                <rect x="6" y="11" width="20" height="14" rx="1.5" stroke="#2D5A27" stroke-width="1.5" fill="none"/>
+                <path d="M11 11V8.5C11 7.12 12.12 6 13.5 6H18.5C19.88 6 21 7.12 21 8.5V11" stroke="#2D5A27" stroke-width="1.5" fill="none"/>
+                <line x1="6" y1="15" x2="26" y2="15" stroke="#2D5A27" stroke-width="1"/>
+              </svg>
+            </div>
+            <span class="semantic-hint">公文包 = 工作/职业</span>
+          </div>
+        </div>
+        <div class="topic-row">
+          <span class="topic-label">生活</span>
+          <div class="topic-icons">
+            <div class="topic-icon-box" style="border-color: var(--topic-life);">
+              <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+                <path d="M16 7C16 7 9 11 9 17C9 21.42 12.13 25 16 25C19.87 25 23 21.42 23 17C23 11 16 7 16 7Z" stroke="#8B4513" stroke-width="1.5" fill="none"/>
+                <path d="M16 11V17" stroke="#8B4513" stroke-width="1.5"/>
+                <path d="M13 14H19" stroke="#8B4513" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <span class="semantic-hint">叶子/植物 = 生活/自然</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 功能图标 -->
+    <section class="section">
+      <h2 class="section-title">功能图标</h2>
+      <p class="section-desc">用于界面功能操作，遵循通用认知</p>
+      
+      <div class="icons-grid">
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <rect x="8" y="5" width="16" height="22" rx="1.5" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <path d="M11 10L13 12L16 9" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <path d="M11 16L13 18L16 15" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <line x1="18" y1="11" x2="21" y2="11" stroke="#1A1612" stroke-width="1.5"/>
+              <line x1="18" y1="17" x2="21" y2="17" stroke="#1A1612" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <span class="icon-label">待办</span>
+          <div class="semantic-note">清单+勾选</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <path d="M9 5H23V27L16 21L9 27V5Z" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <span class="icon-label">收藏</span>
+          <div class="semantic-note">书签</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <path d="M7 5H13V27H7Z" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <path d="M19 5H25V27H19Z" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <line x1="9" y1="10" x2="11" y2="10" stroke="#1A1612" stroke-width="1"/>
+              <line x1="9" y1="14" x2="11" y2="14" stroke="#1A1612" stroke-width="1"/>
+              <line x1="21" y1="10" x2="23" y2="10" stroke="#1A1612" stroke-width="1"/>
+              <line x1="21" y1="14" x2="23" y2="14" stroke="#1A1612" stroke-width="1"/>
+            </svg>
+          </div>
+          <span class="icon-label">叙事</span>
+          <div class="semantic-note">打开的书</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <path d="M6 9H26V19H18L14 23V19H6V9Z" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <line x1="10" y1="13" x2="22" y2="13" stroke="#1A1612" stroke-width="1.2"/>
+              <line x1="10" y1="16" x2="18" y2="16" stroke="#1A1612" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <span class="icon-label">对话</span>
+          <div class="semantic-note">聊天气泡</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <path d="M16 6L18.5 12L25 13L20 18L21 25L16 21.5L11 25L12 18L7 13L13.5 12L16 6Z" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <span class="icon-label">星标</span>
+          <div class="semantic-note">五角星</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <line x1="16" y1="8" x2="16" y2="24" stroke="#1A1612" stroke-width="1.5"/>
+              <line x1="8" y1="16" x2="24" y2="16" stroke="#1A1612" stroke-width="1.5"/>
+              <circle cx="16" cy="16" r="3" stroke="#B8860B" stroke-width="1" fill="none"/>
+            </svg>
+          </div>
+          <span class="icon-label">记录</span>
+          <div class="semantic-note">十字准星</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 导航图标 -->
+    <section class="section">
+      <h2 class="section-title">导航图标</h2>
+      <p class="section-desc">用于底部导航栏和快捷入口，遵循行业标准</p>
+      
+      <div class="icons-grid">
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <path d="M6 13L16 5L26 13V25C26 26.1 25.1 27 24 27H8C6.9 27 6 26.1 6 25V13Z" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <polyline points="12,27 12,18 20,18 20,27" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <span class="icon-label">首页</span>
+          <div class="semantic-note">房子=Home</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <rect x="6" y="7" width="20" height="18" rx="1.5" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <line x1="6" y1="12" x2="26" y2="12" stroke="#1A1612" stroke-width="1.5"/>
+              <line x1="11" y1="7" x2="11" y2="12" stroke="#1A1612" stroke-width="1.5"/>
+              <line x1="21" y1="7" x2="21" y2="12" stroke="#1A1612" stroke-width="1.5"/>
+              <text x="16" y="21" font-size="8" fill="#1A1612" text-anchor="middle" font-family="serif">7</text>
+            </svg>
+          </div>
+          <span class="icon-label">周报</span>
+          <div class="semantic-note">日历</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <rect x="6" y="7" width="20" height="18" rx="1.5" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <line x1="6" y1="12" x2="26" y2="12" stroke="#1A1612" stroke-width="1.5"/>
+              <line x1="11" y1="7" x2="11" y2="12" stroke="#1A1612" stroke-width="1.5"/>
+              <line x1="21" y1="7" x2="21" y2="12" stroke="#1A1612" stroke-width="1.5"/>
+              <text x="16" y="21" font-size="7" fill="#1A1612" text-anchor="middle" font-family="serif">30</text>
+            </svg>
+          </div>
+          <span class="icon-label">月报</span>
+          <div class="semantic-note">日历</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <circle cx="16" cy="16" r="8" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <polyline points="16,10 16,16 20,16" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <path d="M8 6L6 8M24 6L26 8" stroke="#1A1612" stroke-width="1"/>
+            </svg>
+          </div>
+          <span class="icon-label">历史</span>
+          <div class="semantic-note">时钟</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <circle cx="16" cy="16" r="7" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <circle cx="16" cy="16" r="2.5" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <line x1="16" y1="13.5" x2="16" y2="9" stroke="#1A1612" stroke-width="1.5"/>
+              <line x1="18.5" y1="16" x2="23" y2="16" stroke="#1A1612" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <span class="icon-label">设置</span>
+          <div class="semantic-note">齿轮</div>
+        </div>
+        <div class="icon-card">
+          <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="2" y="2" width="28" height="28" fill="none" stroke="#A69F8F" stroke-width="0.8"/>
+              <circle cx="16" cy="10" r="4" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+              <path d="M9 25C9 20 12 17 16 17C20 17 23 20 23 25" stroke="#1A1612" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <span class="icon-label">我的</span>
+          <div class="semantic-note">人形</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 语义映射表 -->
+    <div class="style-spec">
+      <h3>Semantic Mapping</h3>
+      <div class="spec-grid">
+        <div class="spec-item">
+          <span class="spec-key">人工智能</span>
+          <span class="spec-value">芯片(CPU) → 科技/智能</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-key">远程工作</span>
+          <span class="spec-value">公文包 → 工作/职业</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-key">生活</span>
+          <span class="spec-value">叶子 → 生活/自然/健康</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-key">首页</span>
+          <span class="spec-value">房子 → Home (行业标准)</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-key">待办</span>
+          <span class="spec-value">清单+勾选 → 任务</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-key">历史</span>
+          <span class="spec-value">时钟 → 时间/历史</span>
+        </div>
+      </div>
+      <div class="color-swatches">
+        <div class="color-swatch">
+          <div class="swatch" style="background: #1A1612;"></div>
+          <span>主体色</span>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch" style="background: #A69F8F;"></div>
+          <span>边框色</span>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch" style="background: #1E3A5F;"></div>
+          <span>AI主题</span>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch" style="background: #2D5A27;"></div>
+          <span>工作主题</span>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch" style="background: #8B4513;"></div>
+          <span>生活主题</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

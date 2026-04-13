@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI简报 - 时间线风格设计稿</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --fg: #1A1A1A;
+      --muted: #6B6B6B;
+      --accent: #B85450;
+      --card: #FFFFFF;
+      --border: #E5E5E5;
+      --highlight: #FFF8E7;
+      --timeline: #E0E0E0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background: linear-gradient(135deg, #2A2520 0%, #3D352D 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: #1A1A1A;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 24px;
+      background: #0A0A0A;
+      border-radius: 0 0 12px 12px;
+      z-index: 10;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* ========== 顶部简洁报头 ========== */
+    .header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--fg);
+    }
+
+    .date {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      gap: 12px;
+    }
+
+    .header-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    /* ========== 时间线主体 ========== */
+    .timeline-container {
+      padding: 20px;
+      position: relative;
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 36px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), var(--timeline), var(--timeline));
+    }
+
+    .time-node {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .time-marker {
+      width: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .time-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--accent);
+      z-index: 1;
+    }
+
+    .time-dot.secondary {
+      background: var(--timeline);
+      box-shadow: 0 0 0 2px var(--timeline);
+    }
+
+    .time-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      writing-mode: vertical-rl;
+      letter-spacing: 0.1em;
+    }
+
+    .time-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 主要内容卡片 */
+    .main-card {
+      background: var(--card);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .main-card-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-topic {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topic-icon {
+      font-size: 14px;
+    }
+
+    .topic-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    .card-badge {
+      background: var(--highlight);
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 10px;
+      color: var(--accent);
+    }
+
+    .main-card-body {
+      padding: 14px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .card-summary {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .meta-item {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meta-icon {
+      font-size: 12px;
+    }
+
+    /* 次要内容卡片 */
+    .sub-card {
+      background: var(--card);
+      border-radius: 6px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .sub-card-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .sub-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.4;
+    }
+
+    .sub-card-summary {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* 快捷信息块 */
+    .info-block {
+      background: var(--highlight);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .info-icon {
+      font-size: 20px;
+    }
+
+    .info-text {
+      flex: 1;
+    }
+
+    .info-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .info-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .info-action {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* 分组标题 */
+    .section-title {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.3em;
+      margin-bottom: 16px;
+      padding-left: 52px;
+      position: relative;
+    }
+
+    .section-title::before {
+      content: '';
+      position: absolute;
+      left: 36px;
+      top: 50%;
+      width: 8px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* 底部统计栏 */
+    .bottom-stats {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-around;
+      position: sticky;
+      bottom: 56px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* 底部导航 */
+    .tabbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+    }
+
+    .tab-item {
+      flex: 1;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .tab-item.active {
+      color: var(--fg);
+    }
+
+    .tab-item.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .tab-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .tab-label {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    /* 操作按钮 */
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--fg);
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background: var(--fg);
+      color: white;
+      border-color: var(--fg);
+    }
+
+    .action-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="page">
+        <!-- 顶部简洁报头 -->
+        <header class="header">
+          <div class="header-left">
+            <span class="brand">AI简报</span>
+            <span class="date">3月13日 周五</span>
+          </div>
+          <div class="header-right">
+            <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+        </header>
+
+        <!-- 时间线内容 -->
+        <div class="timeline-container">
+          <div class="timeline-line"></div>
+
+          <!-- 分组：今日焦点 -->
+          <div class="section-title">今日焦点</div>
+
+          <!-- 主要内容节点 -->
+          <div class="time-node">
+            <div class="time-marker">
+              <div class="time-dot"></div>
+              <span class="time-label">08:00</span>
+            </div>
+            <div class="time-content">
+              <div class="main-card">
+                <div class="main-card-header">
+                  <div class="card-topic">
+                    <span class="topic-icon">💻</span>
+                    <span class="topic-name">科技前沿</span>
+                  </div>
+                  <span class="card-badge">5条更新</span>
+                </div>
+                <div class="main-card-body">
+                  <h3 class="card-title">OpenAI 发布 GPT-5，推理能力首次超越人类基准</h3>
+                  <p class="card-summary">在复杂推理任务上实现重大突破，多模态理解能力提升200%，长文本处理支持100K tokens...</p>
+                  <div class="card-meta">
+                    <span class="meta-item"><span class="meta-icon">👁</span> 已关注</span>
+                    <span class="meta-item"><span class="meta-icon">💡</span> 3条洞察</span>
+                  </div>
+                  <div class="action-row">
+                    <button class="action-btn primary">记录想法</button>
+                    <button class="action-btn">收藏</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 次要内容节点 -->
+          <div class="time-node">
+            <div class="time-marker">
+              <div class="time-dot secondary"></div>
+              <span class="time-label">09:30</span>
+            </div>
+            <div class="time-content">
+              <div class="sub-card">
+                <div class="sub-card-header">
+                  <span class="topic-icon">📚</span>
+                  <span class="topic-name" style="color: #6B8E23;">阅读写作</span>
+                </div>
+                <h4 class="sub-card-title">村上春树新作《城市与不确定的墙》中文版上市</h4>
+                <p class="sub-card-summary">《纽约客》年度最佳书单同步发布...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-node">
+            <div class="time-marker">
+              <div class="time-dot secondary"></div>
+              <span class="time-label">10:15</span>
+            </div>
+            <div class="time-content">
+              <div class="sub-card">
+                <div class="sub-card-header">
+                  <span class="topic-icon">🎯</span>
+                  <span class="topic-name" style="color: #4682B4;">生活</span>
+                </div>
+                <h4 class="sub-card-title">深度工作：如何在碎片化时代保持专注</h4>
+                <p class="sub-card-summary">Cal Newport 关于深度工作的最新研究...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分组：提醒 -->
+          <div class="section-title">提醒</div>
+
+          <div class="time-node">
+            <div class="time-marker">
+              <div class="time-dot" style="background: #E6A23C; box-shadow: 0 0 0 2px #E6A23C;"></div>
+            </div>
+            <div class="time-content">
+              <div class="info-block">
+                <span class="info-icon">🔔</span>
+                <div class="info-text">
+                  <div class="info-title">本周阅读目标还差2篇</div>
+                  <div class="info-desc">完成可获得「阅读达人」徽章</div>
+                </div>
+                <span class="info-action">去完成 →</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="time-node">
+            <div class="time-marker">
+              <div class="time-dot" style="background: #F56C6C; box-shadow: 0 0 0 2px #F56C6C;"></div>
+            </div>
+            <div class="time-content">
+              <div class="info-block" style="background: #FEF0F0;">
+                <span class="info-icon">⚠️</span>
+                <div class="info-text">
+                  <div class="info-title">年度订阅即将到期</div>
+                  <div class="info-desc">3月20日到期，续订享8折优惠</div>
+                </div>
+                <span class="info-action">续订 →</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分组：个人 -->
+          <div class="section-title">个人</div>
+
+          <div class="time-node">
+            <div class="time-marker">
+              <div class="time-dot" style="background: #67C23A; box-shadow: 0 0 0 2px #67C23A;"></div>
+            </div>
+            <div class="time-content">
+              <div class="info-block" style="background: #F0F9EB;">
+                <span class="info-icon">🔥</span>
+                <div class="info-text">
+                  <div class="info-title">连续打卡 7 天</div>
+                  <div class="info-desc">今天你关注了8条内容，涵盖2个主题</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 底部统计栏 -->
+        <div class="bottom-stats">
+          <div class="stat-item">
+            <div class="stat-value">8</div>
+            <div class="stat-label">今日关注</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color: #4682B4;">3</div>
+            <div class="stat-label">完成待办</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color: #67C23A;">7</div>
+            <div class="stat-label">连续打卡</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" style="color: #E6A23C;">12</div>
+            <div class="stat-label">收藏</div>
+          </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="tabbar">
+          <button class="tab-item active">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span class="tab-label">首页</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <span class="tab-label">待办</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span class="tab-label">设置</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="tab-label">我的</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

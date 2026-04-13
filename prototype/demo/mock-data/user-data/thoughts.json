@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "content": "今天看到GPT-5的新闻，觉得AI发展太快了，有点焦虑但也有期待。",
+    "source_type": "briefing",
+    "source_id": 1,
+    "tags": ["AI", "焦虑", "期待"],
+    "sentiment": "mixed",
+    "created_at": "2026-03-12T09:15:00"
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "content": "版权条例出台是好事，以后用AI创作更有保障了。",
+    "source_type": "briefing",
+    "source_id": 1,
+    "tags": ["AI", "版权", "政策"],
+    "sentiment": "positive",
+    "created_at": "2026-03-11T10:30:00"
+  },
+  {
+    "id": 3,
+    "user_id": 1,
+    "content": "远程办公成为常态，这对我这种想找远程工作的人来说是好消息。",
+    "source_type": "briefing",
+    "source_id": 1,
+    "tags": ["远程工作", "职场"],
+    "sentiment": "positive",
+    "created_at": "2026-03-11T14:20:00"
+  },
+  {
+    "id": 4,
+    "user_id": 1,
+    "content": "Prompt Engineering比我想象的复杂，需要多练习。",
+    "source_type": "manual",
+    "source_id": null,
+    "tags": ["学习", "AI", "Prompt"],
+    "sentiment": "neutral",
+    "created_at": "2026-03-12T16:00:00"
+  },
+  {
+    "id": 5,
+    "user_id": 1,
+    "content": "AI算法工程师薪资45万，看来要好好学习AI了。",
+    "source_type": "briefing",
+    "source_id": 2,
+    "tags": ["薪资", "AI", "职业规划"],
+    "sentiment": "motivated",
+    "created_at": "2026-03-12T21:30:00"
+  }
+]

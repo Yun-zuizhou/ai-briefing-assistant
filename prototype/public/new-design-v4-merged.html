@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI简报 - 融合版设计稿</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --fg: #1A1A1A;
+      --muted: #6B6B6B;
+      --accent: #B85450;
+      --card: #FFFFFF;
+      --border: #E5E5E5;
+      --highlight: #FFF8E7;
+      --section-bg: #F5F3EF;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background: linear-gradient(135deg, #2A2520 0%, #3D352D 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: #1A1A1A;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 24px;
+      background: #0A0A0A;
+      border-radius: 0 0 12px 12px;
+      z-index: 10;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* ========== 报头区域 - 仪式感 ========== */
+    .masthead {
+      padding: 20px 20px 16px;
+      text-align: center;
+      position: relative;
+      background: linear-gradient(180deg, var(--card) 0%, var(--bg) 100%);
+    }
+
+    .masthead::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      right: 20px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .date-line {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.5em;
+      margin-bottom: 10px;
+    }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      color: var(--fg);
+      margin-bottom: 4px;
+    }
+
+    .tagline {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+    }
+
+    /* ========== 主内容区 ========== */
+    .content {
+      padding: 16px 20px;
+    }
+
+    /* ========== 分组标题 ========== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0 12px;
+    }
+
+    .section-header:first-child {
+      margin-top: 0;
+    }
+
+    .section-title {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      font-weight: 600;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-count {
+      font-size: 10px;
+      color: var(--accent);
+      background: var(--highlight);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    /* ========== 焦点卡片 - 绝对主角 ========== */
+    .focus-card {
+      background: var(--card);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+
+    .focus-header {
+      background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .focus-topic {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .focus-topic-icon {
+      font-size: 16px;
+    }
+
+    .focus-topic-name {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+
+    .focus-count {
+      background: rgba(255,255,255,0.2);
+      padding: 3px 10px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+
+    .focus-body {
+      padding: 16px;
+    }
+
+    .focus-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .focus-summary {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    .focus-insights {
+      background: var(--highlight);
+      border-left: 3px solid var(--accent);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+
+    .insight-label {
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .insight-list {
+      list-style: none;
+    }
+
+    .insight-list li {
+      font-size: 12px;
+      color: #4A4A4A;
+      line-height: 1.7;
+      padding-left: 12px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .insight-list li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .focus-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg);
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: var(--fg);
+      color: white;
+      border-color: var(--fg);
+    }
+
+    .action-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* ========== 其他关注 - 分组展示 ========== */
+    .other-topics {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .topic-item {
+      background: var(--card);
+      border-radius: 6px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .topic-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .topic-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .topic-name {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .topic-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .topic-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .topic-arrow {
+      color: var(--border);
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    /* ========== 提醒分组 ========== */
+    .alerts-section {
+      background: var(--section-bg);
+      border-radius: 6px;
+      padding: 14px 16px;
+    }
+
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .alert-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .alert-item:first-child {
+      padding-top: 0;
+    }
+
+    .alert-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 2px;
+    }
+
+    .alert-desc {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .alert-action {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    /* ========== 个人分组 ========== */
+    .personal-section {
+      display: flex;
+      gap: 10px;
+    }
+
+    .personal-card {
+      flex: 1;
+      background: var(--card);
+      border-radius: 6px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .personal-icon {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .personal-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .personal-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ========== 个人叙事 ========== */
+    .story-section {
+      background: linear-gradient(135deg, #F8F6F3 0%, #F5F3F0 100%);
+      border-radius: 6px;
+      padding: 16px;
+      position: relative;
+      margin-top: 16px;
+    }
+
+    .story-section::before {
+      content: '"';
+      position: absolute;
+      top: 6px;
+      left: 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: var(--accent);
+      opacity: 0.25;
+      line-height: 1;
+    }
+
+    .story-text {
+      font-size: 13px;
+      color: #4A4A4A;
+      line-height: 1.8;
+      font-style: italic;
+      padding-left: 18px;
+    }
+
+    .story-text strong {
+      color: var(--accent);
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    .streak {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .streak-badge {
+      background: var(--fg);
+      color: white;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    /* ========== 快捷入口 ========== */
+    .quick-entry {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .entry-btn {
+      background: var(--card);
+      border: none;
+      border-radius: 6px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .entry-icon {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .entry-label {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .entry-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-top: 2px;
+    }
+
+    /* ========== 底部导航 ========== */
+    .tabbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+    }
+
+    .tab-item {
+      flex: 1;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      position: relative;
+    }
+
+    .tab-item.active {
+      color: var(--fg);
+    }
+
+    .tab-item.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .tab-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .tab-label {
+      font-size: 10px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="page">
+        <!-- 报头 - 仪式感 -->
+        <header class="masthead">
+          <div class="date-line">二〇二六年三月十三日 · 星期五</div>
+          <h1 class="brand">AI 简 报</h1>
+          <p class="tagline">每日信息精选 · 智能收集 · 记录成长</p>
+        </header>
+
+        <div class="content">
+          <!-- 分组：今日焦点 -->
+          <div class="section-header">
+            <span class="section-title">今日焦点</span>
+            <span class="section-count">3个主题</span>
+            <span class="section-line"></span>
+          </div>
+
+          <!-- 焦点卡片 - 绝对主角 -->
+          <div class="focus-card">
+            <div class="focus-header">
+              <div class="focus-topic">
+                <span class="focus-topic-icon">💻</span>
+                <span class="focus-topic-name">科技前沿</span>
+              </div>
+              <span class="focus-count">5 条更新</span>
+            </div>
+            <div class="focus-body">
+              <h2 class="focus-title">OpenAI 发布 GPT-5，推理能力首次超越人类基准</h2>
+              <p class="focus-summary">在复杂推理任务上实现重大突破，多模态理解能力提升200%，长文本处理支持100K tokens...</p>
+              <div class="focus-insights">
+                <div class="insight-label">关键洞察</div>
+                <ul class="insight-list">
+                  <li>GPT-5 在数学证明、逻辑推理链上超越人类</li>
+                  <li>量子计算商业化加速，2028年或实用化</li>
+                  <li>AI 监管框架在全球范围逐步完善</li>
+                </ul>
+              </div>
+              <div class="focus-actions">
+                <button class="action-btn primary">记录想法</button>
+                <button class="action-btn">收藏</button>
+                <button class="action-btn">分享</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分组：其他关注 -->
+          <div class="section-header">
+            <span class="section-title">其他关注</span>
+            <span class="section-line"></span>
+          </div>
+
+          <div class="other-topics">
+            <div class="topic-item">
+              <span class="topic-icon">📚</span>
+              <div class="topic-content">
+                <div class="topic-name">阅读写作</div>
+                <h3 class="topic-title">村上春树新作《城市与不确定的墙》中文版上市</h3>
+                <span class="topic-meta">3 条更新</span>
+              </div>
+              <svg class="topic-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+            <div class="topic-item">
+              <span class="topic-icon">🎯</span>
+              <div class="topic-content">
+                <div class="topic-name">生活</div>
+                <h3 class="topic-title">深度工作：如何在碎片化时代保持专注</h3>
+                <span class="topic-meta">2 条更新</span>
+              </div>
+              <svg class="topic-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 分组：提醒 -->
+          <div class="section-header">
+            <span class="section-title">提醒</span>
+            <span class="section-line"></span>
+          </div>
+
+          <div class="alerts-section">
+            <div class="alert-item">
+              <span class="alert-icon">🔔</span>
+              <div class="alert-content">
+                <div class="alert-title">本周阅读目标还差2篇</div>
+                <div class="alert-desc">完成可获得「阅读达人」徽章</div>
+              </div>
+              <span class="alert-action">去完成 →</span>
+            </div>
+            <div class="alert-item">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-content">
+                <div class="alert-title">年度订阅即将到期</div>
+                <div class="alert-desc">3月20日到期，续订享8折优惠</div>
+              </div>
+              <span class="alert-action">续订 →</span>
+            </div>
+          </div>
+
+          <!-- 分组：个人 -->
+          <div class="section-header">
+            <span class="section-title">个人</span>
+            <span class="section-line"></span>
+          </div>
+
+          <div class="personal-section">
+            <div class="personal-card">
+              <div class="personal-icon">👁</div>
+              <div class="personal-value">8</div>
+              <div class="personal-label">今日关注</div>
+            </div>
+            <div class="personal-card">
+              <div class="personal-icon">✓</div>
+              <div class="personal-value" style="color: #2C3E50;">3</div>
+              <div class="personal-label">完成待办</div>
+            </div>
+            <div class="personal-card">
+              <div class="personal-icon">🔥</div>
+              <div class="personal-value" style="color: #27AE60;">7</div>
+              <div class="personal-label">连续打卡</div>
+            </div>
+          </div>
+
+          <!-- 个人叙事 -->
+          <div class="story-section">
+            <p class="story-text">
+              今天你关注了<strong>8</strong>条内容，涵盖<strong>2</strong>个主题。
+              你正在持续追踪多个领域，保持这种好奇心！
+            </p>
+            <div class="streak">
+              <span class="streak-badge">🔥 连续打卡 7 天</span>
+            </div>
+          </div>
+
+          <!-- 快捷入口 -->
+          <div class="quick-entry">
+            <button class="entry-btn">
+              <div class="entry-icon">📑</div>
+              <div class="entry-label">收藏</div>
+              <div class="entry-value">12</div>
+            </button>
+            <button class="entry-btn">
+              <div class="entry-icon">📊</div>
+              <div class="entry-label">周报</div>
+              <div class="entry-value">查看</div>
+            </button>
+            <button class="entry-btn">
+              <div class="entry-icon">📜</div>
+              <div class="entry-label">历史</div>
+              <div class="entry-value">365期</div>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="tabbar">
+          <button class="tab-item active">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span class="tab-label">首页</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <span class="tab-label">待办</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span class="tab-label">设置</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="tab-label">我的</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

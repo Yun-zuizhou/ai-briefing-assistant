@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "badge_type": "first_briefing",
+    "badge_name": "新手上路",
+    "badge_icon": "🌱",
+    "trigger_condition": "首次收到简报",
+    "earned_at": "2026-03-05T08:00:00"
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "badge_type": "first_reply",
+    "badge_name": "记录者",
+    "badge_icon": "✏️",
+    "trigger_condition": "首次回复简报记录想法",
+    "earned_at": "2026-03-06T09:30:00"
+  },
+  {
+    "id": 3,
+    "user_id": 1,
+    "badge_type": "streak_7",
+    "badge_name": "连续7天",
+    "badge_icon": "🔥",
+    "trigger_condition": "连续7天阅读简报",
+    "earned_at": "2026-03-12T08:00:00"
+  },
+  {
+    "id": 4,
+    "user_id": 1,
+    "badge_type": "first_todo",
+    "badge_name": "行动派",
+    "badge_icon": "⚡",
+    "trigger_condition": "首次完成待办",
+    "earned_at": "2026-03-12T15:30:00"
+  }
+]

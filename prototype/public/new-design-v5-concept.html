@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI简报 - V5 产品概念版</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --fg: #1A1A1A;
+      --muted: #6B6B6B;
+      --accent: #B85450;
+      --card: #FFFFFF;
+      --border: #E5E5E5;
+      --highlight: #FFF8E7;
+      --era-color: #2C3E50;
+      --me-color: #B85450;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background: linear-gradient(135deg, #2A2520 0%, #3D352D 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: #1A1A1A;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 24px;
+      background: #0A0A0A;
+      border-radius: 0 0 12px 12px;
+      z-index: 10;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* ========== 简报头部 - 仪式感 ========== */
+    .brief-header {
+      background: linear-gradient(180deg, var(--card) 0%, var(--bg) 100%);
+      padding: 24px 20px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .brief-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      right: 20px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .brief-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .brief-badge {
+      background: var(--accent);
+      color: white;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+
+    .brief-time {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .brief-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--fg);
+      margin-bottom: 6px;
+    }
+
+    .brief-date {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .brief-slogan {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ========== 简报主体 ========== */
+    .brief-content {
+      padding: 20px;
+    }
+
+    /* ========== 模块标题 - 时代/我 标识 ========== */
+    .module-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .module-icon {
+      font-size: 16px;
+    }
+
+    .module-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+
+    .module-title.era {
+      color: var(--era-color);
+    }
+
+    .module-title.me {
+      color: var(--me-color);
+    }
+
+    .module-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .module-subtitle {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ========== 信息追踪 - 时代脉搏 ========== */
+    .tracking-section {
+      margin-bottom: 20px;
+    }
+
+    .tracking-card {
+      background: var(--card);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 10px;
+    }
+
+    .tracking-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .tracking-header {
+      background: linear-gradient(135deg, var(--era-color) 0%, #34495E 100%);
+      color: white;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tracking-topic {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .tracking-count {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      font-size: 10px;
+    }
+
+    .tracking-body {
+      padding: 14px;
+    }
+
+    .tracking-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .tracking-summary {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .tracking-actions {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .tracking-btn {
+      flex: 1;
+      padding: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--fg);
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    .tracking-btn:hover {
+      background: var(--fg);
+      color: white;
+      border-color: var(--fg);
+    }
+
+    .tracking-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* ========== 待办提醒 - 时代计划 ========== */
+    .todo-section {
+      margin-bottom: 20px;
+    }
+
+    .todo-card {
+      background: var(--card);
+      border-radius: 6px;
+      padding: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      margin-bottom: 8px;
+    }
+
+    .todo-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .todo-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+    }
+
+    .todo-checkbox.checked {
+      background: var(--me-color);
+      border-color: var(--me-color);
+    }
+
+    .todo-content {
+      flex: 1;
+    }
+
+    .todo-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 4px;
+    }
+
+    .todo-title.done {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .todo-meta {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .todo-deadline {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .todo-source {
+      font-size: 10px;
+      color: var(--border);
+    }
+
+    /* ========== 个人叙事 - 时代坐标 ========== */
+    .narrative-section {
+      margin-bottom: 20px;
+    }
+
+    .narrative-card {
+      background: linear-gradient(135deg, #F8F6F3 0%, #F5F3F0 100%);
+      border-radius: 6px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .narrative-card::before {
+      content: '"';
+      position: absolute;
+      top: 8px;
+      left: 14px;
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: var(--me-color);
+      opacity: 0.2;
+      line-height: 1;
+    }
+
+    .narrative-text {
+      font-size: 13px;
+      color: #4A4A4A;
+      line-height: 1.8;
+      padding-left: 16px;
+    }
+
+    .narrative-text strong {
+      color: var(--me-color);
+      font-weight: 600;
+    }
+
+    .narrative-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+
+    .narrative-stat {
+      background: var(--card);
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .narrative-stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--me-color);
+    }
+
+    .narrative-stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .streak-badge-inner {
+      background: var(--fg);
+      color: white;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    /* ========== 对话入口 - 核心交互 ========== */
+    .chat-entry {
+      background: var(--card);
+      border: 2px solid var(--fg);
+      border-radius: 6px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chat-entry:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .chat-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .chat-hint {
+      flex: 1;
+    }
+
+    .chat-hint-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 2px;
+    }
+
+    .chat-hint-desc {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .chat-arrow {
+      color: var(--border);
+    }
+
+    /* ========== 快捷入口 ========== */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .quick-btn {
+      background: var(--card);
+      border: none;
+      border-radius: 6px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .quick-icon {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .quick-label {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ========== 底部导航 ========== */
+    .tabbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+    }
+
+    .tab-item {
+      flex: 1;
+      padding: 10px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      position: relative;
+    }
+
+    .tab-item.active {
+      color: var(--fg);
+    }
+
+    .tab-item.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .tab-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .tab-label {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    /* ========== 分隔 ========== */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider-dot {
+      width: 4px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="page">
+        <!-- 简报头部 - 仪式感 -->
+        <header class="brief-header">
+          <div class="brief-meta">
+            <span class="brief-badge">晨间简报</span>
+            <span class="brief-time">08:00 送达</span>
+          </div>
+          <h1 class="brief-title">AI 简 报</h1>
+          <p class="brief-date">二〇二六年三月十三日 · 星期五</p>
+          <p class="brief-slogan">每天一份简报，帮你收集世界，记录自己，看见成长</p>
+        </header>
+
+        <div class="brief-content">
+          <!-- 信息追踪 - 时代脉搏 -->
+          <section class="tracking-section">
+            <div class="module-header">
+              <span class="module-icon">📰</span>
+              <span class="module-title era">信息追踪</span>
+              <span class="module-line"></span>
+              <span class="module-subtitle">时代脉搏</span>
+            </div>
+
+            <div class="tracking-card">
+              <div class="tracking-header">
+                <div class="tracking-topic">
+                  <span>💻</span>
+                  <span>科技前沿</span>
+                </div>
+                <span class="tracking-count">5条</span>
+              </div>
+              <div class="tracking-body">
+                <h3 class="tracking-title">OpenAI 发布 GPT-5，推理能力首次超越人类基准</h3>
+                <p class="tracking-summary">在复杂推理任务上实现重大突破，多模态理解能力提升200%...</p>
+              </div>
+              <div class="tracking-actions">
+                <button class="tracking-btn primary">记录想法</button>
+                <button class="tracking-btn">收藏</button>
+              </div>
+            </div>
+
+            <div class="tracking-card">
+              <div class="tracking-header" style="background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);">
+                <div class="tracking-topic">
+                  <span>💼</span>
+                  <span>机会信息</span>
+                </div>
+                <span class="tracking-count">2条</span>
+              </div>
+              <div class="tracking-body">
+                <h3 class="tracking-title">远程运营岗位 · 200-300/天</h3>
+                <p class="tracking-summary">某互联网公司招聘远程运营，要求1年以上经验...</p>
+              </div>
+              <div class="tracking-actions">
+                <button class="tracking-btn primary">创建待办</button>
+                <button class="tracking-btn">收藏</button>
+              </div>
+            </div>
+          </section>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-dot"></div>
+            <div class="divider-line"></div>
+          </div>
+
+          <!-- 待办提醒 - 时代计划 -->
+          <section class="todo-section">
+            <div class="module-header">
+              <span class="module-icon">📋</span>
+              <span class="module-title era">待办提醒</span>
+              <span class="module-line"></span>
+              <span class="module-subtitle">时代计划</span>
+            </div>
+
+            <div class="todo-card">
+              <div class="todo-item">
+                <div class="todo-checkbox"></div>
+                <div class="todo-content">
+                  <div class="todo-title">投递简历（远程运营岗位）</div>
+                  <div class="todo-meta">
+                    <span class="todo-deadline">截止：明天</span>
+                    <span class="todo-source">来自：机会信息</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="todo-card">
+              <div class="todo-item">
+                <div class="todo-checkbox checked">✓</div>
+                <div class="todo-content">
+                  <div class="todo-title done">阅读GPT-5技术白皮书</div>
+                  <div class="todo-meta">
+                    <span>已完成</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-dot"></div>
+            <div class="divider-line"></div>
+          </div>
+
+          <!-- 个人叙事 - 时代坐标 -->
+          <section class="narrative-section">
+            <div class="module-header">
+              <span class="module-icon">📖</span>
+              <span class="module-title me">个人叙事</span>
+              <span class="module-line"></span>
+              <span class="module-subtitle">时代坐标</span>
+            </div>
+
+            <div class="narrative-card">
+              <p class="narrative-text">
+                今天你关注了<strong>5</strong>条信息，记录了<strong>2</strong>条想法。
+                你正在持续追踪AI领域，保持这种好奇心！
+              </p>
+              <div class="narrative-stats">
+                <div class="narrative-stat">
+                  <div class="narrative-stat-value">5</div>
+                  <div class="narrative-stat-label">今日关注</div>
+                </div>
+                <div class="narrative-stat">
+                  <div class="narrative-stat-value">2</div>
+                  <div class="narrative-stat-label">想法记录</div>
+                </div>
+                <div class="narrative-stat">
+                  <div class="narrative-stat-value">7</div>
+                  <div class="narrative-stat-label">连续打卡</div>
+                </div>
+              </div>
+              <div class="streak-badge">
+                <span class="streak-badge-inner">🔥 连续打卡 7 天</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 对话入口 - 核心交互 -->
+          <div class="chat-entry">
+            <div class="chat-icon">💬</div>
+            <div class="chat-hint">
+              <div class="chat-hint-title">回复简报</div>
+              <div class="chat-hint-desc">记录想法、创建待办、提问...</div>
+            </div>
+            <svg class="chat-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+
+          <!-- 快捷入口 -->
+          <div class="quick-actions">
+            <button class="quick-btn">
+              <div class="quick-icon">📑</div>
+              <div class="quick-label">收藏</div>
+            </button>
+            <button class="quick-btn">
+              <div class="quick-icon">📊</div>
+              <div class="quick-label">周报</div>
+            </button>
+            <button class="quick-btn">
+              <div class="quick-icon">📜</div>
+              <div class="quick-label">历史</div>
+            </button>
+            <button class="quick-btn">
+              <div class="quick-icon">⚙️</div>
+              <div class="quick-label">设置</div>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="tabbar">
+          <button class="tab-item active">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span class="tab-label">简报</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <span class="tab-label">待办</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span class="tab-label">收藏</span>
+          </button>
+          <button class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="tab-label">我的</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

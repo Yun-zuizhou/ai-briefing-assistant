@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "user_id": 1,
+  "morning_briefing_time": "08:00",
+  "evening_briefing_time": "21:00",
+  "push_frequency": "daily",
+  "content_preferences": {
+    "hot_topics": "high",
+    "opportunities": "normal",
+    "learning_resources": "high"
+  },
+  "focus_topics": ["AI", "远程工作", "前端开发"],
+  "push_enabled": true,
+  "reminder_enabled": true,
+  "created_at": "2026-03-05T08:00:00",
+  "updated_at": "2026-03-10T14:00:00"
+}

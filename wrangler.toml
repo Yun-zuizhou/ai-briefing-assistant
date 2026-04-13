@@ -1,0 +1,9 @@
+name = "ai-briefing-assistant-data"
+main = "worker.js"
+compatibility_date = "2026-04-02"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-briefing-assistant-prod"
+database_id = "503a4b2f-b062-4ec5-be21-edfd0e7d8a2d"
+migrations_dir = "cloudflare/d1/migrations"

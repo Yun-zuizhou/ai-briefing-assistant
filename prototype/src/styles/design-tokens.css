@@ -1,0 +1,22 @@
+:root {
+  --font-serif-cn: 'Noto Serif SC', serif;
+  
+  --paper: #F5F2E8;
+  --paper-warm: #EDE9DC;
+  --paper-dark: #E5E0D0;
+  
+  --ink: #2C2416;
+  --ink-light: #5A4D3A;
+  --ink-muted: #8B7D66;
+  
+  --accent: #A63D2F;
+  --accent-light: #F5E6E3;
+  
+  --gold: #8B6914;
+  --gold-light: #F5EBD3;
+  
+  --border: #D4CDB8;
+  
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}

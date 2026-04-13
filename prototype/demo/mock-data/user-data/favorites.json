@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "item_type": "opportunity",
+    "item_id": 1,
+    "item_title": "远程运营专员（AI产品方向）",
+    "item_summary": "负责AI产品的日常运营工作，支持远程办公，弹性工作时间。",
+    "item_source": "拉勾网",
+    "item_url": "https://lagou.com/jobs/remote-ai-operator",
+    "created_at": "2026-03-11T10:00:00"
+  },
+  {
+    "id": 2,
+    "user_id": 1,
+    "item_type": "opportunity",
+    "item_id": 2,
+    "item_title": "技术博客征稿 | AI前沿技术",
+    "item_summary": "面向AI领域技术博主征稿，主题包括大模型应用、AI工具评测等。",
+    "item_source": "掘金",
+    "item_url": "https://juejin.cn/post/ai-article-call",
+    "created_at": "2026-03-10T15:30:00"
+  },
+  {
+    "id": 3,
+    "user_id": 1,
+    "item_type": "hot_topic",
+    "item_id": 1,
+    "item_title": "OpenAI发布GPT-5技术预览版",
+    "item_summary": "OpenAI正式发布GPT-5技术预览版，新版本在推理能力、多模态理解和代码生成方面有显著提升。",
+    "item_source": "OpenAI官方博客",
+    "item_url": "https://openai.com/blog/gpt-5-preview",
+    "created_at": "2026-03-12T08:30:00"
+  },
+  {
+    "id": 4,
+    "user_id": 1,
+    "item_type": "learning_resource",
+    "item_id": 1,
+    "item_title": "Prompt Engineering完全指南",
+    "item_summary": "从零开始学习Prompt Engineering，涵盖基础概念、高级技巧和实战案例。",
+    "item_source": "GitHub",
+    "item_url": "https://github.com/prompt-engineering-guide",
+    "created_at": "2026-03-12T09:00:00"
+  },
+  {
+    "id": 5,
+    "user_id": 1,
+    "item_type": "opportunity",
+    "item_id": 4,
+    "item_title": "AI创新应用大赛",
+    "item_summary": "面向开发者的AI应用创新大赛，主题不限，优秀项目可获得投资机会。",
+    "item_source": "黑客马拉松",
+    "item_url": "https://hackathon.com/ai-innovation-2026",
+    "created_at": "2026-03-12T08:15:00"
+  }
+]

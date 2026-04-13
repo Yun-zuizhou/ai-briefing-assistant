@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI简报 - 周报页面</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --fg: #1A1A1A;
+      --muted: #6B6B6B;
+      --accent: #B85450;
+      --card: #FFFFFF;
+      --border: #E5E5E5;
+      --highlight: #FFF8E7;
+      --topic-ai: #3B82F6;
+      --topic-work: #10B981;
+      --topic-life: #F59E0B;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Serif SC', serif;
+      background: linear-gradient(135deg, #2A2520 0%, #3D352D 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone-frame {
+      width: 375px;
+      height: 812px;
+      background: #1A1A1A;
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 24px;
+      background: #0A0A0A;
+      border-radius: 0 0 12px 12px;
+      z-index: 10;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* ========== 周报头部 ========== */
+    .report-header {
+      background: linear-gradient(180deg, var(--card) 0%, var(--bg) 100%);
+      padding: 20px 20px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    .report-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      right: 20px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 16px;
+      top: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px;
+    }
+
+    .report-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--topic-ai) 0%, #2563EB 100%);
+      color: white;
+      padding: 4px 12px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+
+    .report-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--fg);
+      margin-bottom: 4px;
+    }
+
+    .report-period {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ========== 周报主体 ========== */
+    .report-content {
+      padding: 16px 20px;
+    }
+
+    /* ========== 主题趋势回顾 - 核心概念 ========== */
+    .trend-section {
+      margin-bottom: 20px;
+    }
+
+    .trend-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--topic-ai);
+    }
+
+    .trend-icon {
+      font-size: 18px;
+    }
+
+    .trend-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--topic-ai);
+      letter-spacing: 0.05em;
+      flex: 1;
+    }
+
+    .trend-count {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* 热点趋势卡片 */
+    .trend-card {
+      background: var(--card);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
+
+    .trend-card-header {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .trend-label {
+      font-size: 10px;
+      color: var(--topic-ai);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .trend-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fg);
+      line-height: 1.4;
+    }
+
+    .trend-body {
+      padding: 14px;
+    }
+
+    /* 趋势总结 */
+    .trend-summary {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    /* 讨论热度 */
+    .heat-section {
+      background: var(--highlight);
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+
+    .heat-label {
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .heat-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin-bottom: 6px;
+      overflow: hidden;
+    }
+
+    .heat-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--topic-ai), #60A5FA);
+      border-radius: 3px;
+    }
+
+    .heat-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* 关键观点 */
+    .viewpoints-section {
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+    }
+
+    .viewpoints-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .viewpoint-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .viewpoint-bullet {
+      width: 4px;
+      height: 4px;
+      background: var(--topic-ai);
+      border-radius: 50%;
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+
+    .viewpoint-text {
+      font-size: 12px;
+      color: #4A4A4A;
+      line-height: 1.6;
+    }
+
+    /* ========== 其他主题 ========== */
+    .other-topic {
+      margin-bottom: 20px;
+    }
+
+    .other-topic .trend-header {
+      border-bottom-color: var(--topic-work);
+    }
+
+    .other-topic .trend-name {
+      color: var(--topic-work);
+    }
+
+    .other-topic .trend-card-header {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+    }
+
+    .other-topic .trend-label {
+      color: var(--topic-work);
+    }
+
+    .other-topic .heat-fill {
+      background: linear-gradient(90deg, var(--topic-work), #34D399);
+    }
+
+    .other-topic .viewpoint-bullet {
+      background: var(--topic-work);
+    }
+
+    /* ========== 个人成长 ========== */
+    .growth-section {
+      margin-bottom: 20px;
+    }
+
+    .growth-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .growth-icon {
+      font-size: 16px;
+    }
+
+    .growth-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: 0.05em;
+    }
+
+    .growth-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .growth-card {
+      background: linear-gradient(135deg, #F8F6F3 0%, #F5F3F0 100%);
+      border-radius: 6px;
+      padding: 14px 16px;
+    }
+
+    .growth-narrative {
+      font-size: 13px;
+      color: #4A4A4A;
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    .growth-narrative strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .growth-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .growth-stat {
+      background: var(--card);
+      padding: 10px 6px;
+      text-align: center;
+    }
+
+    .growth-stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .growth-stat-label {
+      font-size: 9px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ========== 操作按钮 ========== */
+    .report-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .report-btn {
+      padding: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .report-btn:hover {
+      background: var(--fg);
+      color: white;
+      border-color: var(--fg);
+    }
+
+    /* ========== 分隔 ========== */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider-dot {
+      width: 3px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen">
+      <div class="page">
+        <!-- 周报头部 -->
+        <header class="report-header">
+          <button class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <span class="report-badge">本周回顾</span>
+          <h1 class="report-title">周 报</h1>
+          <p class="report-period">2026年3月7日 - 3月13日</p>
+        </header>
+
+        <div class="report-content">
+          <!-- 主题趋势：人工智能 -->
+          <section class="trend-section">
+            <div class="trend-header">
+              <span class="trend-icon">🤖</span>
+              <span class="trend-name">人工智能</span>
+              <span class="trend-count">本周 42 条信息</span>
+            </div>
+
+            <!-- 热点趋势1 -->
+            <div class="trend-card">
+              <div class="trend-card-header">
+                <div class="trend-label">🔥 本周热点</div>
+                <h3 class="trend-title">GPT-5 发布引发行业震动</h3>
+              </div>
+              <div class="trend-body">
+                <p class="trend-summary">OpenAI发布GPT-5，推理能力首次超越人类基准。本周相关讨论热度持续攀升，成为AI领域最热门话题。行业普遍认为这是AI从"理解"向"推理"跨越的关键里程碑。</p>
+                
+                <div class="heat-section">
+                  <div class="heat-label">讨论热度</div>
+                  <div class="heat-bar">
+                    <div class="heat-fill" style="width: 92%;"></div>
+                  </div>
+                  <div class="heat-meta">
+                    <span>热度指数：92</span>
+                    <span>较上周 +45%</span>
+                  </div>
+                </div>
+
+                <div class="viewpoints-section">
+                  <div class="viewpoints-label">本周主要观点</div>
+                  <div class="viewpoint-item">
+                    <div class="viewpoint-bullet"></div>
+                    <div class="viewpoint-text">推理能力突破将加速AI在科研、医疗等专业领域的应用</div>
+                  </div>
+                  <div class="viewpoint-item">
+                    <div class="viewpoint-bullet"></div>
+                    <div class="viewpoint-text">行业竞争加剧，Google、Anthropic等公司面临更大压力</div>
+                  </div>
+                  <div class="viewpoint-item">
+                    <div class="viewpoint-bullet"></div>
+                    <div class="viewpoint-text">AI监管讨论升温，各国加速制定相关政策</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 热点趋势2 -->
+            <div class="trend-card">
+              <div class="trend-card-header">
+                <div class="trend-label">📈 上升趋势</div>
+                <h3 class="trend-title">AI Agent 应用落地加速</h3>
+              </div>
+              <div class="trend-body">
+                <p class="trend-summary">多款AI Agent产品发布，从概念验证走向实际应用。企业开始探索Agent在客服、销售、研发等场景的部署。</p>
+                
+                <div class="heat-section">
+                  <div class="heat-label">讨论热度</div>
+                  <div class="heat-bar">
+                    <div class="heat-fill" style="width: 68%;"></div>
+                  </div>
+                  <div class="heat-meta">
+                    <span>热度指数：68</span>
+                    <span>较上周 +28%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-dot"></div>
+            <div class="divider-line"></div>
+          </div>
+
+          <!-- 主题趋势：远程工作 -->
+          <section class="trend-section other-topic">
+            <div class="trend-header">
+              <span class="trend-icon">💼</span>
+              <span class="trend-name">远程工作</span>
+              <span class="trend-count">本周 18 条信息</span>
+            </div>
+
+            <div class="trend-card">
+              <div class="trend-card-header">
+                <div class="trend-label">🔥 本周热点</div>
+                <h3 class="trend-title">远程岗位需求回暖</h3>
+              </div>
+              <div class="trend-body">
+                <p class="trend-summary">本周远程岗位发布量较上周增长23%，运营、设计、开发类岗位居多。薪资区间集中在200-500元/天。</p>
+                
+                <div class="heat-section">
+                  <div class="heat-label">讨论热度</div>
+                  <div class="heat-bar">
+                    <div class="heat-fill" style="width: 56%;"></div>
+                  </div>
+                  <div class="heat-meta">
+                    <span>热度指数：56</span>
+                    <span>较上周 +23%</span>
+                  </div>
+                </div>
+
+                <div class="viewpoints-section">
+                  <div class="viewpoints-label">本周主要观点</div>
+                  <div class="viewpoint-item">
+                    <div class="viewpoint-bullet"></div>
+                    <div class="viewpoint-text">企业对远程工作接受度持续提升</div>
+                  </div>
+                  <div class="viewpoint-item">
+                    <div class="viewpoint-bullet"></div>
+                    <div class="viewpoint-text">副业/自由职业成为新趋势</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-dot"></div>
+            <div class="divider-line"></div>
+          </div>
+
+          <!-- 个人成长 -->
+          <section class="growth-section">
+            <div class="growth-header">
+              <span class="growth-icon">📖</span>
+              <span class="growth-title">个人成长</span>
+              <span class="growth-line"></span>
+            </div>
+
+            <div class="growth-card">
+              <p class="growth-narrative">
+                本周你关注了<strong>2</strong>个主题，阅读了<strong>35</strong>条摘要，记录了<strong>8</strong>条想法。
+                你对AI领域的关注度持续上升，建议深入了解Prompt Engineering方向。
+              </p>
+              <div class="growth-stats">
+                <div class="growth-stat">
+                  <div class="growth-stat-value">35</div>
+                  <div class="growth-stat-label">摘要阅读</div>
+                </div>
+                <div class="growth-stat">
+                  <div class="growth-stat-value">8</div>
+                  <div class="growth-stat-label">想法记录</div>
+                </div>
+                <div class="growth-stat">
+                  <div class="growth-stat-value">5</div>
+                  <div class="growth-stat-label">待办完成</div>
+                </div>
+                <div class="growth-stat">
+                  <div class="growth-stat-value">7</div>
+                  <div class="growth-stat-label">连续打卡</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 操作按钮 -->
+          <div class="report-actions">
+            <button class="report-btn">📤 分享周报</button>
+            <button class="report-btn">📥 导出PDF</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
