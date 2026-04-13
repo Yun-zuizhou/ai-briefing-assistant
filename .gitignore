@@ -1,0 +1,20 @@
+__pycache__/
+.pytest_tmp/
+.pip-tmp/
+.pydeps/
+.pydeps_runtime/
+.wrangler/
+*.db
+*.pyc
+codex-api-mainline-*/
+pytest-cache-files-*/
+prototype/dist/
+prototype/node_modules/
+prototype-vintage-backup/node_modules/
+
+# 生产环境配置文件
+.env.production
+.env.local
+
+# Railway 配置
+.railway/
