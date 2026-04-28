@@ -33,9 +33,6 @@ prototype-vintage-backup/node_modules/
 # Trae IDE 配置
 .trae/
 
-# 隔离待删除目录
-_to_delete_20260428/
-
 # 归档工作区（不需要部署）
 _archive_workspace/
 
