@@ -418,8 +418,6 @@ def _build_periodic_report(
     interests_override: list[str] | None = None,
 ) -> PeriodicReportResponse:
     interests = interests_override[:] if interests_override is not None else _load_user_interests_from_rows(db, user_id)
-    if not interests:
-        interests = _load_user_interests(user)
     completed_todos = sum(1 for todo in todos if _todo_status_value(todo) == TodoStatus.COMPLETED.value)
     streak = _calc_streak(history_items)
     period_label = "本周" if report_type == "weekly" else "本月"
@@ -720,8 +718,6 @@ async def get_annual_report(
     else:
         user = db.query(User).filter(User.id == user_id).first()
         interests = _load_user_interests_from_rows(db, user_id)
-        if not interests:
-            interests = _load_user_interests(user)
         notes = db.query(Note).filter(Note.user_id == user_id).order_by(Note.created_at.desc()).limit(40).all()
         favorites = db.query(Favorite).filter(Favorite.user_id == user_id).all()
         todos = db.query(Todo).filter(Todo.user_id == user_id).all()

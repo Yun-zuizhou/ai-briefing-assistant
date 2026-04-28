@@ -1,6 +1,7 @@
 import json
 
 from fastapi import APIRouter, Depends, Query
+from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -27,13 +28,6 @@ from app.services.chat_session_store import (
     get_chat_session_messages,
     get_or_create_active_session,
     list_chat_sessions,
-)
-from app.services.data import (
-    add_virtual_interest,
-    create_virtual_note,
-    create_virtual_todo,
-    remove_virtual_interest,
-    set_virtual_interests,
 )
 
 
@@ -103,6 +97,17 @@ def _save_user_interests(user: User, interests: list[str]) -> None:
     user.interests = json.dumps(interests, ensure_ascii=False)
 
 
+def _load_user_interests_from_rows(db: Session, user_id: int) -> list[str]:
+    UserInterest.__table__.create(bind=db.get_bind(), checkfirst=True)
+    rows = (
+        db.query(UserInterest)
+        .filter(UserInterest.user_id == user_id, UserInterest.status == "active")
+        .order_by(UserInterest.id.asc())
+        .all()
+    )
+    return [row.interest_name for row in rows if row.interest_name]
+
+
 def _sync_user_interests_rows(db: Session, user_id: int, interests: list[str]) -> None:
     UserInterest.__table__.create(bind=db.get_bind(), checkfirst=True)
     normalized: list[str] = []
@@ -151,91 +156,20 @@ def _append_history(
     db.add(item)
 
 
-def _build_virtual_response(intent_type: str, entities: dict, user_input: str) -> ChatExecuteResponse:
-    if intent_type == "chat_only":
-        return ChatExecuteResponse(
-            success=True,
-            action_type=intent_type,
-            candidate_intents=[intent_type],
-            confirmed_type=intent_type,
-            success_message="当前内容仅作为聊天处理",
-            result_summary="这次不会写入待办、记录或关注，只保留对话反馈。",
-        )
-
-    if intent_type == "create_todo":
-        content = str(entities.get("content", "")).strip() or user_input[:50]
-        deadline_label = str(entities.get("deadline", "待定"))
-        item = create_virtual_todo(content, deadline_label)
-        return ChatExecuteResponse(
-            success=True,
-            action_type=intent_type,
-            candidate_intents=[intent_type],
-            affected_entity=ChatExecuteAffectedEntity(type="todo", id=item["id"]),
-            confirmed_type=intent_type,
-            success_message="已创建待办（虚拟写入）",
-            result_summary=f"待办内容：{content}。当前数据库不可写，结果来自虚拟回退。",
-            next_page_label="去待办页查看",
-            deep_link="/todo",
-        )
-
-    if intent_type in {"record_thought", "fragmented_thought"}:
-        content = str(entities.get("content", user_input)).strip()
-        tags = entities.get("tags", [])
-        item = create_virtual_note(content, tags if isinstance(tags, list) else [])
-        return ChatExecuteResponse(
-            success=True,
-            action_type=intent_type,
-            candidate_intents=[intent_type],
-            affected_entity=ChatExecuteAffectedEntity(type="note", id=item["id"]),
-            confirmed_type=intent_type,
-            success_message="已记录你的想法（虚拟写入）",
-            result_summary=f"{content[:80]}。当前数据库不可写，结果来自虚拟回退。",
-            next_page_label="去日志页查看",
-            deep_link="/log",
-        )
-
-    if intent_type in {"add_interest", "remove_interest"}:
-        interests = entities.get("interests", [])
-        names = [str(item) for item in interests] if isinstance(interests, list) else []
-        action_text = "新增关注" if intent_type == "add_interest" else "移除关注"
-        if intent_type == "add_interest":
-            add_virtual_interest(names)
-        else:
-            remove_virtual_interest(names)
-        return ChatExecuteResponse(
-            success=True,
-            action_type=intent_type,
-            candidate_intents=[intent_type],
-            affected_entity=ChatExecuteAffectedEntity(type="interest", id="virtual-interest"),
-            confirmed_type=intent_type,
-            success_message=f"已更新关注内容（虚拟写入）",
-            result_summary=f"{action_text}：{'、'.join(names) if names else '无明确项'}。当前数据库不可写，结果来自虚拟回退。",
-            next_page_label="返回今日页查看推荐变化",
-            deep_link="/today",
-        )
-
-    if intent_type == "set_push_time":
-        time_value = str(entities.get("time", "08:00"))
-        return ChatExecuteResponse(
-            success=True,
-            action_type=intent_type,
-            candidate_intents=[intent_type],
-            affected_entity=ChatExecuteAffectedEntity(type="settings", id="virtual-settings"),
-            confirmed_type=intent_type,
-            success_message="已记录推送时间调整请求（虚拟写入）",
-            result_summary=f"当前请求时间：{time_value}。当前数据库不可写，结果来自虚拟回退。",
-            next_page_label="去通知设置查看",
-            deep_link="/notification-settings",
-        )
-
+def _build_execute_failure_response(
+    *,
+    intent_type: str,
+    candidate_intents: list[str],
+    source_context: str | None,
+) -> ChatExecuteResponse:
     return ChatExecuteResponse(
-        success=True,
+        success=False,
         action_type=intent_type,
-        candidate_intents=[intent_type],
-        affected_entity=ChatExecuteAffectedEntity(type="unknown", id="virtual"),
+        candidate_intents=candidate_intents,
         confirmed_type=intent_type,
-        success_message="已处理当前输入（虚拟写入）",
-        result_summary="当前数据库不可写，结果来自虚拟回退。",
+        success_message="当前输入未能写入正式数据",
+        result_summary="系统已停止使用虚拟写入回退，请稍后重试或检查后端数据链。",
+        source_context=source_context,
     )
 
 
@@ -509,7 +443,6 @@ async def execute_chat(
     if settings.D1_USE_CLOUD_AS_SOURCE:
         store = D1BehaviorStore()
         session_store = D1ChatSessionStore(store.client)
-        session_store = D1ChatSessionStore(store.client)
         store._ensure_user(user_id)
         if not request.auto_commit and not request.confirmed_type:
             response = ChatExecuteResponse(
@@ -714,7 +647,7 @@ async def execute_chat(
             deep_link = "/log"
 
         elif intent_type in {"add_interest", "remove_interest"}:
-            current = _load_user_interests(user)
+            current = _load_user_interests_from_rows(db, user_id)
             interests = entities.get("interests", [])
             names = [str(item) for item in interests] if isinstance(interests, list) else []
 
@@ -736,9 +669,6 @@ async def execute_chat(
                 result_summary = f"移除关注：{'、'.join(names)}" if names else "关注内容已更新"
                 _append_history(db, user_id, "interest_removed", "更新关注", result_summary)
 
-            # 在“接口真实化、数据源虚拟化”阶段，Today 页仍读取共享虚拟兴趣状态。
-            # 真实写入成功后同步镜像到虚拟状态，保证 Chat -> Today 的写后读一致。
-            set_virtual_interests(updated)
             affected_entity = ChatExecuteAffectedEntity(type="interest")
             next_page_label = "返回今日页查看推荐变化"
             deep_link = "/today"
@@ -791,7 +721,12 @@ async def execute_chat(
         db.commit()
         return response
     except Exception:
-        return _build_virtual_response(intent_type, entities, request.input)
+        db.rollback()
+        return _build_execute_failure_response(
+            intent_type=intent_type,
+            candidate_intents=candidate_intents,
+            source_context=request.source_context,
+        )
 
 
 @router.post("/reclassify", response_model=ChatExecuteResponse, summary="纠偏重分类")
@@ -833,6 +768,7 @@ async def reclassify_chat(
 
     if settings.D1_USE_CLOUD_AS_SOURCE:
         store = D1BehaviorStore()
+        session_store = D1ChatSessionStore(store.client)
 
         if correction_type == "history":
             history_rows = store.client.query(
@@ -1163,26 +1099,37 @@ async def reclassify_chat(
             source_context=request.source_context,
         )
 
-    db.commit()
+    try:
+        db.commit()
 
-    response = ChatExecuteResponse(
-        success=True,
-        action_type=request.target_intent,
-        affected_entity=affected_entity,
-        confirmed_type=request.target_intent,
-        success_message=success_message,
-        result_summary=result_summary,
-        next_page_label=next_page_label,
-        deep_link=deep_link,
-        source_context=request.source_context,
-        change_log=change_log,
-    )
-    _persist_reclassify_message_local(
-        db,
-        user_id=user_id,
-        original_input=original_input,
-        source_context=request.source_context,
-        response=response,
-    )
-    db.commit()
-    return response
+        response = ChatExecuteResponse(
+            success=True,
+            action_type=request.target_intent,
+            affected_entity=affected_entity,
+            confirmed_type=request.target_intent,
+            success_message=success_message,
+            result_summary=result_summary,
+            next_page_label=next_page_label,
+            deep_link=deep_link,
+            source_context=request.source_context,
+            change_log=change_log,
+        )
+        _persist_reclassify_message_local(
+            db,
+            user_id=user_id,
+            original_input=original_input,
+            source_context=request.source_context,
+            response=response,
+        )
+        db.commit()
+        return response
+    except Exception:
+        db.rollback()
+        return ChatExecuteResponse(
+            success=False,
+            action_type=request.target_intent,
+            confirmed_type=request.target_intent,
+            success_message="纠偏写入失败",
+            result_summary="系统已停止使用虚拟纠偏回退，请稍后重试。",
+            source_context=request.source_context,
+        )

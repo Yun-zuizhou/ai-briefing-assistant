@@ -1,0 +1,135 @@
+/* ========================================
+   底部导航 - Bottom Nav
+   ======================================== */
+
+.bottom-nav {
+  flex-shrink: 0;
+  width: 100%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  overflow: visible;
+  align-items: center;
+  z-index: 100;
+  padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0));
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0));
+  position: relative;
+  border-top: 1px solid rgba(143, 130, 105, 0.72);
+  background:
+    linear-gradient(180deg, rgba(255, 244, 221, 0.08) 0%, transparent 36%),
+    #32291b;
+}
+
+.bottom-nav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(245, 242, 232, 0.72);
+  font-size: var(--text-nav-label);
+  letter-spacing: var(--tracking-nav-label);
+  font-weight: 500;
+  font-family: var(--font-nav-label);
+  position: relative;
+  transition: color 0.2s ease;
+  height: 100%;
+}
+
+.nav-btn.active {
+  color: var(--paper);
+  background: linear-gradient(180deg, rgba(245, 242, 232, 0.14) 0%, rgba(245, 242, 232, 0.03) 100%);
+}
+
+.nav-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transition: width 0.2s ease;
+}
+
+.nav-btn.active::after {
+  width: 20px;
+}
+
+.nav-btn-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-btn svg {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.2s ease;
+}
+
+.nav-btn:active svg {
+  transform: scale(0.9);
+}
+
+.nav-btn-label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ========================================
+   装饰性角落 - Decorative Corners
+   ======================================== */
+
+.decorative-corner {
+  display: none;
+}
+
+.decorative-corner.top-left {
+  top: 100px;
+  left: 8px;
+  border-left: 2px solid var(--ink);
+  border-top: 2px solid var(--ink);
+}
+
+.decorative-corner.top-right {
+  top: 100px;
+  right: 8px;
+  border-right: 2px solid var(--ink);
+  border-top: 2px solid var(--ink);
+}
+
+@media (max-width: 767px) {
+  .bottom-nav {
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .nav-btn {
+    min-height: 58px;
+    gap: 4px;
+    padding: 6px 4px;
+  }
+
+  .nav-btn-label {
+    font-size: 12px;
+  }
+}

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -6,9 +6,6 @@ from app.database import get_db
 from app.api.v1.page_schemas import CamelModel
 from app.models.history import HistoryEntry
 from app.services.d1_behavior_store import D1BehaviorStore
-from app.services.data import get_virtual_history
-
-
 router = APIRouter()
 
 
@@ -85,8 +82,8 @@ async def get_history(
                 for item in items
             ],
         }
-    except Exception:
-        return get_virtual_history()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="历史列表读取失败，请稍后重试") from exc
 
 
 @router.post("", response_model=HistoryResponse, summary="创建历史事件")

@@ -9,6 +9,7 @@ import json
 class APIProvider(str, Enum):
     DEEPSEEK = "deepseek"
     OPENAI = "openai"
+    NVIDIA = "nvidia"
     ANTHROPIC = "anthropic"
     GEMINI = "gemini"
     ZHIPU = "zhipu"
@@ -28,8 +29,9 @@ def parse_cors_origins(origins: str | List[str]) -> List[str]:
 class Settings(BaseSettings):
     APP_NAME: str = "AI简报助手"
     DEBUG: bool = True
+    ENABLE_BACKGROUND_SCHEDULER: bool = True
     
-    DATABASE_URL: str = "sqlite:///./info_collector.db"
+    DATABASE_URL: str = "sqlite:///./var/local/info_collector.db"
     D1_DATABASE_ID: str = ""
     D1_DATABASE_NAME: str = "ai-briefing-assistant-prod"
     D1_ACCOUNT_ID: str = ""
@@ -54,7 +56,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     
-    MOCK_DATA_PATH: str = "prototype/demo/mock-data"
+    MOCK_DATA_PATH: str = "apps/web/demo/mock-data"
     
     AI_PROVIDER: str = "deepseek"
     
@@ -65,6 +67,10 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_API_URL: str = "https://api.openai.com/v1/chat/completions"
     OPENAI_MODEL: str = "gpt-4o-mini"
+
+    NVIDIA_API_KEY: str = ""
+    NVIDIA_API_URL: str = "https://integrate.api.nvidia.com/v1/chat/completions"
+    NVIDIA_MODEL: str = "meta/llama-3.1-8b-instruct"
     
     ANTHROPIC_API_KEY: str = ""
     ANTHROPIC_API_URL: str = "https://api.anthropic.com/v1/messages"
@@ -89,14 +95,15 @@ class Settings(BaseSettings):
     AI_MAX_TOKENS: int = 1000
     AI_TEMPERATURE: float = 0.7
     AI_TIMEOUT: int = 30
+    AI_DIGEST_DEBUG_FALLBACK: bool = False
     
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=True,
     )
     
-    def get_active_provider_config(self) -> dict:
-        provider = self.AI_PROVIDER.lower()
+    def get_provider_config(self, provider_name: str, api_key_override: str | None = None) -> dict:
+        provider = str(provider_name or "").lower().strip()
         config_map = {
             "deepseek": {
                 "provider": "deepseek",
@@ -109,6 +116,12 @@ class Settings(BaseSettings):
                 "api_key": self.OPENAI_API_KEY,
                 "api_url": self.OPENAI_API_URL,
                 "model": self.OPENAI_MODEL,
+            },
+            "nvidia": {
+                "provider": "nvidia",
+                "api_key": self.NVIDIA_API_KEY,
+                "api_url": self.NVIDIA_API_URL,
+                "model": self.NVIDIA_MODEL,
             },
             "anthropic": {
                 "provider": "anthropic",
@@ -141,7 +154,13 @@ class Settings(BaseSettings):
                 "model": self.LOCAL_MODEL,
             },
         }
-        return config_map.get(provider, config_map["deepseek"])
+        config = dict(config_map.get(provider, config_map["deepseek"]))
+        if api_key_override is not None:
+            config["api_key"] = api_key_override
+        return config
+
+    def get_active_provider_config(self) -> dict:
+        return self.get_provider_config(self.AI_PROVIDER)
 
 
 settings = Settings()

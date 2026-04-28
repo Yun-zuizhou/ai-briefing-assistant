@@ -75,6 +75,17 @@ ADD_INTEREST_PATTERNS = [
 ]
 
 NEGATIVE_PREFIXES = ["不", "没", "别", "取消", "删除", "移除", "停止"]
+NEGATIVE_HINT_PATTERNS = [
+    r"不想",
+    r"不再",
+    r"不要",
+    r"别给我",
+    r"别再",
+    r"取消",
+    r"删除",
+    r"移除",
+    r"停止",
+]
 
 TIME_PATTERNS = {
     "morning": r"早上?|早晨|上午|8点|9点|10点",
@@ -116,7 +127,6 @@ TODO_ACTION_PATTERNS = [
     r"发送",
     r"预约",
     r"交",
-    r"得",
     r"要完成",
 ]
 
@@ -304,7 +314,10 @@ def extract_fragmented_thought(text: str) -> Optional[dict]:
 
 
 def has_negative_prefix(text: str) -> bool:
-    return any(text.startswith(prefix) or prefix in text for prefix in NEGATIVE_PREFIXES)
+    normalized = text.strip()
+    if any(normalized.startswith(prefix) for prefix in NEGATIVE_PREFIXES):
+        return True
+    return any(re.search(pattern, normalized) for pattern in NEGATIVE_HINT_PATTERNS)
 
 
 def check_remove_interest(text: str) -> Optional[dict]:

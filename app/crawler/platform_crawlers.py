@@ -242,46 +242,8 @@ class ZhihuHotTopicCrawler(BaseHotTopicCrawler):
         return topics
     
     async def _get_fallback_data(self) -> List[HotTopicItem]:
-        topics = []
-        
-        fallback_titles = [
-            "人工智能发展现状与未来趋势",
-            "职场新人如何快速成长",
-            "如何看待当前经济形势",
-            "健康生活方式分享",
-            "教育改革新动向",
-            "科技行业就业前景",
-            "环境保护与可持续发展",
-            "文化传承与创新",
-            "青年人的职业选择",
-            "数字化转型的影响",
-            "远程工作的利与弊",
-            "如何提升个人竞争力",
-            "社交媒体对生活的影响",
-            "新能源技术发展",
-            "城市生活与乡村发展",
-            "如何平衡工作与生活",
-            "在线教育的机遇与挑战",
-            "人工智能伦理问题",
-            "创业还是就业的选择",
-            "终身学习的重要性"
-        ]
-        
-        for i, title in enumerate(fallback_titles):
-            topic = HotTopicItem(
-                title=title,
-                summary=f"知乎热榜话题: {title}",
-                source="知乎热榜",
-                source_url=f"https://www.zhihu.com/search?type=content&q={title}",
-                hot_value=1000 - i * 50,
-                categories=["社会", "热点", "深度讨论"],
-                tags=["知乎热榜", "备用数据"],
-                published_at=datetime.now()
-            )
-            topics.append(topic)
-        
-        logger.info(f"知乎备用数据: {len(topics)}条")
-        return topics
+        logger.warning("知乎热点采集已停止使用备用伪数据，本轮返回空结果等待重试")
+        return []
     
     async def _fetch_from_rss(self) -> List[HotTopicItem]:
         topics = []
@@ -541,46 +503,8 @@ class ToutiaoHotTopicCrawler(BaseHotTopicCrawler):
         return topics
     
     async def _get_fallback_data(self) -> List[HotTopicItem]:
-        topics = []
-        
-        fallback_titles = [
-            "全国两会热点议题",
-            "春季养生指南",
-            "新能源汽车销量创新高",
-            "人工智能技术应用场景",
-            "房地产市场最新动态",
-            "教育公平政策解读",
-            "医疗改革新举措",
-            "乡村振兴战略推进",
-            "科技创新成果展示",
-            "就业市场趋势分析",
-            "消费升级新趋势",
-            "文化旅游融合发展",
-            "数字经济蓬勃发展",
-            "绿色低碳生活方式",
-            "社会保障体系完善",
-            "体育赛事精彩回顾",
-            "美食文化推广",
-            "时尚潮流趋势",
-            "娱乐产业动态",
-            "国际热点事件"
-        ]
-        
-        for i, title in enumerate(fallback_titles):
-            topic = HotTopicItem(
-                title=title,
-                summary=f"今日头条热点: {title}",
-                source="今日头条",
-                source_url=f"https://www.toutiao.com/search?keyword={title}",
-                hot_value=1000 - i * 50,
-                categories=["社会", "热点", "头条"],
-                tags=["今日头条", "备用数据"],
-                published_at=datetime.now()
-            )
-            topics.append(topic)
-        
-        logger.info(f"头条备用数据: {len(topics)}条")
-        return topics
+        logger.warning("头条热点采集已停止使用备用伪数据，本轮返回空结果等待重试")
+        return []
     
     async def _fetch_from_rss(self) -> List[HotTopicItem]:
         topics = []

@@ -6,9 +6,6 @@ from app.database import get_db
 from app.api.v1.page_schemas import CamelModel
 from app.models.favorite import Favorite
 from app.services.d1_behavior_store import D1BehaviorStore
-from app.services.data import get_virtual_favorites
-
-
 router = APIRouter()
 
 
@@ -86,8 +83,8 @@ async def get_favorites(
                 for item in items
             ],
         }
-    except Exception:
-        return get_virtual_favorites()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="收藏列表读取失败，请稍后重试") from exc
 
 
 @router.post("", response_model=FavoriteResponse, summary="创建收藏")

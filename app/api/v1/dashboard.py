@@ -43,9 +43,6 @@ from app.services.content_result import get_hot_topic_processing_result, observe
 from app.services.d1_hot_topic_processing_result_store import D1HotTopicProcessingResultStore
 from app.services.hot_topic_processing_result_store import get_or_create_hot_topic_processing_results
 from app.services.briefing_store import get_briefing_result, upsert_briefing_result
-from app.services.data import get_virtual_interests
-
-
 router = APIRouter()
 
 
@@ -422,18 +419,11 @@ async def get_today_dashboard(
         content_store = D1ContentStore(d1_client)
         hot_topic_result_store = D1HotTopicProcessingResultStore(d1_client)
         interests = behavior_store.get_user_interests(user_id)
-        if not interests:
-            interests = get_virtual_interests()
         hot_topics = content_store.list_hot_topics(limit=8)
         hot_topic_results = _get_d1_hot_topic_results_readonly(hot_topic_result_store, hot_topics)
         opportunities = content_store.list_opportunities(limit=6)
     else:
-        user = db.query(User).filter(User.id == user_id).first()
         interests = _load_user_interests_from_rows(db, user_id)
-        if not interests:
-            interests = _load_user_interests(user)
-        if not interests:
-            interests = get_virtual_interests()
 
         hot_topics = (
             db.query(HotTopic)

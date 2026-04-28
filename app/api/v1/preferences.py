@@ -3,6 +3,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
+from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -42,6 +43,26 @@ router = APIRouter()
 
 def _ensure_user_settings_table() -> None:
     UserSetting.__table__.create(bind=engine, checkfirst=True)
+    try:
+        existing_columns = {
+            str(column.get("name") or "")
+            for column in inspect(engine).get_columns(UserSetting.__tablename__)
+        }
+    except Exception:
+        return
+
+    statements: list[str] = []
+    if "ai_provider" not in existing_columns:
+        statements.append("ALTER TABLE user_settings ADD COLUMN ai_provider VARCHAR(32)")
+    if "ai_api_key" not in existing_columns:
+        statements.append("ALTER TABLE user_settings ADD COLUMN ai_api_key VARCHAR(255)")
+
+    if not statements:
+        return
+
+    with engine.begin() as conn:
+        for statement in statements:
+            conn.exec_driver_sql(statement)
 
 
 def _ensure_user_interests_table() -> None:
@@ -391,15 +412,8 @@ async def get_user_interests(
     if settings.D1_USE_CLOUD_AS_SOURCE:
         return UserInterestsResponse(interests=D1BehaviorStore().get_user_interests(user_id))
 
-    user = db.query(User).filter(User.id == user_id).first()
     row_interests = _load_user_interests_from_rows(db, user_id)
-    if row_interests:
-        return UserInterestsResponse(interests=row_interests)
-
-    if not user:
-        return UserInterestsResponse(interests=[])
-
-    return UserInterestsResponse(interests=_load_user_interests(user))
+    return UserInterestsResponse(interests=row_interests)
 
 
 @router.put("/interests", response_model=UserInterestsResponse, summary="更新用户关注列表")
@@ -425,7 +439,7 @@ async def update_user_interests(
     _save_user_interests(user, payload.interests)
     _sync_user_interests_rows(db, user_id, payload.interests)
     db.commit()
-    return UserInterestsResponse(interests=_load_user_interests(user))
+    return UserInterestsResponse(interests=_load_user_interests_from_rows(db, user_id))
 
 
 @router.get("/settings", response_model=UserSettingsResponse, summary="获取用户通知设置")
@@ -589,12 +603,8 @@ async def get_user_profile(
             behavior_store=behavior_store,
         )
 
-    user = db.query(User).filter(User.id == user_id).first()
     row_interests = _load_user_interests_from_rows(db, user_id)
-    if row_interests:
-        active_interests = row_interests
-    else:
-        active_interests = _load_user_interests(user) if user else []
+    active_interests = row_interests
 
     notes = db.query(Note).filter(Note.user_id == user_id).all()
     favorites_count = db.query(Favorite).filter(Favorite.user_id == user_id).count()

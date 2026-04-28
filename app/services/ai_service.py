@@ -96,6 +96,44 @@ class OpenAIProvider(BaseAIProvider):
             return False
 
 
+class NVIDIAProvider(BaseAIProvider):
+    def __init__(self, api_key: str, api_url: str, model: str):
+        self.api_key = api_key
+        self.api_url = api_url
+        self.model = model
+
+    async def chat(
+        self,
+        messages: list[dict],
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+    ) -> dict:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        data = {
+            "model": model or self.model,
+            "messages": messages,
+            "temperature": temperature if temperature is not None else settings.AI_TEMPERATURE,
+            "max_tokens": max_tokens or settings.AI_MAX_TOKENS,
+            "stream": False,
+        }
+
+        async with httpx.AsyncClient(timeout=settings.AI_TIMEOUT) as client:
+            response = await client.post(self.api_url, headers=headers, json=data)
+            response.raise_for_status()
+            return response.json()
+
+    async def test_connection(self) -> bool:
+        try:
+            result = await self.chat([{"role": "user", "content": "Hi"}], max_tokens=10)
+            return "choices" in result
+        except Exception:
+            return False
+
+
 class AnthropicProvider(BaseAIProvider):
     def __init__(self, api_key: str, api_url: str, model: str):
         self.api_key = api_key
@@ -326,6 +364,7 @@ class AIService:
         providers = {
             "deepseek": DeepSeekProvider,
             "openai": OpenAIProvider,
+            "nvidia": NVIDIAProvider,
             "anthropic": AnthropicProvider,
             "gemini": GeminiProvider,
             "zhipu": ZhipuProvider,
@@ -344,6 +383,7 @@ class AIService:
         providers = {
             "deepseek": DeepSeekProvider,
             "openai": OpenAIProvider,
+            "nvidia": NVIDIAProvider,
             "anthropic": AnthropicProvider,
             "gemini": GeminiProvider,
             "zhipu": ZhipuProvider,

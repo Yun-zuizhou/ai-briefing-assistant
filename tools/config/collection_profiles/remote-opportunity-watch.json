@@ -1,0 +1,41 @@
+{
+  "profile_id": "remote-opportunity-watch",
+  "name": "远程工作机会观察",
+  "description": "围绕远程工作、兼职、实习与可行动机会收集候选内容，用于用户关注“远程工作机会”时的内部执行模板。",
+  "prompt_version": "remote-opportunity-v1",
+  "keyword_whitelist": [
+    "远程",
+    "兼职",
+    "实习",
+    "岗位",
+    "工作",
+    "招聘",
+    "求职",
+    "投递"
+  ],
+  "keyword_blacklist": [
+    "纯广告",
+    "活动报名",
+    "直播预告"
+  ],
+  "top_n_candidates": 20,
+  "top_n_summary": 6,
+  "max_consult_context_items": 3,
+  "sources": [
+    {
+      "source_id": "remote_opportunities",
+      "name": "远程机会池",
+      "type": "opportunity_query",
+      "url": "",
+      "category": "opportunity",
+      "tags": ["远程工作", "求职", "机会"],
+      "trust_weight": 90,
+      "query": {
+        "types_any": ["remote_job", "part_time_job", "internship"],
+        "tags_any": ["远程", "远程工作", "求职", "兼职"],
+        "keywords_any": ["远程", "兼职", "实习", "求职", "招聘"],
+        "limit": 30
+      }
+    }
+  ]
+}

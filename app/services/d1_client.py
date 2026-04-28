@@ -20,7 +20,7 @@ class D1ClientError(RuntimeError):
 
 
 ROOT = Path(__file__).resolve().parents[2]
-WRANGLER_TOML = ROOT / "wrangler.toml"
+WRANGLER_TOML = ROOT / "apps" / "edge-worker" / "wrangler.toml"
 WRANGLER_ACCOUNT_CACHE = ROOT / ".wrangler" / "cache" / "wrangler-account.json"
 
 

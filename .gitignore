@@ -3,13 +3,21 @@ __pycache__/
 .pip-tmp/
 .pydeps/
 .pydeps_runtime/
+.config/
+.npm-cache/
+.playwright-browsers/
 .wrangler/
+.wrangler-logs/
 *.db
 *.pyc
 codex-api-mainline-*/
 pytest-cache-files-*/
-prototype/dist/
-prototype/node_modules/
+node_modules/
+test-results/
+apps/web/dist/
+apps/web/node_modules/
+apps/edge-worker/node_modules/
+apps/edge-worker/.wrangler/
 prototype-vintage-backup/node_modules/
 
 # 生产环境配置文件
@@ -28,17 +36,16 @@ prototype-vintage-backup/node_modules/
 # 归档工作区（不需要部署）
 _archive_workspace/
 
-# 文档目录（不需要部署）
-文档/
-
-# 调试日志
-debug.log
+# 运行产物
+var/local/
+var/logs/
+var/tmp/
+var/*.log
 
 # 环境变量文件
 .env
-.env.example
-prototype/.env
-prototype/.env.example
+apps/web/.env
+apps/edge-worker/.dev.vars
 
 # Python 环境
 sitecustomize.py

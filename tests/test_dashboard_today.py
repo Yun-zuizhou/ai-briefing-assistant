@@ -13,13 +13,13 @@ def test_dashboard_today_source_contains_content_ref_contract():
     dashboard_source = (ROOT_DIR / "app" / "api" / "v1" / "dashboard.py").read_text(encoding="utf-8")
     projection_source = (ROOT_DIR / "app" / "services" / "content_projection.py").read_text(encoding="utf-8")
     schema_source = (ROOT_DIR / "app" / "api" / "v1" / "page_schemas.py").read_text(encoding="utf-8")
-    today_page_source = (ROOT_DIR / "prototype" / "src" / "pages" / "TodayPage.tsx").read_text(encoding="utf-8")
+    today_page_source = (ROOT_DIR / "apps" / "web" / "src" / "pages" / "TodayPage.tsx").read_text(encoding="utf-8")
 
     assert "def build_content_ref(content_type: str, item_id: int | str | None) -> str | None:" in projection_source
     assert "content_ref: str" in schema_source
     assert "def _load_user_interests_from_rows(db: Session, user_id: int) -> list[str]:" in dashboard_source
     assert "interests = _load_user_interests_from_rows(db, user_id)" in dashboard_source
-    assert "interests = get_virtual_interests()" in dashboard_source
+    assert "interests = get_virtual_interests()" not in dashboard_source
     assert "navigate(`/article?ref=${encodeURIComponent(item.contentRef)}`" in today_page_source
 
 
@@ -27,7 +27,7 @@ def test_unified_content_detail_transition_contract_exists():
     content_source = (ROOT_DIR / "app" / "api" / "v1" / "content.py").read_text(encoding="utf-8")
     main_source = (ROOT_DIR / "app" / "main.py").read_text(encoding="utf-8")
     article_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ArticlePage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ArticlePage.tsx"
     ).read_text(encoding="utf-8")
 
     assert '@router.get("/by-ref", response_model=UnifiedContentDetailResponse' in content_source
@@ -41,10 +41,10 @@ def test_unified_content_detail_transition_contract_exists():
 
 def test_hot_topics_and_collections_now_share_content_ref_navigation():
     hot_topics_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "HotTopicsPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "HotTopicsPage.tsx"
     ).read_text(encoding="utf-8")
     collections_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "CollectionsPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "CollectionsPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "const buildContentRef = (contentType: string, id: string | number) =>" in hot_topics_page_source
@@ -61,10 +61,10 @@ def test_favorites_now_expose_content_ref_compat_contract():
         ROOT_DIR / "app" / "api" / "v1" / "favorites.py"
     ).read_text(encoding="utf-8")
     article_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ArticlePage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ArticlePage.tsx"
     ).read_text(encoding="utf-8")
     types_source = (
-        ROOT_DIR / "prototype" / "src" / "types" / "page-data.ts"
+        ROOT_DIR / "packages" / "contracts" / "src" / "page-data.ts"
     ).read_text(encoding="utf-8")
 
     assert 'def _build_content_ref(item_type: str, item_id: int) -> str:' in favorites_source
@@ -72,7 +72,7 @@ def test_favorites_now_expose_content_ref_compat_contract():
     assert "if favorite_data.content_ref:" in favorites_source
     assert "content_ref=_build_content_ref(item.item_type, item.item_id)" in favorites_source
     assert "content_ref: activeArticle.contentRef," in article_page_source
-    assert "content_ref: string;" in types_source
+    assert "content_ref: string | null;" in types_source
 
 
 def test_today_mainline_doc_records_content_ref_priority():
@@ -88,22 +88,25 @@ def test_today_mainline_doc_records_content_ref_priority():
 def test_dashboard_and_reports_interest_fact_layer_doc_exists():
     transition_doc = read_contract_doc("2026-04-03-dashboard与reports兴趣事实层接轨.md")
     reports_source = (ROOT_DIR / "app" / "api" / "v1" / "reports.py").read_text(encoding="utf-8")
+    dashboard_source = (ROOT_DIR / "app" / "api" / "v1" / "dashboard.py").read_text(encoding="utf-8")
 
     assert "Today 兴趣来源顺序" in transition_doc
-    assert "正式态(user_interests) -> 过渡回退(users.interests) -> 虚拟兜底(get_virtual_interests)" in transition_doc
+    assert "正式态(user_interests) -> 空兴趣正式态" in transition_doc
+    assert "旧字段只保留影子同步职责" in transition_doc
+    assert "interests = _load_user_interests(user)" not in dashboard_source
     assert "def _load_user_interests_from_rows(db: Session, user_id: int) -> list[str]:" in reports_source
     assert "interests = _load_user_interests_from_rows(db, user_id)" in reports_source
-    assert "interests = _load_user_interests(user)" in reports_source
+    assert "interests = _load_user_interests(user)" not in reports_source
 
 
 def test_reports_now_expose_hotspot_content_ref_contract():
     projection_source = (ROOT_DIR / "app" / "services" / "content_projection.py").read_text(encoding="utf-8")
     schema_source = (ROOT_DIR / "app" / "api" / "v1" / "page_schemas.py").read_text(encoding="utf-8")
     weekly_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "WeeklyReportPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "WeeklyReportPage.tsx"
     ).read_text(encoding="utf-8")
     monthly_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "MonthlyReportPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "MonthlyReportPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "def build_content_ref(content_type: str, item_id: int | str | None) -> str | None:" in projection_source
@@ -118,10 +121,10 @@ def test_reports_now_expose_hotspot_content_ref_contract():
 def test_history_now_exposes_content_ref_compat_contract():
     history_source = (ROOT_DIR / "app" / "api" / "v1" / "history.py").read_text(encoding="utf-8")
     history_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "HistoryLogsPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "HistoryLogsPage.tsx"
     ).read_text(encoding="utf-8")
     types_source = (
-        ROOT_DIR / "prototype" / "src" / "types" / "page-data.ts"
+        ROOT_DIR / "packages" / "contracts" / "src" / "page-data.ts"
     ).read_text(encoding="utf-8")
 
     assert 'def _build_content_ref(ref_type: str | None, ref_id: int | None) -> str | None:' in history_source
@@ -134,7 +137,7 @@ def test_history_now_exposes_content_ref_compat_contract():
 
 def test_article_page_now_renders_content_body_from_unified_detail():
     article_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ArticlePage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ArticlePage.tsx"
     ).read_text(encoding="utf-8")
     detail_doc_source = read_contract_doc("2026-04-03-内容详情正文层过渡收束.md")
 
@@ -150,7 +153,7 @@ def test_unified_content_detail_now_contains_related_items_contract():
     content_source = (ROOT_DIR / "app" / "api" / "v1" / "content.py").read_text(encoding="utf-8")
     schema_source = (ROOT_DIR / "app" / "api" / "v1" / "page_schemas.py").read_text(encoding="utf-8")
     article_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ArticlePage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ArticlePage.tsx"
     ).read_text(encoding="utf-8")
     doc_source = read_contract_doc("2026-04-03-内容相关推荐最小过渡态.md")
 
@@ -170,7 +173,7 @@ def test_today_dashboard_now_contains_processing_fields_contract():
     projection_source = (ROOT_DIR / "app" / "services" / "content_projection.py").read_text(encoding="utf-8")
     schema_source = (ROOT_DIR / "app" / "api" / "v1" / "page_schemas.py").read_text(encoding="utf-8")
     today_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "TodayPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "TodayPage.tsx"
     ).read_text(encoding="utf-8")
     doc_source = read_contract_doc("2026-04-03-Today内容加工字段最小收束.md")
 
@@ -182,7 +185,7 @@ def test_today_dashboard_now_contains_processing_fields_contract():
     assert "processing_note=" in dashboard_source
     assert "quality_score: Optional[float] = None" in schema_source
     assert "match_score: Optional[int] = None" in schema_source
-    assert "processing_stage: Optional[Literal[\"raw\", \"aggregated\", \"ranked\", \"transitional\"]] = None" in schema_source
+    assert "processing_stage: Optional[Literal[\"raw\", \"aggregated\", \"ranked\", \"partial\"]] = None" in schema_source
     assert "processing_note: Optional[str] = None" in schema_source
     assert "排序分：" not in today_page_source
     assert "processingNote" not in today_page_source
@@ -192,7 +195,7 @@ def test_today_dashboard_now_contains_processing_fields_contract():
 
 def test_today_recommendation_section_now_renders_real_top_items():
     today_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "TodayPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "TodayPage.tsx"
     ).read_text(encoding="utf-8")
     doc_source = read_contract_doc("2026-04-03-Today推荐区内容块落地.md")
 
@@ -206,7 +209,7 @@ def test_today_recommendation_section_now_renders_real_top_items():
 
 def test_today_worth_acting_now_supports_detail_navigation_and_todo_action():
     today_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "TodayPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "TodayPage.tsx"
     ).read_text(encoding="utf-8")
     doc_source = read_contract_doc("2026-04-03-Today行动区详情链路接入.md")
 
@@ -220,7 +223,7 @@ def test_today_worth_acting_now_supports_detail_navigation_and_todo_action():
 
 def test_article_page_now_exposes_opportunity_action_entry():
     article_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ArticlePage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ArticlePage.tsx"
     ).read_text(encoding="utf-8")
     doc_source = read_contract_doc("2026-04-03-机会详情页行动入口收束.md")
 
@@ -236,7 +239,7 @@ def test_article_page_now_exposes_opportunity_action_entry():
 
 def test_chat_page_now_accepts_action_context_from_article_page():
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
     doc_source = read_contract_doc("2026-04-03-Chat页动作上下文接收收束.md")
 
@@ -253,10 +256,10 @@ def test_chat_page_now_accepts_action_context_from_article_page():
 
 def test_chat_message_flow_now_carries_intent_analysis_metadata():
     chat_logic_source = (
-        ROOT_DIR / "prototype" / "src" / "hooks" / "useChatLogic.ts"
+        ROOT_DIR / "apps" / "web" / "src" / "hooks" / "useChatLogic.ts"
     ).read_text(encoding="utf-8")
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "function buildIntentAnalysisMessage(params:" in chat_logic_source
@@ -283,10 +286,10 @@ def test_chat_message_flow_now_carries_intent_analysis_metadata():
 
 def test_chat_execution_actions_now_render_inside_message_flow():
     chat_logic_source = (
-        ROOT_DIR / "prototype" / "src" / "hooks" / "useChatLogic.ts"
+        ROOT_DIR / "apps" / "web" / "src" / "hooks" / "useChatLogic.ts"
     ).read_text(encoding="utf-8")
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "nextPageLabel?: string;" in chat_logic_source
@@ -305,13 +308,13 @@ def test_chat_execution_actions_now_render_inside_message_flow():
 
 def test_chat_now_exposes_minimal_post_execution_reclassification_entry():
     chat_logic_source = (
-        ROOT_DIR / "prototype" / "src" / "hooks" / "useChatLogic.ts"
+        ROOT_DIR / "apps" / "web" / "src" / "hooks" / "useChatLogic.ts"
     ).read_text(encoding="utf-8")
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
     types_source = (
-        ROOT_DIR / "prototype" / "src" / "types" / "page-data.ts"
+        ROOT_DIR / "packages" / "contracts" / "src" / "page-data.ts"
     ).read_text(encoding="utf-8")
 
     assert "function buildCorrectionQuickActions(userMessage: string, currentType?: string, correctionFrom?: string)" in chat_logic_source
@@ -328,13 +331,13 @@ def test_chat_now_exposes_minimal_post_execution_reclassification_entry():
 
 def test_chat_post_execution_reclassification_now_calls_backend_when_possible():
     chat_logic_source = (
-        ROOT_DIR / "prototype" / "src" / "hooks" / "useChatLogic.ts"
+        ROOT_DIR / "apps" / "web" / "src" / "hooks" / "useChatLogic.ts"
     ).read_text(encoding="utf-8")
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
     api_source = (
-        ROOT_DIR / "prototype" / "src" / "services" / "api.ts"
+        ROOT_DIR / "apps" / "web" / "src" / "services" / "api.ts"
     ).read_text(encoding="utf-8")
     backend_source = (
         ROOT_DIR / "app" / "api" / "v1" / "chat.py"
@@ -355,10 +358,10 @@ def test_chat_reclassification_result_now_exposes_object_change_log():
     chat_source = (ROOT_DIR / "app" / "api" / "v1" / "chat.py").read_text(encoding="utf-8")
     schema_source = (ROOT_DIR / "app" / "api" / "v1" / "page_schemas.py").read_text(encoding="utf-8")
     types_source = (
-        ROOT_DIR / "prototype" / "src" / "types" / "page-data.ts"
+        ROOT_DIR / "packages" / "contracts" / "src" / "page-data.ts"
     ).read_text(encoding="utf-8")
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "class ChatObjectChange(CamelModel):" in schema_source
@@ -373,10 +376,10 @@ def test_chat_reclassification_result_now_exposes_object_change_log():
 
 def test_chat_user_facing_copy_now_prefers_user_language_over_system_language():
     chat_logic_source = (
-        ROOT_DIR / "prototype" / "src" / "hooks" / "useChatLogic.ts"
+        ROOT_DIR / "apps" / "web" / "src" / "hooks" / "useChatLogic.ts"
     ).read_text(encoding="utf-8")
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "我已经帮你" in chat_logic_source
@@ -391,35 +394,34 @@ def test_chat_user_facing_copy_now_prefers_user_language_over_system_language():
 
 def test_chat_message_visual_hierarchy_now_separates_lead_body_changes_and_actions():
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "function MessageBody({ content, isUser }" in chat_page_source
     assert "const [lead, ...rest] = blocks;" in chat_page_source
-    assert "fontWeight: isUser ? 500 : 700" in chat_page_source
+    assert "className={`chat-message-lead ${isUser ? 'user' : 'assistant'}${rest.length > 0 ? ' has-rest' : ''}`}" in chat_page_source
     assert "rest.length > 0 ? (" in chat_page_source
-    assert "background: isUser ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.55)'" in chat_page_source
+    assert "className=\"chat-message-rest-list\"" in chat_page_source
     assert "<MessageBody content={content} isUser={isUser} />" in chat_page_source
-    assert "display: 'grid'" in chat_page_source
+    assert "className=\"chat-message-change-log\"" in chat_page_source
     assert "item.summary" in chat_page_source
 
 
 def test_chat_auxiliary_metadata_now_falls_back_to_secondary_text_layer():
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
 
     assert "function MessageMeta({" in chat_page_source
-    assert "fontSize: '11px'" in chat_page_source
-    assert "color: 'var(--ink-muted)'" in chat_page_source
-    assert "opacity: 0.85" in chat_page_source
-    assert "fontStyle: 'italic'" in chat_page_source
+    assert "className=\"chat-meta-details\"" in chat_page_source
+    assert "className=\"chat-meta-details-body\"" in chat_page_source
+    assert "<summary>" in chat_page_source
     assert "<MessageMeta" in chat_page_source
 
 
 def test_chat_reclassification_now_uses_specific_result_templates():
     chat_logic_source = (
-        ROOT_DIR / "prototype" / "src" / "hooks" / "useChatLogic.ts"
+        ROOT_DIR / "apps" / "web" / "src" / "hooks" / "useChatLogic.ts"
     ).read_text(encoding="utf-8")
 
     assert "function buildReclassifyReply(params:" in chat_logic_source
@@ -470,3 +472,5 @@ def test_first_batch_behavior_endpoints_now_have_d1_switch_branch():
     assert "def create_chat_todo" in d1_store_source
     assert "def create_chat_note" in d1_store_source
     assert "def reclassify_note_to_todo" in d1_store_source
+
+

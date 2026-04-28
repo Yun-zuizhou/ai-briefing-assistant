@@ -1,0 +1,10 @@
+{
+  "name": "ai-briefing-assistant-web-formal-ui-copy",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "..\\..\\node_modules\\.bin\\vite.cmd --configLoader native --host 127.0.0.1 --port 4173",
+    "preview": "..\\..\\node_modules\\.bin\\vite.cmd preview --host 127.0.0.1 --port 4174"
+  }
+}

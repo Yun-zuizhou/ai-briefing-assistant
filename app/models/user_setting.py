@@ -17,6 +17,8 @@ class UserSetting(Base):
     do_not_disturb_end = Column(String(10), nullable=True)
     sound_enabled = Column(Boolean, default=True)
     vibration_enabled = Column(Boolean, default=True)
+    ai_provider = Column(String(32), nullable=True)
+    ai_api_key = Column(String(255), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

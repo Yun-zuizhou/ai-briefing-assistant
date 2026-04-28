@@ -69,7 +69,7 @@ class RecommendedContentItem(CamelModel):
     quality_score: Optional[float] = None
     match_score: Optional[int] = None
     ranking_score: Optional[float] = None
-    processing_stage: Optional[Literal["raw", "aggregated", "ranked", "transitional"]] = None
+    processing_stage: Optional[Literal["raw", "aggregated", "ranked", "partial"]] = None
 
 
 class RecommendationItem(CamelModel):
@@ -95,7 +95,7 @@ class WorthKnowingItem(CamelModel):
     quality_score: Optional[float] = None
     match_score: Optional[int] = None
     ranking_score: Optional[float] = None
-    processing_stage: Optional[Literal["raw", "aggregated", "ranked", "transitional"]] = None
+    processing_stage: Optional[Literal["raw", "aggregated", "ranked", "partial"]] = None
 
 
 class WorthActingItem(CamelModel):
@@ -112,7 +112,7 @@ class WorthActingItem(CamelModel):
     quality_score: Optional[float] = None
     match_score: Optional[int] = None
     ranking_score: Optional[float] = None
-    processing_stage: Optional[Literal["raw", "aggregated", "ranked", "transitional"]] = None
+    processing_stage: Optional[Literal["raw", "aggregated", "ranked", "partial"]] = None
 
 
 class TodayQuickNoteEntry(CamelModel):
@@ -158,7 +158,7 @@ class UnifiedContentDetailResponse(CamelModel):
     tags: List[str] = []
     published_at: Optional[str] = None
     quality_score: Optional[float] = None
-    detail_state: Literal["formal", "transitional"] = "transitional"
+    detail_state: Literal["formal", "partial"] = "partial"
     related_items: List[RelatedContentItem] = []
 
 

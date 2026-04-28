@@ -26,9 +26,11 @@ from app.crawler.scheduler import rss_scheduler
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    rss_scheduler.start()
+    if settings.ENABLE_BACKGROUND_SCHEDULER:
+        rss_scheduler.start()
     yield
-    rss_scheduler.stop()
+    if settings.ENABLE_BACKGROUND_SCHEDULER:
+        rss_scheduler.stop()
 
 
 app = FastAPI(

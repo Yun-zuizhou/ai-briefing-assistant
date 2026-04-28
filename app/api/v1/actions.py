@@ -254,6 +254,7 @@ async def check_in_today(
         event_type="daily_check_in",
         title="今日打卡",
         summary="已完成今日打卡",
+        created_at=datetime.now(),
     )
     db.add(item)
     db.commit()

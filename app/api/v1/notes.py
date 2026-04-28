@@ -6,9 +6,6 @@ from app.config import settings
 from app.database import get_db
 from app.models.note import Note
 from app.services.d1_behavior_store import D1BehaviorStore
-from app.services.data import get_virtual_notes
-
-
 router = APIRouter()
 
 
@@ -65,8 +62,8 @@ async def get_notes(
                 for item in items
             ],
         }
-    except Exception:
-        return get_virtual_notes()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="记录列表读取失败，请稍后重试") from exc
 
 
 @router.post("", response_model=NoteResponse, summary="创建记录")

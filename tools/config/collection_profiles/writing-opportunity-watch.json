@@ -1,0 +1,39 @@
+{
+  "profile_id": "writing-opportunity-watch",
+  "name": "写作机会观察",
+  "description": "围绕写作、投稿、征稿与内容表达机会收集候选内容，用于用户关注“写作”时的内部执行模板。",
+  "prompt_version": "writing-opportunity-v1",
+  "keyword_whitelist": [
+    "写作",
+    "投稿",
+    "征稿",
+    "内容",
+    "表达",
+    "专栏",
+    "稿件"
+  ],
+  "keyword_blacklist": [
+    "纯广告",
+    "活动报名"
+  ],
+  "top_n_candidates": 16,
+  "top_n_summary": 5,
+  "max_consult_context_items": 3,
+  "sources": [
+    {
+      "source_id": "writing_opportunities",
+      "name": "写作机会池",
+      "type": "opportunity_query",
+      "url": "",
+      "category": "opportunity",
+      "tags": ["写作", "投稿", "表达"],
+      "trust_weight": 88,
+      "query": {
+        "types_any": ["writing_submission", "submission", "part_time_job"],
+        "tags_any": ["写作", "投稿", "征稿", "内容"],
+        "keywords_any": ["写作", "投稿", "征稿", "博客", "专栏", "稿件", "内容"],
+        "limit": 20
+      }
+    }
+  ]
+}

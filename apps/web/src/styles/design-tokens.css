@@ -1,0 +1,41 @@
+:root {
+  --font-serif-cn: 'Noto Serif SC', serif;
+  --font-sans-cn: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-latin-elegant: 'EB Garamond', 'Times New Roman', 'Georgia', serif;
+  --font-article-title-cn: 'Noto Serif SC', serif;
+  --font-label-cn: 'Noto Serif SC', serif;
+
+  --text-page-title: 1.75rem;
+  --text-section-title: 0.875rem;
+  --text-card-title: 1rem;
+  --text-body: 0.9375rem;
+  --text-body-lg: 1rem;
+  --text-meta: 0.8125rem;
+  --text-micro: 0.75rem;
+  
+  --paper: #F5F2E8;
+  --paper-warm: #EDE9DC;
+  --paper-dark: #E5E0D0;
+  
+  --ink: #2C2416;
+  --ink-light: #5A4D3A;
+  --ink-muted: #6C5E49;
+  --ink-reading: #5F5240;
+  
+  --accent: #A63D2F;
+  --accent-dark: #7F2F24;
+  --accent-light: #F5E6E3;
+  
+  --gold: #8B6914;
+  --gold-light: #F5EBD3;
+  
+  --semantic-success: #2D5A27;
+  --border: #B8AE96;
+  --border-strong: #8F8269;
+  --surface-raised: #FBF8F2;
+  --surface-soft: #F1EBDF;
+  --shadow-soft: 0 8px 20px rgba(44, 36, 22, 0.08);
+  
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -129,7 +129,7 @@ class D1ContentStore:
                    reward, reward_min, reward_max, reward_unit, location, is_remote,
                    tags, category, quality_score, reliability_score
             FROM opportunities
-            WHERE status = 'ACTIVE'
+            WHERE lower(status) = 'active'
             ORDER BY quality_score DESC, published_at DESC
             LIMIT ?
             """,

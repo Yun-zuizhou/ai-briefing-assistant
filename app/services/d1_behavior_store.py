@@ -41,28 +41,18 @@ class D1BehaviorStore:
             "total_thoughts": 0,
         }
 
-    def _load_user_interests_json(self, user_row: dict[str, Any]) -> list[str]:
-        try:
-            raw = json.loads(user_row.get("interests") or "[]")
-            return [str(item) for item in raw] if isinstance(raw, list) else []
-        except Exception:
-            return []
-
     def get_user_interests(self, user_id: int) -> list[str]:
+        self._ensure_user(user_id)
         rows = self.client.query(
             """
             SELECT interest_name
             FROM user_interests
-            WHERE user_id = ? AND status = 'active'
+            WHERE user_id = ? AND lower(status) = 'active'
             ORDER BY id ASC
             """,
             [user_id],
         )
-        if rows:
-            return [str(row["interest_name"]) for row in rows if row.get("interest_name")]
-
-        user = self._ensure_user(user_id)
-        return self._load_user_interests_json(user)
+        return [str(row["interest_name"]) for row in rows if row.get("interest_name")]
 
     def replace_user_interests(self, user_id: int, interests: list[str]) -> list[str]:
         normalized: list[str] = []

@@ -252,7 +252,7 @@ def build_recommended_content_item(
     *,
     match_score: int,
     ranking_score: float,
-    processing_stage: Literal["raw", "aggregated", "ranked", "transitional"] = "ranked",
+    processing_stage: Literal["raw", "aggregated", "ranked", "partial"] = "ranked",
 ) -> RecommendedContentItem:
     return RecommendedContentItem(
         content_ref=base.content_ref or "",
@@ -275,7 +275,7 @@ def build_worth_knowing_item(
     relevance_reason: str,
     match_score: int,
     ranking_score: float,
-    processing_stage: Literal["raw", "aggregated", "ranked", "transitional"] = "ranked",
+    processing_stage: Literal["raw", "aggregated", "ranked", "partial"] = "ranked",
 ) -> WorthKnowingItem:
     return WorthKnowingItem(
         content_ref=base.content_ref or "",
@@ -305,7 +305,7 @@ def build_worth_acting_item(
     match_score: int,
     ranking_score: float,
     difficulty: Literal["low", "medium", "high"] = "medium",
-    processing_stage: Literal["raw", "aggregated", "ranked", "transitional"] = "ranked",
+    processing_stage: Literal["raw", "aggregated", "ranked", "partial"] = "ranked",
 ) -> WorthActingItem:
     return WorthActingItem(
         content_ref=base.content_ref or "",
@@ -346,7 +346,7 @@ def build_content_detail_view(
     base: BaseContentProjection,
     *,
     related_items: list[RelatedContentItem],
-    detail_state: Literal["formal", "transitional"] = "transitional",
+    detail_state: Literal["formal", "partial"] = "partial",
 ) -> UnifiedContentDetailResponse:
     content = _normalize_text(base.content) or _build_detail_fallback_content(base)
     return UnifiedContentDetailResponse(

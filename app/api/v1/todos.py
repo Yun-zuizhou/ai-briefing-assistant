@@ -8,9 +8,6 @@ from app.config import settings
 from app.database import get_db
 from app.models.todo import Todo, TodoStatus, TodoPriority
 from app.services.d1_behavior_store import D1BehaviorStore
-from app.services.data import get_virtual_todos
-
-
 router = APIRouter()
 
 
@@ -105,8 +102,8 @@ async def get_todos(
                 for item in items
             ]
         }
-    except Exception:
-        return get_virtual_todos()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="待办列表读取失败，请稍后重试") from exc
 
 
 @router.post("", response_model=TodoResponse, summary="创建待办事项")

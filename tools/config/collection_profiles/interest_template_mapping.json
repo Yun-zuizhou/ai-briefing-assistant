@@ -1,0 +1,56 @@
+{
+  "version": "v1",
+  "default_template_ids": [],
+  "rules": [
+    {
+      "rule_id": "ai-interest-default",
+      "match_keywords": [
+        "AI",
+        "人工智能",
+        "OpenAI",
+        "Anthropic",
+        "Claude",
+        "GPT",
+        "Gemini",
+        "LLM",
+        "agent",
+        "agents",
+        "模型",
+        "推理",
+        "多模态",
+        "论文"
+      ],
+      "template_ids": ["ai-daily"],
+      "weight": 100,
+      "reason": "AI 相关关注当前映射到阶段十六首批内部执行模板 ai-daily"
+    },
+    {
+      "rule_id": "remote-opportunity-default",
+      "match_keywords": [
+        "远程工作",
+        "远程",
+        "兼职",
+        "实习",
+        "工作机会",
+        "求职",
+        "招聘"
+      ],
+      "template_ids": ["remote-opportunity-watch"],
+      "weight": 96,
+      "reason": "远程工作与求职相关关注映射到机会观察模板"
+    },
+    {
+      "rule_id": "writing-opportunity-default",
+      "match_keywords": [
+        "写作",
+        "投稿",
+        "征稿",
+        "内容表达",
+        "专栏"
+      ],
+      "template_ids": ["writing-opportunity-watch"],
+      "weight": 92,
+      "reason": "写作与投稿相关关注映射到写作机会观察模板"
+    }
+  ]
+}

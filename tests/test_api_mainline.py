@@ -1,5 +1,6 @@
 import os
 import json
+import sqlite3
 import shutil
 import tempfile
 from datetime import datetime, timedelta
@@ -238,6 +239,55 @@ def _seed_mainline_data(session_factory):
         db.close()
 
 
+def test_preferences_settings_schema_backfills_ai_columns(monkeypatch):
+    fd, raw_path = tempfile.mkstemp(prefix="codex-user-settings-compat-", suffix=".db", dir=tempfile.gettempdir())
+    os.close(fd)
+    Path(raw_path).unlink(missing_ok=True)
+    db_path = Path(raw_path).resolve()
+    compat_engine = None
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            """
+            CREATE TABLE user_settings (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER NOT NULL UNIQUE,
+                morning_brief_time VARCHAR(10),
+                evening_brief_time VARCHAR(10),
+                do_not_disturb_enabled BOOLEAN,
+                do_not_disturb_start VARCHAR(10),
+                do_not_disturb_end VARCHAR(10),
+                sound_enabled BOOLEAN,
+                vibration_enabled BOOLEAN,
+                created_at DATETIME,
+                updated_at DATETIME
+            )
+            """
+        )
+        conn.commit()
+        conn.close()
+
+        compat_engine = create_engine(
+            f"sqlite:///{db_path.as_posix()}",
+            connect_args={"check_same_thread": False},
+        )
+        monkeypatch.setattr(preferences, "engine", compat_engine)
+        preferences._ensure_user_settings_table()
+
+        with compat_engine.connect() as db:
+            columns = {
+                row[1]
+                for row in db.exec_driver_sql("PRAGMA table_info(user_settings)").fetchall()
+            }
+
+        assert "ai_provider" in columns
+        assert "ai_api_key" in columns
+    finally:
+        if compat_engine is not None:
+            compat_engine.dispose()
+        Path(raw_path).unlink(missing_ok=True)
+
+
 def test_dashboard_today_api_returns_mainline_blocks_and_content_refs(api_client):
     client, session_factory = api_client
     _seed_mainline_data(session_factory)
@@ -280,7 +330,7 @@ def test_content_by_ref_api_returns_detail_and_related_items(api_client):
     assert data["contentRef"] == "opportunity:1"
     assert data["contentType"] == "opportunity"
     assert "AI 写作" in data["content"]
-    assert data["detailState"] == "transitional"
+    assert data["detailState"] == "partial"
     assert data["relatedItems"]
     assert any(item["contentRef"].startswith("hot_topic:") for item in data["relatedItems"])
 
@@ -875,6 +925,46 @@ def test_chat_execute_api_add_interest_updates_user_interest_rows(api_client):
         assert any("新增关注" in (item.summary or "") for item in history_items)
     finally:
         db.close()
+
+
+def test_chat_execute_interest_flow_updates_dashboard_recommendations(api_client):
+    client, session_factory = api_client
+    _seed_mainline_data(session_factory)
+
+    db = session_factory()
+    try:
+        user = db.query(User).filter(User.id == 1).first()
+        assert user is not None
+        user.interests = json.dumps(["写作"], ensure_ascii=False)
+        db.query(UserInterest).filter(UserInterest.user_id == 1).delete()
+        db.add(UserInterest(user_id=1, interest_name="写作", status="active"))
+        db.commit()
+    finally:
+        db.close()
+
+    execute_response = client.post(
+        "/api/v1/chat/execute?user_id=1",
+        json={
+            "input": "今天特别关注了AI，以后希望得到更多关于AI的咨询",
+            "current_interests": ["写作"],
+        },
+    )
+
+    assert execute_response.status_code == 200
+    execute_data = execute_response.json()
+    assert execute_data["success"] is True
+    assert execute_data["actionType"] == "add_interest"
+
+    interests_response = client.get("/api/v1/preferences/interests", params={"user_id": 1})
+    assert interests_response.status_code == 200
+    interests_data = interests_response.json()
+    assert "AI" in interests_data["interests"]
+
+    today_response = client.get("/api/v1/dashboard/today", params={"user_id": 1})
+    assert today_response.status_code == 200
+    today_data = today_response.json()
+    interest_names = [item["interestName"] for item in today_data["recommendedForYou"]]
+    assert "AI" in interest_names
 
 
 def test_chat_execute_api_records_thought_into_notes_and_history(api_client):

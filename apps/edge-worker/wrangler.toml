@@ -1,0 +1,12 @@
+name = "ai-briefing-assistant"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "development"
+CORS_ORIGINS = "[\"http://127.0.0.1:5173\",\"http://localhost:5173\",\"https://ai-briefing-assistant.aibriefing2026.workers.dev\"]"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-briefing-assistant-prod"
+database_id = "503a4b2f-b062-4ec5-be21-edfd0e7d8a2d"

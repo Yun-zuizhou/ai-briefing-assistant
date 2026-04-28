@@ -11,13 +11,13 @@ def read_contract_doc(name: str) -> str:
 
 def test_today_article_chat_action_chain_contract():
     today_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "TodayPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "TodayPage.tsx"
     ).read_text(encoding="utf-8")
     article_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ArticlePage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ArticlePage.tsx"
     ).read_text(encoding="utf-8")
     chat_page_source = (
-        ROOT_DIR / "prototype" / "src" / "pages" / "ChatPage.tsx"
+        ROOT_DIR / "apps" / "web" / "src" / "pages" / "ChatPage.tsx"
     ).read_text(encoding="utf-8")
     doc_source = read_contract_doc("2026-04-03-Today主链路smoke测试补强.md")
 
@@ -49,5 +49,8 @@ def test_user_interests_fact_layer_mainline_contract():
     assert "return UserInterestsResponse(interests=row_interests)" in preferences_source
     assert "interests = _load_user_interests_from_rows(db, user_id)" in dashboard_source
     assert "interests = _load_user_interests_from_rows(db, user_id)" in reports_source
+    assert "interests = _load_user_interests(user)" not in dashboard_source
+    assert "interests = _load_user_interests(user)" not in reports_source
     assert "user_interests -> preferences / dashboard / reports" in doc_source
     assert "兴趣事实层主读链路" in doc_source
+

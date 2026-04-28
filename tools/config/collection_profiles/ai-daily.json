@@ -1,0 +1,104 @@
+{
+  "profile_id": "ai-daily",
+  "name": "每日 AI 重点信息",
+  "description": "阶段十六首批定向采集 profile，围绕每日人工智能产品更新、模型进展、工程工具链和研究突破收集候选内容。",
+  "prompt_version": "ai-daily-v1",
+  "keyword_whitelist": [
+    "OpenAI",
+    "Anthropic",
+    "Claude",
+    "GPT",
+    "Gemini",
+    "LLM",
+    "AI",
+    "agent",
+    "agents",
+    "多模态",
+    "推理",
+    "benchmark",
+    "inference",
+    "开源模型",
+    "模型",
+    "API",
+    "安全",
+    "价格",
+    "发布",
+    "论文"
+  ],
+  "keyword_blacklist": [
+    "招聘",
+    "广告",
+    "活动报名",
+    "直播预告",
+    "纯营销"
+  ],
+  "top_n_candidates": 24,
+  "top_n_summary": 8,
+  "max_consult_context_items": 3,
+  "sources": [
+    {
+      "source_id": "openai_blog",
+      "name": "OpenAI Blog",
+      "type": "rss",
+      "url": "https://openai.com/blog/rss.xml",
+      "category": "ai_tech",
+      "tags": ["AI", "OpenAI", "GPT"],
+      "trust_weight": 98
+    },
+    {
+      "source_id": "google_ai_blog",
+      "name": "Google AI Blog",
+      "type": "rss",
+      "url": "https://blog.google/technology/ai/rss/",
+      "category": "ai_tech",
+      "tags": ["AI", "Google", "Gemini"],
+      "trust_weight": 95
+    },
+    {
+      "source_id": "infoq_ai",
+      "name": "InfoQ AI",
+      "type": "rss",
+      "url": "https://www.infoq.cn/feed/topic/ai",
+      "category": "ai_tech",
+      "tags": ["AI", "工程"],
+      "trust_weight": 84
+    },
+    {
+      "source_id": "qbitai",
+      "name": "量子位",
+      "type": "rss",
+      "url": "https://www.qbitai.com/feed",
+      "category": "ai_tech",
+      "tags": ["AI", "资讯"],
+      "trust_weight": 76
+    },
+    {
+      "source_id": "arxiv_ai",
+      "name": "arXiv AI",
+      "type": "rss",
+      "url": "http://export.arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=30&sortBy=lastUpdatedDate&sortOrder=descending",
+      "category": "academic",
+      "tags": ["论文", "AI", "学术"],
+      "trust_weight": 88
+    },
+    {
+      "source_id": "arxiv_ml",
+      "name": "arXiv Machine Learning",
+      "type": "rss",
+      "url": "http://export.arxiv.org/api/query?search_query=cat:cs.LG&start=0&max_results=30&sortBy=lastUpdatedDate&sortOrder=descending",
+      "category": "academic",
+      "tags": ["论文", "机器学习", "学术"],
+      "trust_weight": 86
+    },
+    {
+      "source_id": "arxiv_nlp",
+      "name": "arXiv NLP",
+      "type": "rss",
+      "url": "http://export.arxiv.org/api/query?search_query=cat:cs.CL&start=0&max_results=30&sortBy=lastUpdatedDate&sortOrder=descending",
+      "category": "academic",
+      "tags": ["论文", "NLP", "学术"],
+      "trust_weight": 86
+    }
+  ]
+}
+

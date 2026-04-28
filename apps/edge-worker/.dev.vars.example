@@ -1,0 +1,19 @@
+# Cloudflare Workers local-only variables.
+# `npm.cmd run setup` will copy this file to `apps/edge-worker/.dev.vars` if it does not exist.
+
+# Internal executor token for protected system write endpoints:
+# - POST /api/v1/system/ingestion-runs
+# - POST /api/v1/system/ai-processing-runs
+INTERNAL_API_TOKEN=dev-internal-token
+
+# Local logging controls. Keep request logs off by default to reduce dev-server CPU/IO.
+# Set REQUEST_LOGGING=true or ERROR_LOGGING=verbose when tracing API behavior.
+REQUEST_LOGGING=false
+ERROR_LOGGING=default
+
+# Optional summary / consult provider configuration for Workers read-side consult endpoint.
+SUMMARY_PROVIDER_ENABLED=false
+SUMMARY_PROVIDER_API_URL=https://api.openai.com/v1/chat/completions
+SUMMARY_PROVIDER_API_KEY=
+SUMMARY_PROVIDER_MODEL=gpt-4o-mini
+SUMMARY_PROVIDER_DEBUG_FALLBACK=false
