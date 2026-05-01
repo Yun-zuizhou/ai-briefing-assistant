@@ -69,6 +69,42 @@ export interface ChainHealthCounts {
   replayPending: number
 }
 
+export interface BriefingDispatchStats {
+  userId: number
+  windowLabel: string
+  windowHours: number
+  generatedAt: string
+  totals: {
+    total: number
+    success: number
+    skipped: number
+    error: number
+  }
+  byStatus: Array<{
+    status: string
+    total: number
+    lastOccurredAt: string | null
+  }>
+  byTrigger: Array<{
+    triggerSource: string
+    total: number
+    success: number
+    skipped: number
+    error: number
+    lastOccurredAt: string | null
+  }>
+  recentDispatches: Array<{
+    id: number
+    scheduleId: number | null
+    briefingType: string
+    triggerSource: string
+    scheduledFor: string | null
+    status: string
+    summary: string | null
+    createdAt: string | null
+  }>
+}
+
 export interface FeedbackSubmissionRow {
   id: number
   user_id: number

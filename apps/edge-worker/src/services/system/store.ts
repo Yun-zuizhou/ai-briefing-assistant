@@ -1,5 +1,6 @@
 import { execute, queryAll, queryOne } from '../../utils/db'
 import type {
+  BriefingDispatchStats,
   ChainHealthCounts,
   FeedbackSubmissionRow,
   ReplayTaskRow,
@@ -8,6 +9,65 @@ import type {
   SummaryTaskRow,
   SummaryTaskStatus,
 } from './types'
+
+type DispatchTotalsRow = {
+  total?: number | null
+  success?: number | null
+  skipped?: number | null
+  error?: number | null
+}
+
+type DispatchStatusRow = {
+  status?: string | null
+  total?: number | null
+  last_occurred_at?: string | null
+}
+
+type DispatchTriggerRow = {
+  trigger_source?: string | null
+  total?: number | null
+  success?: number | null
+  skipped?: number | null
+  error?: number | null
+  last_occurred_at?: string | null
+}
+
+type DispatchSampleRow = {
+  id?: number | null
+  schedule_id?: number | null
+  briefing_type?: string | null
+  trigger_source?: string | null
+  scheduled_for?: string | null
+  status?: string | null
+  summary?: string | null
+  created_at?: string | null
+}
+
+function normalizeInteger(value: unknown): number {
+  const numeric = Number(value)
+  if (!Number.isFinite(numeric)) return 0
+  return Math.max(0, Math.round(numeric))
+}
+
+function normalizeDispatchWindow(value: string | null | undefined): {
+  label: string
+  hours: number
+  sqliteModifier: string
+} {
+  const normalized = String(value || '').trim().toLowerCase()
+  const known: Record<string, number> = {
+    '1h': 1,
+    '24h': 24,
+    '7d': 24 * 7,
+    '30d': 24 * 30,
+  }
+  const hours = known[normalized] || 24
+  return {
+    label: known[normalized] ? normalized : '24h',
+    hours,
+    sqliteModifier: `-${hours} hours`,
+  }
+}
 
 export async function getChainHealthCounts(
   db: D1Database,
@@ -30,6 +90,116 @@ export async function getChainHealthCounts(
     aiProcessingRuns: Number(processingCount?.count || 0),
     summaryTasks: Number(summaryTaskCount?.count || 0),
     replayPending: Number(replayPendingCount?.count || 0),
+  }
+}
+
+export async function getBriefingDispatchStats(params: {
+  db: D1Database
+  userId: number
+  window?: string | null
+  limit?: number
+}): Promise<BriefingDispatchStats> {
+  const window = normalizeDispatchWindow(params.window)
+  const limit = Math.min(50, Math.max(1, normalizeInteger(params.limit) || 20))
+  const baseParams = [params.userId, window.sqliteModifier]
+
+  const [totalsRows, statusRows, triggerRows, sampleRows] = await Promise.all([
+    queryAll<DispatchTotalsRow>(
+      params.db,
+      `
+        SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN lower(status) = 'success' THEN 1 ELSE 0 END) AS success,
+          SUM(CASE WHEN lower(status) = 'skipped' THEN 1 ELSE 0 END) AS skipped,
+          SUM(CASE WHEN lower(status) = 'error' THEN 1 ELSE 0 END) AS error
+        FROM briefing_dispatch_logs
+        WHERE user_id = ? AND created_at >= datetime('now', ?)
+      `,
+      baseParams
+    ),
+    queryAll<DispatchStatusRow>(
+      params.db,
+      `
+        SELECT
+          lower(COALESCE(status, 'unknown')) AS status,
+          COUNT(*) AS total,
+          MAX(created_at) AS last_occurred_at
+        FROM briefing_dispatch_logs
+        WHERE user_id = ? AND created_at >= datetime('now', ?)
+        GROUP BY lower(COALESCE(status, 'unknown'))
+        ORDER BY total DESC, last_occurred_at DESC
+        LIMIT ?
+      `,
+      [...baseParams, limit]
+    ),
+    queryAll<DispatchTriggerRow>(
+      params.db,
+      `
+        SELECT
+          COALESCE(trigger_source, 'unknown') AS trigger_source,
+          COUNT(*) AS total,
+          SUM(CASE WHEN lower(status) = 'success' THEN 1 ELSE 0 END) AS success,
+          SUM(CASE WHEN lower(status) = 'skipped' THEN 1 ELSE 0 END) AS skipped,
+          SUM(CASE WHEN lower(status) = 'error' THEN 1 ELSE 0 END) AS error,
+          MAX(created_at) AS last_occurred_at
+        FROM briefing_dispatch_logs
+        WHERE user_id = ? AND created_at >= datetime('now', ?)
+        GROUP BY COALESCE(trigger_source, 'unknown')
+        ORDER BY total DESC, last_occurred_at DESC
+        LIMIT ?
+      `,
+      [...baseParams, limit]
+    ),
+    queryAll<DispatchSampleRow>(
+      params.db,
+      `
+        SELECT
+          id, schedule_id, briefing_type, trigger_source, scheduled_for,
+          status, summary, created_at
+        FROM briefing_dispatch_logs
+        WHERE user_id = ? AND created_at >= datetime('now', ?)
+        ORDER BY datetime(created_at) DESC, id DESC
+        LIMIT ?
+      `,
+      [...baseParams, limit]
+    ),
+  ])
+
+  const totals = totalsRows[0] || {}
+  return {
+    userId: params.userId,
+    windowLabel: window.label,
+    windowHours: window.hours,
+    generatedAt: new Date().toISOString(),
+    totals: {
+      total: normalizeInteger(totals.total),
+      success: normalizeInteger(totals.success),
+      skipped: normalizeInteger(totals.skipped),
+      error: normalizeInteger(totals.error),
+    },
+    byStatus: statusRows.map((row) => ({
+      status: String(row.status || 'unknown'),
+      total: normalizeInteger(row.total),
+      lastOccurredAt: row.last_occurred_at || null,
+    })),
+    byTrigger: triggerRows.map((row) => ({
+      triggerSource: String(row.trigger_source || 'unknown'),
+      total: normalizeInteger(row.total),
+      success: normalizeInteger(row.success),
+      skipped: normalizeInteger(row.skipped),
+      error: normalizeInteger(row.error),
+      lastOccurredAt: row.last_occurred_at || null,
+    })),
+    recentDispatches: sampleRows.map((row) => ({
+      id: normalizeInteger(row.id),
+      scheduleId: row.schedule_id == null ? null : normalizeInteger(row.schedule_id),
+      briefingType: String(row.briefing_type || 'unknown'),
+      triggerSource: String(row.trigger_source || 'unknown'),
+      scheduledFor: row.scheduled_for || null,
+      status: String(row.status || 'unknown'),
+      summary: row.summary || null,
+      createdAt: row.created_at || null,
+    })),
   }
 }
 

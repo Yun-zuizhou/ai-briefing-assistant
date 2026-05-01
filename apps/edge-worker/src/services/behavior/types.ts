@@ -18,6 +18,8 @@ export interface UserSettingRow {
   vibration_enabled: number
   ai_provider?: string | null
   ai_api_key?: string | null
+  ai_api_key_encrypted?: string | null
+  ai_api_key_encryption_version?: string | null
   updated_at?: string | null
 }
 

@@ -348,6 +348,8 @@ export async function saveUserAiProviderSettings(
   input: {
     provider: string | null
     apiKey: string | null
+    apiKeyEncrypted?: string | null
+    apiKeyEncryptionVersion?: string | null
   }
 ): Promise<void> {
   await execute(
@@ -357,12 +359,16 @@ export async function saveUserAiProviderSettings(
       SET
         ai_provider = ?,
         ai_api_key = ?,
+        ai_api_key_encrypted = ?,
+        ai_api_key_encryption_version = ?,
         updated_at = datetime('now')
       WHERE user_id = ?
     `,
     [
       input.provider,
       input.apiKey,
+      input.apiKeyEncrypted ?? null,
+      input.apiKeyEncryptionVersion ?? null,
       userId,
     ]
   )

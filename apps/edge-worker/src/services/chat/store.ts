@@ -124,11 +124,45 @@ export async function getOrCreateActiveSession(
   }
 }
 
+export async function createNewSession(
+  db: D1Database,
+  userId: number,
+  sourceContext: string | null
+): Promise<ChatSession> {
+  await execute(
+    db,
+    `UPDATE chat_sessions SET status = 'completed', updated_at = datetime('now') WHERE user_id = ? AND status = 'active'`,
+    [userId]
+  )
+
+  const result = await execute(
+    db,
+    `INSERT INTO chat_sessions (user_id, source_context, status, created_at, updated_at) VALUES (?, ?, 'active', datetime('now'), datetime('now'))`,
+    [userId, sourceContext]
+  )
+
+  return {
+    id: result.meta.last_row_id,
+    user_id: userId,
+    session_title: null,
+    source_context: sourceContext,
+    status: 'active',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    last_message_at: null,
+  }
+}
+
 export async function listChatSessions(
   db: D1Database,
   userId: number,
-  limit: number
+  limit: number,
+  status?: string
 ): Promise<ChatSessionSummary[]> {
+  const statusFilter = status ? `AND s.status = ?` : `AND s.status != 'archived'`
+  const params: unknown[] = [userId]
+  if (status) params.push(status)
+
   const sessions = await queryAll<ChatSession & { message_count: number }>(
     db,
     `
@@ -140,11 +174,11 @@ export async function listChatSessions(
           WHERE m.session_id = s.id
         ) AS message_count
       FROM chat_sessions s
-      WHERE s.user_id = ?
+      WHERE s.user_id = ? ${statusFilter}
       ORDER BY datetime(COALESCE(s.last_message_at, s.updated_at, s.created_at)) DESC, s.id DESC
       LIMIT ?
     `,
-    [userId, limit]
+    [...params, limit]
   )
 
   return sessions.map((session) => ({
@@ -155,6 +189,33 @@ export async function listChatSessions(
     lastMessageAt: session.last_message_at,
     messageCount: Number(session.message_count || 0),
   }))
+}
+
+export async function renameSession(
+  db: D1Database,
+  sessionId: number,
+  userId: number,
+  title: string
+): Promise<boolean> {
+  const result = await execute(
+    db,
+    `UPDATE chat_sessions SET session_title = ?, updated_at = datetime('now') WHERE id = ? AND user_id = ?`,
+    [title, sessionId, userId]
+  )
+  return result.meta.changes > 0
+}
+
+export async function archiveSession(
+  db: D1Database,
+  sessionId: number,
+  userId: number
+): Promise<boolean> {
+  const result = await execute(
+    db,
+    `UPDATE chat_sessions SET status = 'archived', updated_at = datetime('now') WHERE id = ? AND user_id = ?`,
+    [sessionId, userId]
+  )
+  return result.meta.changes > 0
 }
 
 export async function getChatSessionMessages(
@@ -251,6 +312,35 @@ export async function getChatSession(
   )
 }
 
+export async function deleteChatMessage(
+  db: D1Database,
+  messageId: number,
+  userId: number
+): Promise<{ deleted: boolean; sessionId?: number }> {
+  const message = await queryOne<{ id: number; session_id: number }>(
+    db,
+    `SELECT m.id, m.session_id
+     FROM chat_messages m
+     JOIN chat_sessions s ON m.session_id = s.id
+     WHERE m.id = ? AND s.user_id = ?`,
+    [messageId, userId]
+  )
+
+  if (!message) {
+    return { deleted: false }
+  }
+
+  await execute(db, `DELETE FROM chat_messages WHERE id = ?`, [messageId])
+
+  await execute(
+    db,
+    `UPDATE chat_sessions SET updated_at = datetime('now') WHERE id = ?`,
+    [message.session_id]
+  )
+
+  return { deleted: true, sessionId: message.session_id }
+}
+
 export async function appendChatMessage(
   db: D1Database,
   sessionId: number,
@@ -272,8 +362,8 @@ export async function appendChatMessage(
     affectedEntityId?: string
     changeLog?: unknown[]
   } = {}
-): Promise<void> {
-  await execute(
+): Promise<number> {
+  const insertResult = await execute(
     db,
     `INSERT INTO chat_messages (
       session_id, role, content, message_state, intent_type, candidate_intents_json,
@@ -307,6 +397,8 @@ export async function appendChatMessage(
     `UPDATE chat_sessions SET last_message_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`,
     [sessionId]
   )
+
+  return insertResult.meta.last_row_id ?? 0
 }
 
 export function parseOpportunityIdFromContentRef(contentRef?: string | null): number | null {

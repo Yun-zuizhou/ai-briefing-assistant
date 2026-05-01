@@ -15,6 +15,11 @@ export interface HotTopic {
   published_at: string | null
 }
 
+export type ListHotTopicsOptions = {
+  limit?: number
+  interests?: string[]
+}
+
 export interface Opportunity {
   id: number
   title: string
@@ -52,8 +57,59 @@ export type { ArticleRow, RelatedItemRow }
 
 export async function listHotTopics(
   db: D1Database,
-  limit: number = 8
+  optionsOrLimit: ListHotTopicsOptions | number = 8
 ): Promise<HotTopic[]> {
+  const options = typeof optionsOrLimit === 'number'
+    ? { limit: optionsOrLimit, interests: [] }
+    : optionsOrLimit
+  const limit = options.limit ?? 8
+  const interests = (options.interests ?? [])
+    .map((interest) => String(interest || '').trim())
+    .filter(Boolean)
+
+  if (interests.length > 0) {
+    const matchCases = interests.map(() => `
+      WHEN title LIKE ?
+        OR COALESCE(summary, '') LIKE ?
+        OR categories LIKE ?
+        OR tags LIKE ?
+      THEN 1
+    `).join('\n')
+    const matchParams = interests.flatMap((interest) => {
+      const pattern = `%${interest}%`
+      return [pattern, pattern, pattern, pattern]
+    })
+    const sql = `
+      SELECT
+        id,
+        title,
+        summary,
+        source,
+        source_url,
+        categories,
+        tags,
+        hot_value,
+        quality_score,
+        published_at,
+        CASE
+          ${matchCases}
+          ELSE 0
+        END AS match_score,
+        (
+          CASE
+            ${matchCases}
+            ELSE 0
+          END * 1000
+          + quality_score * 100
+          + hot_value * 0.1
+        ) AS ranking_score
+      FROM hot_topics
+      ORDER BY match_score DESC, ranking_score DESC, datetime(published_at) DESC, id DESC
+      LIMIT ?
+    `
+    return queryAll<HotTopic>(db, sql, [...matchParams, ...matchParams, limit])
+  }
+
   const sql = `
     SELECT id, title, summary, source, source_url, categories, tags, 
            hot_value, quality_score, published_at

@@ -1,5 +1,17 @@
-export * as behavior from './behavior'
-export * as chat from './chat'
-export * as content from './content'
-export * as reports from './reports'
-export * as system from './system'
+import * as behavior from './behavior'
+import * as chat from './chat'
+import * as content from './content'
+import * as dashboard from './dashboard'
+import * as preferences from './preferences'
+import * as reports from './reports'
+import * as system from './system'
+
+export {
+  behavior,
+  chat,
+  content,
+  dashboard,
+  preferences,
+  reports,
+  system,
+}

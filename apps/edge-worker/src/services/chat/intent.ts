@@ -117,7 +117,7 @@ function detectStatsPeriod(text: string): string {
 
 export function parseIntent(text: string, currentInterests: string[]): ParsedIntentResult {
   const todoSignals = ['提醒我', '明天', '下周', '待办', '记得', '要做', '完成']
-  const recordSignals = ['记下', '记录', '保存这个想法', '帮我记', '写下']
+  const recordSignals = ['记下', '记录', '想记录', '保存这个想法', '帮我记', '写下']
   const fragmentSignals = ['突然想到', '忽然想到', '有个想法', '记一下', '灵感来了', '碎碎念']
 
   for (const pattern of removeInterestPatterns) {
@@ -130,6 +130,15 @@ export function parseIntent(text: string, currentInterests: string[]): ParsedInt
         entities: { interests: interests.length > 0 ? interests : currentInterests.filter((item) => text.includes(item)) },
         matchedBy: 'pattern',
       }
+    }
+  }
+
+  if (recordSignals.some((signal) => text.includes(signal))) {
+    return {
+      type: 'record_thought',
+      confidence: 0.9,
+      entities: { content: text, tags: extractInterests(text) },
+      matchedBy: 'keyword',
     }
   }
 
@@ -221,7 +230,7 @@ export function buildCandidateIntents(
 ): string[] {
   const candidates: string[] = [recognizedIntent]
 
-  const explicitRecordSignals = ['记下', '记录', '保存这个想法', '帮我记', '写下']
+  const explicitRecordSignals = ['记下', '记录', '想记录', '保存这个想法', '帮我记', '写下']
   const fragmentedSignals = ['突然想到', '忽然想到', '有个想法', '记一下', '灵感来了', '碎碎念', '冒出个想法']
   const todoSignals = ['提醒我', '明天', '下周', '待办', '记得']
 
@@ -254,6 +263,10 @@ export function requiresConfirmation(
   confidence: number
 ): boolean {
   const contentWriteIntents = new Set(['create_todo', 'record_thought', 'fragmented_thought'])
+  const systemConfigIntents = new Set(['add_interest', 'remove_interest', 'set_push_time'])
+  if (systemConfigIntents.has(intentType)) {
+    return true
+  }
   if (!contentWriteIntents.has(intentType)) {
     return false
   }

@@ -17,6 +17,10 @@ export interface ReportEntryRow {
   status: string
   generated_at: string | null
   report_payload_json: string | null
+  evidence_refs_json?: string | null
+  generation_source?: string | null
+  provider_name?: string | null
+  model_name?: string | null
   created_at: string
 }
 
@@ -187,9 +191,17 @@ export async function upsertReportResult(
     title: string
     summaryText: string
     payload: Record<string, unknown>
+    evidenceRefs?: unknown[]
+    generationSource?: 'rules' | 'llm'
+    providerName?: string | null
+    modelName?: string | null
   }
 ): Promise<void> {
   const { userId, reportType, periodStart, periodEnd, title, summaryText, payload } = params
+  const evidenceRefs = JSON.stringify(params.evidenceRefs || [])
+  const generationSource = params.generationSource || 'rules'
+  const providerName = params.providerName || null
+  const modelName = params.modelName || null
   const existing = await queryOne<{ id: number }>(
     db,
     `
@@ -210,10 +222,12 @@ export async function upsertReportResult(
       db,
       `
         UPDATE reports
-        SET title = ?, summary_text = ?, status = 'ready', report_payload_json = ?, generated_at = datetime('now'), updated_at = datetime('now')
+        SET title = ?, summary_text = ?, status = 'ready', report_payload_json = ?,
+            evidence_refs_json = ?, generation_source = ?, provider_name = ?, model_name = ?,
+            generated_at = datetime('now'), updated_at = datetime('now')
         WHERE id = ?
       `,
-      [title, summaryText, JSON.stringify(payload), existing.id]
+      [title, summaryText, JSON.stringify(payload), evidenceRefs, generationSource, providerName, modelName, existing.id]
     )
     return
   }
@@ -223,10 +237,23 @@ export async function upsertReportResult(
     `
       INSERT INTO reports (
         user_id, report_type, period_start, period_end, title, summary_text,
-        status, report_payload_json, generated_at, created_at, updated_at
+        status, report_payload_json, evidence_refs_json, generation_source, provider_name, model_name,
+        generated_at, created_at, updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, 'ready', ?, datetime('now'), datetime('now'), datetime('now'))
+      VALUES (?, ?, ?, ?, ?, ?, 'ready', ?, ?, ?, ?, ?, datetime('now'), datetime('now'), datetime('now'))
     `,
-    [userId, reportType, periodStart, periodEnd, title, summaryText, JSON.stringify(payload)]
+    [
+      userId,
+      reportType,
+      periodStart,
+      periodEnd,
+      title,
+      summaryText,
+      JSON.stringify(payload),
+      evidenceRefs,
+      generationSource,
+      providerName,
+      modelName,
+    ]
   )
 }

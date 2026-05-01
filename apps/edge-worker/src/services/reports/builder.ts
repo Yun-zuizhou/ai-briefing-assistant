@@ -6,6 +6,8 @@
  * 所有函数均支持 null/undefined 输入，具有防御性编程特性。
  */
 
+import { buildContentRef, buildEvidenceRef, type EvidenceRef } from '../reference-registry'
+
 /** 报告相关的笔记记录类型 */
 export interface ReportNoteRow {
   id: number
@@ -44,6 +46,77 @@ export interface ReportHistoryRow {
   ref_id: number | null
   created_at: string
 }
+
+function tryBuildEvidenceRef(input: Parameters<typeof buildEvidenceRef>[0]): EvidenceRef | null {
+  try {
+    return buildEvidenceRef(input)
+  } catch {
+    return null
+  }
+}
+
+export function buildReportEvidenceRefs(params: {
+  notes?: ReportNoteRow[] | null
+  favorites?: ReportFavoriteRow[] | null
+  todos?: ReportTodoRow[] | null
+  historyItems?: ReportHistoryRow[] | null
+}): EvidenceRef[] {
+  const refs: EvidenceRef[] = []
+
+  for (const note of (params.notes || []).slice(0, 4)) {
+    const ref = tryBuildEvidenceRef({
+      refType: 'note',
+      refId: note.id,
+      title: note.content.slice(0, 40),
+      snippet: note.content.slice(0, 120),
+      reason: '用户记录支撑报告判断',
+    })
+    if (ref) refs.push(ref)
+  }
+
+  for (const favorite of (params.favorites || []).slice(0, 4)) {
+    const contentRef = buildContentRef(favorite.item_type, favorite.item_id)
+    const ref = tryBuildEvidenceRef({
+      refType: 'favorite',
+      refId: favorite.id,
+      title: favorite.item_title || contentRef || '收藏内容',
+      snippet: contentRef || null,
+      reason: '收藏内容支撑关注主题判断',
+    })
+    if (ref) refs.push(ref)
+  }
+
+  for (const todo of (params.todos || []).filter((item) => item.status === 'completed').slice(0, 4)) {
+    const ref = tryBuildEvidenceRef({
+      refType: 'todo',
+      refId: todo.id,
+      title: todo.content.slice(0, 40),
+      snippet: todo.content.slice(0, 120),
+      reason: '已完成待办支撑行动判断',
+    })
+    if (ref) refs.push(ref)
+  }
+
+  for (const history of (params.historyItems || []).slice(0, 4)) {
+    const ref = tryBuildEvidenceRef({
+      refType: history.ref_type || 'history_entry',
+      refId: history.ref_id || history.id,
+      title: history.title,
+      snippet: history.event_type,
+      reason: '历史行为支撑活跃度判断',
+    })
+    if (ref) refs.push(ref)
+  }
+
+  const seen = new Set<string>()
+  return refs.filter((ref) => {
+    const key = `${ref.refType}:${ref.refId ?? ''}:${ref.resultRef ?? ''}:${ref.sourceUrl ?? ''}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  }).slice(0, 12)
+}
+
 
 /**
  * 计算报告周期的时间范围
@@ -299,6 +372,12 @@ export function buildPeriodicReportPayload(params: {
     completedTodos,
     interests: interests.length,
   })
+  const evidenceRefs = buildReportEvidenceRefs({
+    notes,
+    favorites,
+    todos,
+    historyItems,
+  })
 
   const currentStats = [historyItems.length, notes.length, favorites.length, completedTodos]
   const previousStats = currentStats.map((value) => Math.max(0, Math.floor(value * previousFactor)))
@@ -338,6 +417,7 @@ export function buildPeriodicReportPayload(params: {
   return {
     reportType,
     dataQuality,
+    evidenceRefs,
     overview: {
       period: periodLabel,
       viewed: historyItems.length,

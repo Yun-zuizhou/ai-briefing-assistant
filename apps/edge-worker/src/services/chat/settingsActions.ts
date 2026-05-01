@@ -32,9 +32,9 @@ export async function executeSetPushTimeAction(params: {
     requiresConfirmation: false,
     affectedEntity: { type: 'settings' },
     confirmedType: confirmedType || 'set_push_time',
-    successMessage: '已记录你的推送时间调整请求',
-    resultSummary: `当前请求时间：${timeValue}\n已写入调度事实层，等待调度执行`,
-    nextPageLabel: '去通知设置查看',
+    successMessage: '已配置简报推送时间',
+    resultSummary: `配置成功：简报推送时间已设为 ${timeValue}。调度记录已同步，后续会按这个时间执行。`,
+    nextPageLabel: '查看通知设置',
     deepLink: '/notification-settings',
     sourceContext,
   }

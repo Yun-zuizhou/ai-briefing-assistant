@@ -22,6 +22,10 @@ import {
   upsertMorningSchedule,
 } from './store'
 import { buildResolvedUserAiProviderSettings, buildResolvedUserSettings } from './builder'
+import {
+  AI_API_KEY_ENCRYPTION_VERSION,
+  encryptAiApiKey,
+} from '../ai-key-crypto'
 import { getAiPlatformDefinition } from '../ai-provider'
 import type {
   FavoriteRow,
@@ -102,6 +106,7 @@ export async function updateUserSettings(params: {
 export async function updateUserAiProviderSettings(params: {
   db: D1Database
   userId: number
+  encryptionSecret?: string | null
   payload: {
     provider?: string | null
     api_key?: string | null
@@ -116,6 +121,8 @@ export async function updateUserAiProviderSettings(params: {
     await saveUserAiProviderSettings(db, userId, {
       provider: null,
       apiKey: null,
+      apiKeyEncrypted: null,
+      apiKeyEncryptionVersion: null,
     })
     const updated = await getUserSettings(db, userId)
     return buildResolvedUserAiProviderSettings(updated)
@@ -131,9 +138,13 @@ export async function updateUserAiProviderSettings(params: {
     throw new Error('API Key 不能为空。')
   }
 
+  const encryptedApiKey = await encryptAiApiKey(apiKey, params.encryptionSecret)
+
   await saveUserAiProviderSettings(db, userId, {
     provider: definition.provider,
-    apiKey,
+    apiKey: null,
+    apiKeyEncrypted: encryptedApiKey,
+    apiKeyEncryptionVersion: AI_API_KEY_ENCRYPTION_VERSION,
   })
 
   const updated = await getUserSettings(db, userId)

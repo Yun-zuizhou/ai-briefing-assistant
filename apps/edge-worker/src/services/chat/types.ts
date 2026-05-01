@@ -15,4 +15,10 @@ export interface ChatActionResponse {
   nextPageLabel?: string
   deepLink?: string
   sourceContext?: string
+  changeLog?: Array<{
+    entityType: 'todo' | 'note' | 'history' | 'favorite' | 'unknown'
+    entityId?: number | string
+    change: 'created' | 'kept' | 'cancelled' | 'retagged' | 'repointed'
+    summary: string
+  }>
 }

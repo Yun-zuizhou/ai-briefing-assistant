@@ -7,6 +7,7 @@
 
 import type { ActionsOverviewData, GrowthOverviewData, JournalOverviewData } from '../../types/page-data'
 import { getAiPlatformDefinition, maskApiKey } from '../ai-provider'
+import { buildContentRef, CONTENT_REF_TYPES } from '../reference-registry'
 import type {
   ActionReminderSettingsRow,
   BriefingScheduleRow,
@@ -25,6 +26,8 @@ import type {
   UserSettingRow,
   BriefingScheduleState,
 } from './types'
+
+export { buildContentRef, parseContentRef, parseFavoriteContentRef } from '../reference-registry'
 
 /**
  * 构建成长关键词列表
@@ -167,12 +170,13 @@ export function buildResolvedUserAiProviderSettings(
 ): ResolvedUserAiProviderSettings {
   const definition = getAiPlatformDefinition(settings?.ai_provider)
   const apiKey = String(settings?.ai_api_key || '').trim()
-  const hasApiKey = Boolean(apiKey)
+  const encryptedApiKey = String(settings?.ai_api_key_encrypted || '').trim()
+  const hasApiKey = Boolean(encryptedApiKey || apiKey)
 
   return {
     provider: definition?.provider || null,
     provider_label: definition?.label || null,
-    api_key_masked: maskApiKey(apiKey),
+    api_key_masked: encryptedApiKey ? '已加密保存' : maskApiKey(apiKey),
     has_api_key: hasApiKey,
     is_configured: Boolean(definition && hasApiKey),
     api_url: definition?.apiUrl || null,
@@ -218,33 +222,6 @@ export function mapTodoResponse(todo: TodoRow) {
   }
 }
 
-export function buildContentRef(refType: string | null, refId: number | null): string | null {
-  if (!refType || refId == null) return null
-  if (!['hot_topic', 'article', 'opportunity'].includes(refType)) return null
-  return `${refType}:${refId}`
-}
-
-export function parseContentRef(contentRef: string): { refType: string; refId: number } {
-  const [refType, idText] = contentRef.split(':')
-  const refId = Number.parseInt(idText || '', 10)
-  if (!refType || Number.isNaN(refId)) {
-    throw new Error('content_ref 格式无效，应为 type:id')
-  }
-  return { refType, refId }
-}
-
-export function parseFavoriteContentRef(contentRef: string): [string, number] {
-  const parts = contentRef.split(':')
-  if (parts.length !== 2) {
-    throw new Error('content_ref 格式无效，应为 item_type:id')
-  }
-  const itemId = Number.parseInt(parts[1], 10)
-  if (Number.isNaN(itemId)) {
-    throw new Error('content_ref 中的 item_id 无效')
-  }
-  return [parts[0], itemId]
-}
-
 export function mapFavoriteResponse(favorite: FavoriteRow) {
   return {
     id: favorite.id,
@@ -283,7 +260,7 @@ export function mapHistoryResponse(history: HistoryRow) {
   }
 }
 
-const actionSavedTypes = new Set(['hot_topic', 'article', 'opportunity'])
+const actionSavedTypes = new Set<string>(CONTENT_REF_TYPES)
 const todoPriorityRank: Record<ActionsOverviewData['todayTodos'][number]['priority'], number> = {
   urgent: 4,
   high: 3,
