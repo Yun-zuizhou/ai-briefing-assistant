@@ -18,6 +18,7 @@ apps/web/dist/
 apps/web/node_modules/
 apps/edge-worker/node_modules/
 apps/edge-worker/.wrangler/
+apps/edge-worker/wrangler*.log
 prototype-vintage-backup/node_modules/
 
 # 生产环境配置文件
