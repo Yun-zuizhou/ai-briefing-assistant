@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
-import { resolveSessionUser } from './auth'
+import { resolveDevelopmentSessionUser, resolveSessionUser } from './auth'
 
 type WorkerBindings = {
   DB: D1Database
@@ -10,7 +10,7 @@ type WorkerBindings = {
 export async function resolveUserId(
   c: Context<{ Bindings: WorkerBindings }>
 ): Promise<number> {
-  const sessionUser = await resolveSessionUser(c)
+  const sessionUser = await resolveSessionUser(c) || await resolveDevelopmentSessionUser(c)
   if (sessionUser) {
     return sessionUser.id
   }

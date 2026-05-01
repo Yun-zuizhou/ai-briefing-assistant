@@ -18,6 +18,7 @@ vi.mock('../src/utils/auth', async () => {
   const { resolveSessionUserFromCookie } = await import('./helpers/session-auth')
   return {
     resolveSessionUser: vi.fn(resolveSessionUserFromCookie),
+    resolveDevelopmentSessionUser: vi.fn(async () => null),
   }
 })
 

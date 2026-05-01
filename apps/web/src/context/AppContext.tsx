@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiService } from '../services/api';
 import { AppContext, type AppContextType, type AppUser } from './context';
 
@@ -9,6 +9,10 @@ const EMPTY_USER: AppUser = {
   email: '',
   nickname: null,
 };
+
+const DEV_AUTO_LOGIN_ENABLED = import.meta.env.DEV && import.meta.env.VITE_DEV_AUTO_LOGIN !== 'false';
+const DEV_AUTO_LOGIN_IDENTIFIER = import.meta.env.VITE_DEV_AUTO_LOGIN_IDENTIFIER || 'test@example.com';
+const DEV_AUTO_LOGIN_PASSWORD = import.meta.env.VITE_DEV_AUTO_LOGIN_PASSWORD || 'test123456';
 
 function toAppUser(payload?: {
   id: number;
@@ -34,26 +38,62 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [authResolved, setAuthResolved] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [openChatPanel, setOpenChatPanel] = useState<boolean>(false);
+  const autoLoginAttemptedRef = useRef(false);
+  const refreshInFlightRef = useRef<Promise<void> | null>(null);
 
   const refreshCurrentUser = useCallback(async () => {
-    try {
-      const response = await apiService.getCurrentUser();
-      if (response.error) {
-        setUser(EMPTY_USER);
-        return;
-      }
-      if (response.data?.user) {
-        setUser(toAppUser(response.data.user));
-      } else {
-        setUser(EMPTY_USER);
-      }
-    } catch (error) {
-      console.error('Failed to hydrate current user:', error);
-      setUser(EMPTY_USER);
-    } finally {
-      setAuthResolved(true);
-      setAuthLoading(false);
+    if (refreshInFlightRef.current) {
+      return refreshInFlightRef.current;
     }
+
+    const refreshTask = (async () => {
+      try {
+        const response = await apiService.getCurrentUser();
+        if (response.data?.user) {
+          setUser(toAppUser(response.data.user));
+          return;
+        }
+
+        if (
+          DEV_AUTO_LOGIN_ENABLED
+          && !autoLoginAttemptedRef.current
+          && response.error
+        ) {
+          autoLoginAttemptedRef.current = true;
+          const loginResponse = await apiService.login({
+            identifier: DEV_AUTO_LOGIN_IDENTIFIER,
+            password: DEV_AUTO_LOGIN_PASSWORD,
+          });
+          if (loginResponse.data?.user) {
+            const hydratedResponse = await apiService.getCurrentUser();
+            if (hydratedResponse.data?.user) {
+              setUser(toAppUser(hydratedResponse.data.user));
+              return;
+            }
+
+            setUser(toAppUser(loginResponse.data.user));
+            return;
+          }
+        }
+
+        if (response.error) {
+          setUser(EMPTY_USER);
+          return;
+        }
+
+        setUser(EMPTY_USER);
+      } catch (error) {
+        console.error('Failed to hydrate current user:', error);
+        setUser(EMPTY_USER);
+      } finally {
+        setAuthResolved(true);
+        setAuthLoading(false);
+        refreshInFlightRef.current = null;
+      }
+    })();
+
+    refreshInFlightRef.current = refreshTask;
+    return refreshTask;
   }, []);
 
   useEffect(() => {

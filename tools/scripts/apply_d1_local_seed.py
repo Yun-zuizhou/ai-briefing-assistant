@@ -15,6 +15,7 @@ SEED_GROUPS: dict[str, list[str]] = {
     "content-minimal": [
         "seed.content.hot_topics.sql",
         "seed.content.opportunities.sql",
+        "../source/seed.today-briefing-semantic-demo.sql",
     ],
 }
 
@@ -79,8 +80,11 @@ def resolve_seed_paths(seed_group: str | None, seed_files: list[str]) -> list[Pa
         raise RuntimeError("No local seed files selected.")
 
     paths: list[Path] = []
+    seeds_root = SEEDS_DIR.parent.resolve()
     for filename in selected:
-        path = SEEDS_DIR / filename
+        path = (SEEDS_DIR / filename).resolve()
+        if path != seeds_root and seeds_root not in path.parents:
+            raise RuntimeError(f"Seed file must be inside infra/cloudflare/d1/seeds: {path}")
         if not path.exists():
             raise RuntimeError(f"Seed file not found: {path}")
         paths.append(path)

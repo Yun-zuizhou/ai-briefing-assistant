@@ -2,11 +2,15 @@ import { expect, test } from '@playwright/test';
 
 async function loginAsDemoUser(page: import('@playwright/test').Page) {
   await page.goto('/login');
+  if (page.url().includes('/today')) {
+    await expect(page.getByRole('heading', { name: '今日内容摘要' })).toBeVisible();
+    return;
+  }
   await page.getByLabel('邮箱').fill('test@example.com');
   await page.getByLabel('密码', { exact: true }).fill('test123456');
   await page.getByRole('button', { name: /登 录/ }).click();
   await page.waitForURL('**/today');
-  await expect(page.getByText(/今天先看|今天先做/).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: '今日内容摘要' })).toBeVisible();
 }
 
 async function registerFreshUser(page: import('@playwright/test').Page) {
@@ -34,16 +38,21 @@ async function registerFreshUser(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: '编程学习' }).click();
   await page.getByRole('button', { name: '完成' }).click();
   await page.waitForURL('**/today');
-  await expect(page.getByText(/今天先看|今天先做/).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: '今日内容摘要' })).toBeVisible();
 }
 
 test.describe('web + worker browser E2E', () => {
-  test('enforces protected-route auth gate, preserves session on reload, and blocks again after logout', async ({ page }) => {
-    await page.goto('/today');
-    await page.waitForURL('**/welcome');
-    await expect(page.getByText('发现你的信息世界')).toBeVisible();
+  test('auto signs in with the dev demo account on login route in local development', async ({ page }) => {
+    await page.goto('/login');
+    await page.waitForURL('**/today');
+    await expect(page.getByRole('heading', { name: '今日内容摘要' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '头版重点' })).toBeVisible();
+  });
 
-    await loginAsDemoUser(page);
+  test('uses dev auto-login, preserves session on reload, and returns to welcome after logout', async ({ page }) => {
+    await page.goto('/today');
+    await page.waitForURL('**/today');
+    await expect(page.getByRole('heading', { name: '今日内容摘要' })).toBeVisible();
 
     await page.goto('/me');
     await page.waitForURL('**/me');

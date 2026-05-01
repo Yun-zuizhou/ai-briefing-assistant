@@ -8,7 +8,8 @@
     "build": "tsc -b && .\\node_modules\\.bin\\vite.cmd build --app --configLoader native",
     "lint": "eslint .",
     "check:decor-fonts": "node scripts/check-decor-fonts.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest --run"
   },
   "dependencies": {
     "lucide-react": "^0.577.0",
@@ -32,7 +33,8 @@
     "tailwindcss": "^4.2.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
-    "vite": "^8.0.0-beta.13"
+    "vite": "^8.0.0-beta.13",
+    "vitest": "^1.6.1"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"

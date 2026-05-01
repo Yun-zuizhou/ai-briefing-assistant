@@ -213,6 +213,7 @@ vi.mock('../src/services/content', async () => {
     getHotTopicById: vi.fn(async (_db, id: number) => flowState.get().hotTopics.find((item) => item.id === id) ?? null),
     getOpportunityById: vi.fn(async (_db, id: number) => flowState.get().opportunities.find((item) => item.id === id) ?? null),
     getArticleById: vi.fn(async (_db, id: number) => flowState.get().articles.find((item) => item.id === id) ?? null),
+    listArticlesBySourceUrls: vi.fn(async () => []),
     listRelatedItemsForHotTopic: vi.fn(async () => {
       const article = flowState.get().articles[0]
       return article

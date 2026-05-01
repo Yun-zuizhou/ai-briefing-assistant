@@ -67,8 +67,14 @@ const actionContracts = [
         file: 'apps/web/src/components/business/article/controls.tsx',
         tokens: [
           'onClick={onCollect}',
-          'onClick={onOpenOriginal}',
           'onClick={onShare}',
+        ],
+      },
+      {
+        file: 'apps/web/src/components/business/article/body.tsx',
+        tokens: [
+          'onOpenOriginal',
+          '原文链接',
         ],
       },
       {

@@ -277,7 +277,7 @@ async function checkComponentInterfaces(addFailure) {
   const decorPreviewApiPath = path.join(rootDir, 'apps/web/src/components/decor/preview.ts');
   const decorPublicApiText = await readText(decorPublicApiPath);
   const decorPreviewApiText = await readText(decorPreviewApiPath);
-  if (/\b(?:Bookish|Sample|StateMatrix|SectionHeader|SystemBriefCard|ChipGroup)\b/.test(decorPublicApiText)) {
+  if (/\b(?:Bookish|Sample|StateMatrix|SystemBriefCard|ChipGroup)\b/.test(decorPublicApiText)) {
     addFailure('apps/web/src/components/decor/index.ts must stay the formal decor interface; preview, migration, and exploratory assets belong in decor/preview.ts.');
   }
   for (const requiredPreviewExport of ['EditorialStateMatrix', 'EditorialChatSample', 'EditorialTodaySample', 'EditorialPageReframeSample']) {
@@ -498,6 +498,7 @@ async function checkPageContracts(indexCssText, addFailure) {
         'apps/web/src/pages/TodayPage.tsx',
         'apps/web/src/pages/useTodayPageLogic.ts',
         'apps/web/src/components/business/today.tsx',
+        'apps/web/src/components/today/TodayEditorialShell.tsx',
       ],
       style: './styles/today-page.css',
       tokens: [
@@ -506,17 +507,15 @@ async function checkPageContracts(indexCssText, addFailure) {
         "from './useTodayPageLogic'",
         "from '../types/page-data'",
         'TodayPageData',
-        "from '../components/layout'",
+        "from '../components/today'",
         "from '../components/business'",
-        "from '../components/ui'",
-        'PageSection',
-        'PageStack',
+        "from '../components/decor'",
+        'TodayEditorialShell',
+        'TodayEditorialSection',
         'today-',
       ],
       forbiddenTokens: [
-        'TodaySection',
         'TodaySectionHeader',
-        'section-header',
         'section-more',
       ],
       fileForbiddenTokens: [

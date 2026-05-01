@@ -58,6 +58,7 @@ const DEMO_IDENTITIES: DemoIdentity[] = [
     nickname: '展示用户',
   },
 ]
+const DEFAULT_DEV_IDENTIFIER = 'test@example.com'
 
 function normalizeIdentifier(value: string | null | undefined): string {
   return String(value || '').trim().toLowerCase()
@@ -304,11 +305,28 @@ export async function resolveSessionUser(
 export async function requireSessionUser(
   c: CookieContext
 ): Promise<AuthenticatedUser> {
-  const user = await resolveSessionUser(c)
+  const user = await resolveSessionUser(c) || await resolveDevelopmentSessionUser(c)
   if (!user) {
     throw new HTTPException(401, { message: 'Authentication required. Please log in.' })
   }
   return user
+}
+
+export async function resolveDevelopmentSessionUser(
+  c: CookieContext
+): Promise<AuthenticatedUser | null> {
+  if (String(c.env.ENVIRONMENT || '').trim().toLowerCase() !== 'development') {
+    return null
+  }
+
+  await ensureDemoAuthUser(c.env.DB, DEFAULT_DEV_IDENTIFIER, c.env.ENVIRONMENT)
+  const user = await findUserByIdentifier(c.env.DB, DEFAULT_DEV_IDENTIFIER)
+  if (!user || user.is_active !== 1) {
+    return null
+  }
+
+  await createUserSession(c, user.id)
+  return publicUser(user)
 }
 
 function resolveDemoIdentity(identifier: string): DemoIdentity | null {

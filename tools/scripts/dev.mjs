@@ -1,11 +1,13 @@
 import {
   edgeWorkerDir,
   frontendPort,
+  isLocalPortListening,
   makeBackendEnv,
   npmCommand,
   rootDir,
   runCommand,
   spawnLogged,
+  waitForLocalPort,
   webDir,
 } from './_shared.mjs';
 
@@ -103,7 +105,14 @@ if (backendRuntime === 'python') {
   console.log(`Local D1 Prepare: ${skipD1Prepare ? 'skipped' : `migrations + ${d1SeedGroup}`}`);
 }
 
+let startupCompleted = false;
+let shuttingDown = false;
+
 function shutdown(code = 0) {
+  if (shuttingDown) {
+    return;
+  }
+  shuttingDown = true;
   for (const child of [backend, frontend]) {
     if (!child.killed) {
       child.kill('SIGINT');
@@ -112,13 +121,50 @@ function shutdown(code = 0) {
   setTimeout(() => process.exit(code), 300);
 }
 
+const childLabels = new Map([
+  [backend, 'backend'],
+  [frontend, 'frontend'],
+]);
+
 for (const child of [backend, frontend]) {
   child.on('exit', (code) => {
+    if (shuttingDown) {
+      return;
+    }
+
+    if (!startupCompleted) {
+      if (code && code !== 0) {
+        shutdown(code);
+      }
+      return;
+    }
+
     if (code && code !== 0) {
+      const label = childLabels.get(child) || 'service';
+      console.warn(`${label} exited with code ${code}, leaving the other service running.`);
+      if (!isLocalPortListening(frontendPort) && !isLocalPortListening(backendPort)) {
+        process.exit(code);
+      }
+      return;
+    }
+
+    if (!isLocalPortListening(frontendPort) && !isLocalPortListening(backendPort)) {
       shutdown(code);
     }
   });
 }
+
+const frontendReady = await waitForLocalPort(frontendPort);
+const backendReady = await waitForLocalPort(backendPort);
+if (!frontendReady || !backendReady) {
+  shutdown(1);
+  throw new Error(
+    `Dev startup failed: frontend ready=${frontendReady}, backend ready=${backendReady}.`,
+  );
+}
+
+startupCompleted = true;
+console.log('Dev startup health check passed.');
 
 process.on('SIGINT', () => shutdown(0));
 process.on('SIGTERM', () => shutdown(0));

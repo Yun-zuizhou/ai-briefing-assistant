@@ -4,6 +4,7 @@ import { handleApiError, createErrorResponse, ErrorCode } from '../src/utils/err
 
 vi.mock('../src/utils/auth', () => ({
   resolveSessionUser: vi.fn(async () => null),
+  resolveDevelopmentSessionUser: vi.fn(async () => null),
 }))
 
 import actionsRoutes from '../src/routes/actions'
