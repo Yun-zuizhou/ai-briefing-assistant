@@ -1,13 +1,13 @@
-import { Newspaper, TrendingUp, CheckSquare, FileText, MessageCircle } from 'lucide-react';
+import { Newspaper, TrendingUp, CheckSquare, MessageCircle, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Button from '../ui/Button';
+import { Button } from '../ui';
 
 const tabs = [
   { path: '/chat', icon: MessageCircle, label: '对话' },
   { path: '/today', icon: Newspaper, label: '简报' },
   { path: '/todo', icon: CheckSquare, label: '待办' },
-  { path: '/log', icon: FileText, label: '日志' },
   { path: '/growth', icon: TrendingUp, label: '成长' },
+  { path: '/me', icon: User, label: '我的' },
 ];
 
 export default function TabBar() {

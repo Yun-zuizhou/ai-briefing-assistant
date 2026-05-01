@@ -7,6 +7,7 @@
     "dev": "vite --configLoader native",
     "build": "tsc -b && .\\node_modules\\.bin\\vite.cmd build --app --configLoader native",
     "lint": "eslint .",
+    "check:decor-fonts": "node scripts/check-decor-fonts.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -96,6 +96,28 @@
   white-space: nowrap;
 }
 
+@media (min-width: 768px) and (max-height: 720px) {
+  .bottom-nav {
+    height: 56px;
+    padding: 3px 4px calc(3px + env(safe-area-inset-bottom, 0));
+  }
+
+  .nav-btn {
+    gap: 2px;
+    padding: 3px 4px;
+  }
+
+  .nav-btn-icon,
+  .nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .nav-btn-label {
+    font-size: 12px;
+  }
+}
+
 /* ========================================
    装饰性角落 - Decorative Corners
    ======================================== */

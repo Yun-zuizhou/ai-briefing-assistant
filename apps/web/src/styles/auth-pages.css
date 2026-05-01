@@ -391,11 +391,20 @@
 }
 
 .interest-config-category-icon {
+  display: inline-flex;
+  align-items: center;
   margin-right: 6px;
 }
 
 .interest-config-category-body {
   padding: 14px 18px;
+}
+
+.interest-config-category-purpose {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-muted);
 }
 
 .interest-config-interest-grid {
@@ -681,6 +690,68 @@
   font-size: 15px;
 }
 
+.social-login-panel {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(143, 130, 105, 0.7);
+}
+
+.social-login-title {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.social-login-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.social-login-btn {
+  min-width: 94px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--radius-control);
+  border: 1px solid rgba(143, 130, 105, 0.82);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-sans-cn);
+}
+
+.social-login-btn.is-available {
+  background: var(--paper-warm);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(44, 36, 22, 0.08);
+}
+
+.social-login-btn.is-disabled {
+  background: rgba(237, 233, 220, 0.55);
+  color: var(--ink-muted);
+  cursor: not-allowed;
+}
+
+.social-login-btn-icon {
+  display: inline-flex;
+}
+
+.social-login-btn-icon.is-disabled {
+  opacity: 0.66;
+}
+
+.social-login-agreement {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 14px;
+  line-height: 1.7;
+}
+
 @media (max-width: 767px) {
   .login-page-content {
     padding: 12px;
@@ -755,5 +826,14 @@
 
   .welcome-dots {
     margin-bottom: 20px;
+  }
+
+  .social-login-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .social-login-btn {
+    width: 100%;
   }
 }

@@ -67,6 +67,25 @@
   margin: 0 0 12px;
 }
 
+.hot-topics-brief-card {
+  margin: 0 0 12px;
+  padding: 14px;
+}
+
+.hot-topics-brief-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.hot-topics-brief-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+
 .hot-topics-trend-panel {
   padding: 12px;
   background: linear-gradient(180deg, rgba(245, 242, 232, 0.95) 0%, rgba(237, 233, 220, 0.84) 100%);

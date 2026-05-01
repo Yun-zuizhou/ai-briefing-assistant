@@ -1,48 +1,6 @@
 import type { ReactNode } from 'react';
 import ContentListCard from './ContentListCard';
-import Button from '../ui/Button';
-
-export function TodaySection({
-  children,
-  className = '',
-  id,
-}: {
-  children: ReactNode;
-  className?: string;
-  id?: string;
-}) {
-  return (
-    <section id={id} className={`section today-section ${className}`.trim()}>
-      {children}
-    </section>
-  );
-}
-
-export function TodaySectionHeader({
-  title,
-  actionLabel,
-  onAction,
-}: {
-  title: string;
-  actionLabel?: string;
-  onAction?: () => void;
-}) {
-  return (
-    <div className="section-header">
-      <span className="section-title">{title}</span>
-      {actionLabel && onAction ? (
-        <Button
-          type="button"
-          variant="unstyled"
-          className="section-more"
-          onClick={onAction}
-        >
-          {actionLabel}
-        </Button>
-      ) : null}
-    </div>
-  );
-}
+import { Button } from '../ui';
 
 export function TodayErrorState({ message }: { message: string }) {
   return (
@@ -70,7 +28,7 @@ export function TodaySummaryCard({
     <div className="surface-hero">
       <div className="surface-hero-inner">
         <div className="today-summary-head">
-          <span className="hero-kicker">今日总述</span>
+          <span className="hero-kicker">简报总述</span>
           <span className="hero-meta today-summary-meta">
             {loading ? '同步中' : `${totalCount} 条核心内容`}
           </span>
@@ -128,7 +86,7 @@ export function TodayLeadCard({
     <div className="today-lead-card">
       <div className="today-lead-topline">
         <span className="hero-kicker">{kicker}</span>
-        <span className="hero-meta">{loading ? '同步中' : '今日重点'}</span>
+        <span className="hero-meta">{loading ? '同步中' : '头版重点'}</span>
       </div>
       <h2 className="today-lead-title">{title}</h2>
       <p className="today-lead-summary">{summary}</p>
@@ -176,8 +134,8 @@ export function TodayFocusBar({
   recommendationCount: number;
 }) {
   const items = [
-    { label: '可看', value: knowledgeCount },
-    { label: '可做', value: actionCount },
+    { label: '报道', value: knowledgeCount },
+    { label: '待办线索', value: actionCount },
     { label: '相关', value: recommendationCount },
   ];
 
@@ -216,8 +174,8 @@ export function TodayEmptyCard({ text }: { text: string }) {
 }
 
 export function TodayLoadingState() {
-  const knowledgeRows = ['今日热点校读', '趋势线索誊写', '重点来源核验'];
-  const actionRows = ['机会条目筛选', '行动价值评估'];
+  const knowledgeRows = ['关注报道校读', '趋势线索誊写', '重点来源核验'];
+  const actionRows = ['待办线索筛选', '后续价值评估'];
 
   return (
     <div className="today-loading-state" aria-live="polite" aria-label="正在整理今日简报">
@@ -233,7 +191,7 @@ export function TodayLoadingState() {
 
       <div className="today-loading-grid">
         <div className="today-loading-column">
-          <div className="today-loading-column-title">值得知道的</div>
+          <div className="today-loading-column-title">关注报道</div>
           {knowledgeRows.map((item, index) => (
             <div className="today-loading-card" key={item}>
               <span className="today-loading-number">{String(index + 1).padStart(2, '0')}</span>
@@ -243,7 +201,7 @@ export function TodayLoadingState() {
           ))}
         </div>
         <div className="today-loading-column">
-          <div className="today-loading-column-title">值得行动的</div>
+          <div className="today-loading-column-title">待办线索</div>
           {actionRows.map((item, index) => (
             <div className="today-loading-card is-action" key={item}>
               <span className="today-loading-number">{String(index + 1).padStart(2, '0')}</span>

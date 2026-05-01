@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { AppProvider } from './context/AppContext';
 import { useAppContext } from './context/useAppContext';
@@ -15,7 +15,6 @@ const HistoryBriefPage = lazy(() => import('./pages/HistoryBriefPage'));
 const WelcomePage = lazy(() => import('./pages/WelcomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const InterestConfigPage = lazy(() => import('./pages/InterestConfigPage'));
-const PreviewPage = lazy(() => import('./pages/PreviewPage'));
 const WeeklyReportPage = lazy(() => import('./pages/WeeklyReportPage'));
 const MonthlyReportPage = lazy(() => import('./pages/MonthlyReportPage'));
 const AnnualReportPage = lazy(() => import('./pages/AnnualReportPage'));
@@ -28,6 +27,8 @@ const NotificationSettingsPage = lazy(() => import('./pages/NotificationSettings
 const HelpFeedbackPage = lazy(() => import('./pages/HelpFeedbackPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const AiDigestLabPage = lazy(() => import('./pages/AiDigestLabPage'));
+const DecorPreviewPage = lazy(() => import('./pages/DecorPreviewPage'));
+const SystemDiagnosticsPage = lazy(() => import('./pages/SystemDiagnosticsPage'));
 
 function RouteFallback() {
   return (
@@ -39,11 +40,12 @@ function RouteFallback() {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, authResolved } = useAppContext();
+  const location = useLocation();
   if (!authResolved) {
     return <RouteFallback />;
   }
   if (!user.isLoggedIn) {
-    return <Navigate to="/welcome" replace />;
+    return <Navigate to="/welcome" state={{ from: { pathname: location.pathname, search: location.search } }} replace />;
   }
   return <>{children}</>;
 }
@@ -64,7 +66,7 @@ function AppRoutes() {
           <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/interest-config" element={<InterestConfigPage />} />
-          <Route path="/preview" element={<PreviewPage />} />
+          <Route path="/decor-preview" element={<DecorPreviewPage />} />
           <Route path="/" element={<RootRoute />} />
           <Route path="/today" element={<ProtectedRoute><TodayPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
@@ -88,6 +90,7 @@ function AppRoutes() {
           <Route path="/help-feedback" element={<ProtectedRoute><HelpFeedbackPage /></ProtectedRoute>} />
           <Route path="/about" element={<ProtectedRoute><AboutPage /></ProtectedRoute>} />
           <Route path="/ai-digest-lab" element={<ProtectedRoute><AiDigestLabPage /></ProtectedRoute>} />
+          <Route path="/system-diagnostics" element={<ProtectedRoute><SystemDiagnosticsPage /></ProtectedRoute>} />
           <Route path="*" element={<RootRoute />} />
         </Routes>
       </Suspense>

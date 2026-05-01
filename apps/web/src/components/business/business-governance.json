@@ -1,0 +1,198 @@
+{
+  "note": "Business component governance registry. Keep direct business files registered so growth is intentional, not accidental.",
+  "rules": {
+    "largeFileBytes": 8000,
+    "facadeMaxBytes": 1600
+  },
+  "governance": {
+    "mode": "stabilize",
+    "activeCandidates": [
+      "settings.tsx",
+      "login.tsx",
+      "profile.tsx"
+    ],
+    "deferredCandidates": [
+      "actions.tsx",
+      "aiDigestLab.tsx"
+    ],
+    "packageCriteria": [
+      "The file has at least two business areas that can evolve independently.",
+      "The caller-facing export can stay stable through a facade.",
+      "The split creates clearer ownership without adding page-visible imports."
+    ]
+  },
+  "directFiles": {
+    "about.tsx": {
+      "owner": "About page business widgets",
+      "status": "single-page",
+      "maxBytes": 4000
+    },
+    "actions.tsx": {
+      "owner": "Actions page business widgets",
+      "status": "package-candidate",
+      "decision": "Split only when todo, following, saved, and rhythm areas continue to grow independently.",
+      "maxBytes": 12000
+    },
+    "aiDigestLab.tsx": {
+      "owner": "AI digest lab business widgets",
+      "status": "package-candidate",
+      "decision": "Candidate because workspace, result list, detail, and consult output are separate responsibilities.",
+      "maxBytes": 10500
+    },
+    "aiProvider.tsx": {
+      "owner": "AI provider settings business widgets",
+      "status": "single-page",
+      "maxBytes": 6500
+    },
+    "article.tsx": {
+      "owner": "Article reading business public facade",
+      "status": "facade",
+      "package": "article",
+      "maxBytes": 1600
+    },
+    "chat.tsx": {
+      "owner": "Shared chat business widgets",
+      "status": "shared-widget",
+      "maxBytes": 2500
+    },
+    "collections.tsx": {
+      "owner": "Collections page business widgets",
+      "status": "monitor",
+      "decision": "Keep as one file while search, states, list, and modal remain tightly coupled.",
+      "maxBytes": 9500
+    },
+    "common.tsx": {
+      "owner": "Shared business primitives",
+      "status": "shared-widget",
+      "maxBytes": 3000
+    },
+    "ContentListCard.tsx": {
+      "owner": "Shared content list card",
+      "status": "shared-widget",
+      "maxBytes": 2500
+    },
+    "growth.tsx": {
+      "owner": "Growth page business widgets",
+      "status": "single-page",
+      "maxBytes": 6000
+    },
+    "helpFeedback.tsx": {
+      "owner": "Help and feedback business widgets",
+      "status": "single-page",
+      "maxBytes": 6500
+    },
+    "historyBrief.tsx": {
+      "owner": "History brief business widgets",
+      "status": "single-page",
+      "maxBytes": 6000
+    },
+    "historyLogs.tsx": {
+      "owner": "History logs business widgets",
+      "status": "monitor",
+      "decision": "Keep as one file unless archive grouping and record rendering start changing separately.",
+      "maxBytes": 9500
+    },
+    "hotTopics.tsx": {
+      "owner": "Hot topics business widgets",
+      "status": "monitor",
+      "decision": "Near large-file threshold; split detail modal only if it grows independently.",
+      "maxBytes": 9000
+    },
+    "interestConfig.tsx": {
+      "owner": "Interest config business widgets",
+      "status": "single-page",
+      "maxBytes": 6000
+    },
+    "journal.tsx": {
+      "owner": "Journal page business widgets",
+      "status": "monitor",
+      "decision": "Keep together while overview, thought list, progress, keep grid, and review share one page model.",
+      "maxBytes": 9500
+    },
+    "login.tsx": {
+      "owner": "Login and welcome business widgets",
+      "status": "package-candidate",
+      "decision": "Candidate because welcome deck and auth form are different experiences behind one business file.",
+      "maxBytes": 12500
+    },
+    "my.tsx": {
+      "owner": "My page business widgets",
+      "status": "single-page",
+      "maxBytes": 3500
+    },
+    "profile.tsx": {
+      "owner": "Profile page business widgets",
+      "status": "package-candidate",
+      "decision": "Candidate because generation state, radar, stats, persona, insights, keywords, and evidence can evolve independently.",
+      "maxBytes": 11000
+    },
+    "reports.tsx": {
+      "owner": "Report business public facade",
+      "status": "facade",
+      "package": "reports",
+      "maxBytes": 1600
+    },
+    "settings.tsx": {
+      "owner": "Settings and notification business widgets",
+      "status": "package-candidate",
+      "decision": "Candidate because account settings and notification configuration already expose distinct widget groups.",
+      "maxBytes": 12000
+    },
+    "systemDiagnostics.tsx": {
+      "owner": "System diagnostics business public facade",
+      "status": "facade",
+      "package": "systemDiagnostics",
+      "maxBytes": 1600
+    },
+    "today.tsx": {
+      "owner": "Today page business widgets",
+      "status": "monitor",
+      "decision": "Keep as one file while lead, focus, grid, and content card remain the main Today page composition.",
+      "maxBytes": 8000
+    }
+  },
+  "packages": {
+    "article": {
+      "owner": "Article reading business package",
+      "facade": "article.tsx",
+      "requiredFiles": [
+        "article/aiSummary.tsx",
+        "article/body.tsx",
+        "article/chrome.tsx",
+        "article/content.tsx",
+        "article/controls.tsx",
+        "article/footer.tsx",
+        "article/hero.tsx"
+      ]
+    },
+    "reports": {
+      "owner": "Report business package",
+      "facade": "reports.tsx",
+      "requiredFiles": [
+        "reports/annual.tsx",
+        "reports/contracts.ts",
+        "reports/exportFormats.ts",
+        "reports/periodic.tsx",
+        "reports/periodicAi.tsx",
+        "reports/periodicGrowth.tsx",
+        "reports/periodicOverview.tsx",
+        "reports/periodicState.tsx",
+        "reports/periodicTrends.tsx",
+        "reports/shared.tsx",
+        "reports/sheets.tsx"
+      ]
+    },
+    "systemDiagnostics": {
+      "owner": "System diagnostics business package",
+      "facade": "systemDiagnostics.tsx",
+      "requiredFiles": [
+        "systemDiagnostics/chrome.tsx",
+        "systemDiagnostics/content.tsx",
+        "systemDiagnostics/dispatchSections.tsx",
+        "systemDiagnostics/format.ts",
+        "systemDiagnostics/llmSections.tsx",
+        "systemDiagnostics/metrics.tsx"
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
-import Button from '../ui/Button';
+import { Button } from '../ui';
 
 type NoticeTone = 'danger' | 'muted';
 

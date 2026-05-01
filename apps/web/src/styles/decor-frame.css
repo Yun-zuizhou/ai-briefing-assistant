@@ -1,0 +1,75 @@
+/* ========================================
+   DecorFrame — 简报虚线画框
+   复用于 Chat 内容区、报告卡片、Hero 区域
+   ======================================== */
+
+.decor-frame {
+  position: relative;
+  isolation: isolate;
+}
+
+.decor-frame::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(143, 130, 105, 0.38);
+  border-radius: calc(var(--radius-panel) - 2px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.decor-frame > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 用于 flex 容器内部时，传递 flex 链 */
+.decor-frame-flex {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ========================================
+   Dateline — 报刊署名行
+   ======================================== */
+
+.dateline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(143, 130, 105, 0.22);
+  font-family: var(--font-latin-elegant), var(--font-sans-cn);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.dateline-label {
+  color: var(--ink-muted);
+}
+
+.dateline-label::before {
+  content: '◆ ';
+  color: var(--gold);
+  font-size: 9px;
+}
+
+.dateline-dot {
+  color: rgba(143, 130, 105, 0.5);
+}
+
+.dateline-time {
+  color: var(--ink-muted);
+  opacity: 0.65;
+}
+
+@media (max-width: 767px) {
+  .decor-frame::after {
+    inset: 4px;
+    border-radius: calc(var(--radius-panel) - 4px);
+  }
+}

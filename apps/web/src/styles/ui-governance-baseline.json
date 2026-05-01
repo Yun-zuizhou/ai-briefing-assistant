@@ -1,0 +1,19 @@
+{
+  "note": "Current UI debt baseline. Reduce these limits as cleanup progresses; do not raise them for new UI work.",
+  "limits": {
+    "indexCssClassSelectors": 9,
+    "indexCssNonImportLines": 153,
+    "previewSelectorCssFiles": 2,
+    "genericSectionHeaderFiles": 15,
+    "extraViewportShellCssFiles": 3
+  },
+  "allowedPreviewSelectorCssFiles": [
+    "apps/web/src/styles/auth-pages.css",
+    "apps/web/src/styles/bookish-decor.css"
+  ],
+  "allowedExtraViewportShellCssFiles": [
+    "apps/web/src/index.css",
+    "apps/web/src/styles/bookish-decor.css",
+    "apps/web/src/styles/today-page.css"
+  ]
+}

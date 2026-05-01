@@ -1,2 +1,2 @@
 export { useChatLogic } from './useChatLogic';
-export { useChatPanelDrag } from './useChatPanelDrag';
+export type { ComposeMode } from './useChatLogic';

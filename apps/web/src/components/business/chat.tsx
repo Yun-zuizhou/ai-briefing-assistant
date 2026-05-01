@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import Button from '../ui/Button';
+import { Button } from '../ui';
 
 export function ChatQuickActionButton({
   text,
@@ -50,7 +50,7 @@ export function ChatStatusPill({
   tone = 'neutral',
 }: {
   text: string;
-  tone?: 'neutral' | 'pending' | 'success';
+  tone?: 'neutral' | 'pending' | 'success' | 'error';
 }) {
   return (
     <span

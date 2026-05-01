@@ -1,0 +1,20 @@
+{
+  "name": "bookish-icons",
+  "preset": "bookish",
+  "grid": 24,
+  "strokeWidth": 2,
+  "strokeLinecap": "round",
+  "strokeLinejoin": "round",
+  "cornerRadius": 2,
+  "padding": 2,
+  "opticalBalance": true,
+  "iconCount": 6,
+  "icons": ["bell", "search", "bookmark", "edit", "brief", "section-break"],
+  "palette": {
+    "gold": "#B89A46",
+    "primary": "#4A3F35",
+    "secondary": "#7A6D60",
+    "faint": "#A89A8C"
+  },
+  "generated": "2026-04-29"
+}

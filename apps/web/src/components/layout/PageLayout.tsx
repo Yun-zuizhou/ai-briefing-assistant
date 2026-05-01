@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import TabBar from './TabBar';
-import Button from '../ui/Button';
+import { Button } from '../ui';
 
 export type PageVariant = 'main' | 'secondary' | 'auth' | 'report';
 
@@ -259,6 +259,66 @@ interface PageActionBarProps {
 export function PageActionBar({ children }: PageActionBarProps) {
   return (
     <div className="page-action-bar">
+      {children}
+    </div>
+  );
+}
+
+interface PageSectionProps {
+  children: ReactNode;
+  title?: string;
+  action?: ReactNode;
+  className?: string;
+  contentClassName?: string;
+  id?: string;
+}
+
+export function PageSection({
+  children,
+  title,
+  action,
+  className = '',
+  contentClassName = '',
+  id,
+}: PageSectionProps) {
+  const headerClassName = `page-section-header${title ? '' : ' page-section-header--action-only'}`;
+
+  return (
+    <section id={id} className={`page-section ${className}`.trim()}>
+      {title || action ? (
+        <div className={headerClassName}>
+          {title ? <h2 className="page-section-title">{title}</h2> : null}
+          {action ? <div className="page-section-action">{action}</div> : null}
+        </div>
+      ) : null}
+      <div className={`page-section-content ${contentClassName}`.trim()}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+interface PageStackProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function PageStack({ children, className = '' }: PageStackProps) {
+  return (
+    <div className={`page-stack ${className}`.trim()}>
+      {children}
+    </div>
+  );
+}
+
+interface PageGridProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function PageGrid({ children, className = '' }: PageGridProps) {
+  return (
+    <div className={`page-grid ${className}`.trim()}>
       {children}
     </div>
   );

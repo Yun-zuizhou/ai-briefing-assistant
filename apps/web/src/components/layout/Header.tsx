@@ -1,6 +1,6 @@
 import { ArrowLeft, Share2, Settings, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../ui/Button';
+import { Button } from '../ui';
 
 interface HeaderProps {
   title: string;

@@ -6,6 +6,9 @@ export {
   PageFooter, 
   PageFooterDecorative,
   PageActionBar,
+  PageGrid,
+  PageSection,
+  PageStack,
   type PageVariant 
 } from './PageLayout';
 export { default as TabBar } from './TabBar';

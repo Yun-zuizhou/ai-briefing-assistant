@@ -11,7 +11,7 @@
 }
 
 .actions-error-card {
-  margin: 16px 0 0;
+  margin: 0;
   padding: 16px;
   text-align: center;
 }
@@ -23,7 +23,7 @@
 }
 
 .actions-primary-card {
-  margin: 16px 0 12px;
+  margin: 0;
   padding: 16px;
   display: grid;
   gap: 14px;
@@ -166,7 +166,7 @@
 }
 
 .actions-rhythm-summary-card {
-  margin: 8px 0 16px;
+  margin: 0;
   padding: 12px;
   display: grid;
   gap: 10px;
@@ -198,7 +198,7 @@
 }
 
 .actions-filter-row {
-  margin: 0 0 16px;
+  margin: 0;
 }
 
 .actions-filter-chip {
@@ -206,18 +206,14 @@
   justify-content: center;
 }
 
-.actions-section {
-  padding-bottom: 8px;
-}
-
 .actions-empty-card {
-  margin: 0 0 16px;
+  margin: 0;
   padding: 24px;
   text-align: center;
 }
 
 .actions-empty-card-inline {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .actions-empty-title {
@@ -239,8 +235,7 @@
 
 .actions-todo-list,
 .actions-content-list {
-  margin: 0 0 16px;
-  display: grid;
+  margin: 0;
   gap: 8px;
 }
 
@@ -354,7 +349,6 @@
 }
 
 .actions-primary-card {
-  margin-top: 12px;
   padding: 14px;
 }
 

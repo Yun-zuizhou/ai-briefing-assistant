@@ -1,1 +1,1 @@
-export * from '@ai-briefing/contracts/page-data';
+export * from '../../../../packages/contracts/src/page-data';

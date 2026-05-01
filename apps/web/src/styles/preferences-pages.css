@@ -307,6 +307,25 @@
   margin: 0;
 }
 
+.notification-config-notice-card {
+  padding: 14px;
+  margin-bottom: 4px;
+}
+
+.notification-config-notice-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.notification-config-notice-text {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+
 .notification-section {
   padding-bottom: 8px;
 }
