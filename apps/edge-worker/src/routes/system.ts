@@ -10,6 +10,7 @@ import {
   completeSummaryTaskAction,
   failSummaryTaskAction,
   getOperationLogById,
+  getBriefingDispatchStats,
   getSummaryResultByTaskId,
   getChainHealthCounts,
   getSummaryTaskById,
@@ -19,17 +20,35 @@ import {
   mapSummaryTask,
   startSummaryTaskAction,
 } from '../services/system'
+import { migrateLegacyAiApiKeys } from '../services/ai-key-migration'
+import { getLlmInvocationStats } from '../services/llm-invocations'
 import { requireInternalExecutorAuth } from '../utils/internal-auth'
 import { resolveUserId } from '../utils/request-user'
+import { queryOne } from '../utils/db'
 
 type Bindings = {
   DB: D1Database
   ENVIRONMENT: string
   SUMMARY_PROVIDER_ENABLED?: string
   INTERNAL_API_TOKEN?: string
+  AI_KEY_ENCRYPTION_SECRET?: string
 }
 
 const router = new Hono<{ Bindings: Bindings }>()
+
+async function canViewDiagnostics(db: D1Database, userId: number, environment: string): Promise<boolean> {
+  const env = String(environment || '').trim().toLowerCase()
+  if (env !== 'production') {
+    return true
+  }
+
+  const row = await queryOne<{ is_superuser: number | null }>(
+    db,
+    `SELECT is_superuser FROM users WHERE id = ? LIMIT 1`,
+    [userId]
+  )
+  return Number(row?.is_superuser || 0) === 1
+}
 
 router.get('/chain-health', async (c) => {
   const db = c.env.DB
@@ -40,6 +59,58 @@ router.get('/chain-health', async (c) => {
   } catch (error) {
     console.error('Get chain health error:', error)
     return c.json({ error: 'Failed to load chain health' }, 500)
+  }
+})
+
+router.get('/llm-invocations/stats', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+  const window = c.req.query('window')
+  const windowDays = Number.parseInt(c.req.query('days') || '30', 10)
+  const limit = Number.parseInt(c.req.query('limit') || '20', 10)
+
+  try {
+    const allowed = await canViewDiagnostics(db, userId, c.env.ENVIRONMENT)
+    if (!allowed) {
+      return c.json({ error: '无权访问 LLM 调用诊断统计' }, 403)
+    }
+
+    const stats = await getLlmInvocationStats({
+      db,
+      userId,
+      window,
+      windowDays: Number.isNaN(windowDays) ? 30 : windowDays,
+      limit: Number.isNaN(limit) ? 20 : limit,
+    })
+    return c.json(stats)
+  } catch (error) {
+    console.error('Get LLM invocation stats error:', error)
+    return c.json({ error: 'Failed to load LLM invocation stats' }, 500)
+  }
+})
+
+router.get('/briefing-dispatches/stats', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+  const window = c.req.query('window')
+  const limit = Number.parseInt(c.req.query('limit') || '20', 10)
+
+  try {
+    const allowed = await canViewDiagnostics(db, userId, c.env.ENVIRONMENT)
+    if (!allowed) {
+      return c.json({ error: '无权访问简报调度诊断统计' }, 403)
+    }
+
+    const stats = await getBriefingDispatchStats({
+      db,
+      userId,
+      window,
+      limit: Number.isNaN(limit) ? 20 : limit,
+    })
+    return c.json(stats)
+  } catch (error) {
+    console.error('Get briefing dispatch stats error:', error)
+    return c.json({ error: 'Failed to load briefing dispatch stats' }, 500)
   }
 })
 
@@ -322,6 +393,40 @@ router.post('/ai-processing-runs', async (c) => {
     }
     console.error('Create ai processing run error:', error)
     return c.json({ error: 'Failed to create ai processing run' }, 500)
+  }
+})
+
+router.post('/ai-provider-keys/migrate-legacy', async (c) => {
+  const db = c.env.DB
+  try {
+    requireInternalExecutorAuth(c)
+    const body: {
+      dry_run?: boolean
+      limit?: number
+    } = await c.req.json<{
+      dry_run?: boolean
+      limit?: number
+    }>().catch(() => ({ dry_run: false }))
+    const result = await migrateLegacyAiApiKeys({
+      db,
+      encryptionSecret: c.env.AI_KEY_ENCRYPTION_SECRET,
+      dryRun: Boolean(body.dry_run),
+      limit: body.limit,
+    })
+
+    const status = result.skippedMissingSecret > 0 && result.migrated === 0 && result.clearedPlaintextOnly === 0
+      ? 503
+      : 200
+    return c.json({
+      success: status === 200,
+      ...result,
+    }, status)
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error
+    }
+    console.error('Migrate legacy AI API keys error:', error)
+    return c.json({ error: 'Failed to migrate legacy AI API keys' }, 500)
   }
 })
 

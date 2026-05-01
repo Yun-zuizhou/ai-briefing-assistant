@@ -5,6 +5,7 @@ import {
   mapHistoryResponse,
   parseContentRef,
 } from '../services/behavior'
+import { InvalidReferenceError, normalizeHistoryRef } from '../services/reference-registry'
 import { resolveUserId } from '../utils/request-user'
 
 type Bindings = {
@@ -50,14 +51,15 @@ router.post('/', async (c) => {
       refType = parsed.refType
       refId = parsed.refId
     }
+    const normalizedRef = normalizeHistoryRef(refType, refId)
     const history = await createHistoryAction({
       db,
       userId,
       eventType: body.event_type,
       title: body.title,
       summary: body.summary || null,
-      refType,
-      refId,
+      refType: normalizedRef.refType,
+      refId: normalizedRef.refId,
     })
     if (!history) {
       return c.json({ error: 'Failed to create history' }, 500)
@@ -65,6 +67,9 @@ router.post('/', async (c) => {
 
     return c.json(mapHistoryResponse(history))
   } catch (error) {
+    if (error instanceof InvalidReferenceError) {
+      return c.json({ error: error.message }, 400)
+    }
     console.error('Create history error:', error)
     return c.json({ error: 'Failed to create history' }, 500)
   }

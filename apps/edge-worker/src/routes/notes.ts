@@ -8,6 +8,7 @@ import {
   mapNoteResponse,
   updateNoteAction,
 } from '../services/behavior'
+import { InvalidReferenceError, normalizeNoteSourceRef } from '../services/reference-registry'
 import { resolveUserId } from '../utils/request-user'
 
 type Bindings = {
@@ -46,12 +47,13 @@ router.post('/', async (c) => {
       source_id?: number
       tags?: string[]
     }>()
+    const sourceRef = normalizeNoteSourceRef(body.source_type || 'manual', body.source_id ?? null)
     const note = await createNoteAction({
       db,
       userId,
       content: body.content,
-      sourceType: body.source_type || 'manual',
-      sourceId: body.source_id || null,
+      sourceType: sourceRef.sourceType,
+      sourceId: sourceRef.sourceId,
       tags: body.tags || [],
     })
     if (!note) {
@@ -60,6 +62,9 @@ router.post('/', async (c) => {
 
     return c.json(mapNoteResponse(note))
   } catch (error) {
+    if (error instanceof InvalidReferenceError) {
+      return c.json({ error: error.message }, 400)
+    }
     console.error('Create note error:', error)
     return c.json({ error: 'Failed to create note' }, 500)
   }

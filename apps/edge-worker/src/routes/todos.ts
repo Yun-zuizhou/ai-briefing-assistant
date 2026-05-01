@@ -9,6 +9,7 @@ import {
   mapTodoResponse,
   updateTodoAction,
 } from '../services/behavior'
+import { InvalidReferenceError, normalizeTodoRelatedRef } from '../services/reference-registry'
 import { resolveUserId } from '../utils/request-user'
 
 type Bindings = {
@@ -55,12 +56,21 @@ router.post('/', async (c) => {
       related_title?: string
       tags?: string[]
     }>()
-    const created = await createTodoAction({ db, userId, payload: body })
+    const payload = { ...body }
+    if (body.related_type !== undefined || body.related_id !== undefined) {
+      const relatedRef = normalizeTodoRelatedRef(body.related_type ?? null, body.related_id ?? null)
+      payload.related_type = relatedRef.relatedType ?? undefined
+      payload.related_id = relatedRef.relatedId ?? undefined
+    }
+    const created = await createTodoAction({ db, userId, payload })
     if (!created) {
       return c.json({ error: 'Failed to create todo' }, 500)
     }
     return c.json(mapTodoResponse(created))
   } catch (error) {
+    if (error instanceof InvalidReferenceError) {
+      return c.json({ error: error.message }, 400)
+    }
     console.error('Create todo error:', error)
     return c.json({ error: 'Failed to create todo' }, 500)
   }
@@ -106,6 +116,12 @@ router.put('/:id', async (c) => {
       related_title?: string | null
       tags?: string[]
     }>()
+    const payload = { ...body }
+    if (body.related_type !== undefined || body.related_id !== undefined) {
+      const relatedRef = normalizeTodoRelatedRef(body.related_type ?? null, body.related_id ?? null)
+      payload.related_type = relatedRef.relatedType
+      payload.related_id = relatedRef.relatedId
+    }
 
     const existing = await getTodoRow(db, todoId, userId)
 
@@ -116,12 +132,15 @@ router.put('/:id', async (c) => {
       }
       return c.json({ error: '待办不存在' }, 404)
     }
-    const updated = await updateTodoAction({ db, todo: existing, payload: body })
+    const updated = await updateTodoAction({ db, todo: existing, payload })
     if (!updated) {
       return c.json({ error: 'Failed to update todo' }, 500)
     }
     return c.json(mapTodoResponse(updated))
   } catch (error) {
+    if (error instanceof InvalidReferenceError) {
+      return c.json({ error: error.message }, 400)
+    }
     console.error('Update todo error:', error)
     return c.json({ error: 'Failed to update todo' }, 500)
   }

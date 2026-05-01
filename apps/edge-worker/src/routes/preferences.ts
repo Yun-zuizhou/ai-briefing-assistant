@@ -2,38 +2,26 @@ import { Hono } from 'hono'
 import { getUserInterests, replaceUserInterests } from '../services/content'
 import {
   buildResolvedUserAiProviderSettings,
-  buildGrowthKeywords,
-  buildPersonaSummary,
-  buildRadarMetrics,
-  buildRecentHistoryItems,
   buildResolvedUserSettings,
-  getActivityStreak,
-  getLatestBriefing,
-  getLatestNote,
-  getLatestOpportunityFollow,
   getMorningBriefingScheduleState,
-  getProfileCounts,
   getUserSettings,
   updateUserAiProviderSettings,
   updateUserSettings,
 } from '../services/behavior'
+import {
+  generateUserProfileForUser,
+  loadGrowthOverview,
+  loadUserProfile,
+  type PreferencesRuntimeEnv,
+} from '../services/preferences'
 import { resolveUserId } from '../utils/request-user'
-import type { GrowthOverviewData } from '../types/page-data'
 
-type Bindings = {
+type Bindings = PreferencesRuntimeEnv & {
   DB: D1Database
   ENVIRONMENT: string
 }
 
 const router = new Hono<{ Bindings: Bindings }>()
-
-interface UserInterest {
-  id: number
-  user_id: number
-  interest_name: string
-  status: string
-  created_at: string
-}
 
 router.get('/interests', async (c) => {
   const db = c.env.DB
@@ -151,6 +139,7 @@ router.put('/ai-provider', async (c) => {
     const settings = await updateUserAiProviderSettings({
       db,
       userId,
+      encryptionSecret: c.env.AI_KEY_ENCRYPTION_SECRET,
       payload: body,
     })
 
@@ -166,32 +155,31 @@ router.get('/profile', async (c) => {
   const userId = await resolveUserId(c)
 
   try {
-    const [interests, counts] = await Promise.all([
-      getUserInterests(db, userId),
-      getProfileCounts(db, userId),
-    ])
-
-    const radarMetrics = {
-      ...buildRadarMetrics(interests, counts),
-    }
-
-    const personaSummary = buildPersonaSummary(interests, counts)
-    const keywords = buildGrowthKeywords(interests)
-
-    return c.json({
-      active_interests: interests,
-      notes_count: counts.notes_count,
-      favorites_count: counts.favorites_count,
-      completed_todos: counts.completed_todos,
-      total_todos: counts.total_todos,
-      history_count: counts.history_count,
-      radar_metrics: radarMetrics,
-      persona_summary: personaSummary,
-      growth_keywords: keywords,
-    })
+    return c.json(await loadUserProfile(db, userId))
   } catch (error) {
     console.error('Get profile error:', error)
     return c.json({ error: 'Failed to load profile' }, 500)
+  }
+})
+
+router.post('/profile/generate', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+
+  try {
+    const result = await generateUserProfileForUser({
+      db,
+      userId,
+      env: c.env,
+    })
+
+    if (!result.ok) {
+      return c.json(result.payload, result.status)
+    }
+    return c.json(result.payload)
+  } catch (error) {
+    console.error('Generate profile error:', error)
+    return c.json({ error: 'Failed to generate profile' }, 500)
   }
 })
 
@@ -200,59 +188,7 @@ router.get('/growth-overview', async (c) => {
   const userId = await resolveUserId(c)
 
   try {
-    const [interests, counts, streakDays, briefing, note, follow] = await Promise.all([
-      getUserInterests(db, userId),
-      getProfileCounts(db, userId),
-      getActivityStreak(db, userId),
-      getLatestBriefing(db, userId),
-      getLatestNote(db, userId),
-      getLatestOpportunityFollow(db, userId),
-    ])
-
-    const keywords = buildGrowthKeywords(interests)
-    const personaSummary = buildPersonaSummary(interests, counts)
-    const recentHistoryItems = buildRecentHistoryItems({ briefing, note, follow })
-
-    const available = counts.history_count > 0 || counts.notes_count > 0 || counts.favorites_count > 0
-
-    const response: GrowthOverviewData = {
-      userName: '探索者',
-      streakDays,
-      totalThoughts: counts.notes_count,
-      weeklySummary: {
-        weekLabel: '本周',
-        growthSummary: `本周你完成了${counts.completed_todos}项待办，记录了${counts.notes_count}条想法，收藏了${counts.favorites_count}条内容。继续保持记录和行动的习惯！`,
-      },
-      keywords: keywords.map((keyword) => ({
-        keyword,
-        weight: undefined,
-        trend: undefined,
-      })),
-      persona: {
-        personaSummary,
-        personaVersion: 'v1',
-      },
-      recentHistoryItems,
-      reports: [
-        {
-          reportType: 'weekly',
-          reportTitle: '周报',
-          available,
-        },
-        {
-          reportType: 'monthly',
-          reportTitle: '月报',
-          available,
-        },
-        {
-          reportType: 'annual',
-          reportTitle: '年度报告',
-          available,
-        },
-      ],
-    }
-
-    return c.json(response)
+    return c.json(await loadGrowthOverview(db, userId))
   } catch (error) {
     console.error('Growth overview error:', error)
     return c.json({ error: 'Failed to load growth overview' }, 500)

@@ -7,6 +7,7 @@ import {
   mapFavoriteResponse,
   parseFavoriteContentRef,
 } from '../services/behavior'
+import { InvalidReferenceError } from '../services/reference-registry'
 import { resolveUserId } from '../utils/request-user'
 
 type Bindings = {
@@ -78,6 +79,9 @@ router.post('/', async (c) => {
 
     return c.json(mapFavoriteResponse(favorite))
   } catch (error) {
+    if (error instanceof InvalidReferenceError) {
+      return c.json({ error: error.message }, 400)
+    }
     console.error('Create favorite error:', error)
     return c.json({ error: 'Failed to create favorite' }, 500)
   }

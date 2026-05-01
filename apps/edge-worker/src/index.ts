@@ -3,7 +3,7 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { handleApiError, createErrorResponse, ErrorCode } from './utils/error-handler'
 import authRoutes from './routes/auth'
-import dashboardRoutes from './routes/dashboard'
+import dashboardRoutes, { runTodayBriefingCron } from './routes/dashboard'
 import actionsRoutes from './routes/actions'
 import contentRoutes, { getHotTopicsHandler, getOpportunitiesHandler } from './routes/content'
 import preferencesRoutes from './routes/preferences'
@@ -26,11 +26,13 @@ type Bindings = {
   SUMMARY_PROVIDER_API_URL?: string
   SUMMARY_PROVIDER_API_KEY?: string
   SUMMARY_PROVIDER_MODEL?: string
+  SUMMARY_PROVIDER_TRANSPORT?: string
   SUMMARY_PROVIDER_DEBUG_FALLBACK?: string
+  AI_KEY_ENCRYPTION_SECRET?: string
   CORS_ORIGINS?: string
 }
 
-const app = new Hono<{ Bindings: Bindings }>()
+export const app = new Hono<{ Bindings: Bindings }>()
 const requestLogger = logger()
 
 function isTruthy(value: string | undefined): boolean {
@@ -51,12 +53,14 @@ function shouldLogRequests(c: { env: Bindings }): boolean {
   return c.env.ENVIRONMENT !== 'development'
 }
 
+function isLocalDevOrigin(origin: string): boolean {
+  return /^https?:\/\/(127\.0\.0\.1|localhost):\d{1,5}$/.test(origin)
+}
+
 function parseCorsOrigins(value: string | undefined): string[] {
   const raw = String(value || '').trim()
   if (!raw) {
     return [
-      'http://127.0.0.1:5173',
-      'http://localhost:5173',
       'https://ai-briefing-assistant.aibriefing2026.workers.dev',
     ]
   }
@@ -86,6 +90,9 @@ app.use('*', cors({
       return allowedOrigins[0] || '*'
     }
     if (allowedOrigins.includes(origin)) {
+      return origin
+    }
+    if (isLocalDevOrigin(origin)) {
       return origin
     }
     return allowedOrigins[0] || origin
@@ -133,4 +140,21 @@ app.onError((err, c) => {
   return handleApiError(err, c)
 })
 
-export default app
+export default {
+  fetch(request, env, ctx) {
+    return app.fetch(request, env, ctx)
+  },
+  scheduled(controller, env, ctx) {
+    ctx.waitUntil(runTodayBriefingCron(env, {
+      trigger: controller.cron,
+    }).then((result) => {
+      console.log('Today briefing cron completed:', JSON.stringify({
+        trigger: result.trigger,
+        checked: result.checked,
+        generated: result.generated,
+        skipped: result.skipped,
+        failed: result.failed,
+      }))
+    }))
+  },
+} satisfies ExportedHandler<Bindings>

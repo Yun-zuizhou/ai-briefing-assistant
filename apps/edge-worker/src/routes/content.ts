@@ -7,6 +7,7 @@ import {
   buildOpportunityDetail,
   getDailyDigestResultByRef,
   getArticleById,
+  getUserInterests,
   getHotTopicById,
   getOpportunityById,
   listHotTopics,
@@ -19,6 +20,8 @@ import {
   mapRelatedItems,
 } from '../services/content'
 import { getUserSettings } from '../services/behavior'
+import { resolveStoredAiApiKey } from '../services/ai-key-crypto'
+import { InvalidReferenceError, parseContentRef } from '../services/reference-registry'
 import { resolveUserId } from '../utils/request-user'
 
 type Bindings = {
@@ -28,7 +31,9 @@ type Bindings = {
   SUMMARY_PROVIDER_API_URL?: string
   SUMMARY_PROVIDER_API_KEY?: string
   SUMMARY_PROVIDER_MODEL?: string
+  SUMMARY_PROVIDER_TRANSPORT?: string
   SUMMARY_PROVIDER_DEBUG_FALLBACK?: string
+  AI_KEY_ENCRYPTION_SECRET?: string
 }
 
 const router = new Hono<{ Bindings: Bindings }>()
@@ -92,8 +97,7 @@ router.get('/by-ref', async (c) => {
   }
   
   try {
-    const [type, idStr] = contentRef.split(':')
-    const id = parseInt(idStr)
+    const { refType: type, refId: id } = parseContentRef(contentRef)
     
     if (type === 'hot_topic') {
       const topic = await getHotTopicById(db, id)
@@ -126,8 +130,10 @@ router.get('/by-ref', async (c) => {
       return c.json(buildArticleDetail({ contentRef, article, relatedItems }))
     }
     
-    return c.json({ error: 'Unsupported content type' }, 400)
   } catch (error) {
+    if (error instanceof InvalidReferenceError) {
+      return c.json({ error: error.message }, 400)
+    }
     console.error('Content by-ref error:', error)
     return c.json({ error: 'Failed to load content' }, 500)
   }
@@ -161,14 +167,31 @@ router.post('/consult', async (c) => {
       return c.json({ error: 'Summary result not found' }, 404)
     }
 
-    const userSettings = await getUserSettings(db, userId)
+    const [userSettings, userInterests] = await Promise.all([
+      getUserSettings(db, userId),
+      getUserInterests(db, userId),
+    ])
+    const userApiKey = await resolveStoredAiApiKey(userSettings, c.env.AI_KEY_ENCRYPTION_SECRET)
     const consultResult = await consultDigestResult({
       bindings: c.env,
       digestResult,
       question,
+      userInterests,
       userProvider: {
         provider: userSettings?.ai_provider,
-        apiKey: userSettings?.ai_api_key,
+        apiKey: userApiKey,
+      },
+      invocation: {
+        db,
+        userId,
+        feature: 'content.consult',
+        requestRef: resultRef,
+        metadata: {
+          profileId: digestResult.profile_id,
+          providerName: digestResult.provider_name,
+          modelName: digestResult.model_name,
+          hasUserInterests: userInterests.length > 0,
+        },
       },
     })
 

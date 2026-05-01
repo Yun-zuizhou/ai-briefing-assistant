@@ -1,23 +1,30 @@
 import { Hono } from 'hono'
-import { execute } from '../utils/db'
 import { resolveUserId } from '../utils/request-user'
 import {
-  buildPendingConfirmationResponse,
-  executeConfirmedChatAction,
-  reclassifyChatAction,
-  buildCandidateIntents,
-  parseIntent,
-  requiresConfirmation,
-  appendChatMessage,
+  archiveSession,
+  confirmChatMessage,
+  createChatMessageStream,
+  createNewSession,
+  deleteChatMessage,
   getChatSession,
   getChatSessionMessages,
-  getOrCreateActiveSession,
   listChatSessions,
+  reclassifyChatMessage,
+  renameSession,
+  type ChatConfirmRequest,
+  type ChatMessageStreamRequest,
+  type ChatReclassifyRequest,
 } from '../services/chat'
 
 type Bindings = {
   DB: D1Database
   ENVIRONMENT: string
+  SUMMARY_PROVIDER_ENABLED?: string
+  SUMMARY_PROVIDER_API_URL?: string
+  SUMMARY_PROVIDER_API_KEY?: string
+  SUMMARY_PROVIDER_MODEL?: string
+  SUMMARY_PROVIDER_TRANSPORT?: string
+  AI_KEY_ENCRYPTION_SECRET?: string
 }
 
 const router = new Hono<{ Bindings: Bindings }>()
@@ -33,6 +40,64 @@ router.get('/sessions', async (c) => {
   } catch (error) {
     console.error('Get chat sessions error:', error)
     return c.json({ error: 'Failed to load chat sessions' }, 500)
+  }
+})
+
+router.post('/sessions', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+
+  try {
+    const session = await createNewSession(db, userId, null)
+    return c.json({
+      sessionId: session.id,
+      sessionTitle: session.session_title,
+      status: session.status,
+      lastMessageAt: session.last_message_at,
+      messageCount: 0,
+    })
+  } catch (error) {
+    console.error('Create chat session error:', error)
+    return c.json({ error: 'Failed to create session' }, 500)
+  }
+})
+
+router.patch('/sessions/:session_id', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+  const sessionId = parseInt(c.req.param('session_id'))
+
+  const body = await c.req.json<{ session_title: string }>()
+  if (!body.session_title?.trim()) {
+    return c.json({ error: '会话标题不能为空' }, 400)
+  }
+
+  try {
+    const updated = await renameSession(db, sessionId, userId, body.session_title.trim())
+    if (!updated) {
+      return c.json({ error: '会话不存在或无权修改' }, 404)
+    }
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Rename chat session error:', error)
+    return c.json({ error: 'Failed to rename session' }, 500)
+  }
+})
+
+router.post('/sessions/:session_id/archive', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+  const sessionId = parseInt(c.req.param('session_id'))
+
+  try {
+    const updated = await archiveSession(db, sessionId, userId)
+    if (!updated) {
+      return c.json({ error: '会话不存在或无权归档' }, 404)
+    }
+    return c.json({ success: true })
+  } catch (error) {
+    console.error('Archive chat session error:', error)
+    return c.json({ error: 'Failed to archive session' }, 500)
   }
 })
 
@@ -57,138 +122,44 @@ router.get('/sessions/:session_id/messages', async (c) => {
   }
 })
 
-router.post('/recognize', async (c) => {
-  const body = await c.req.json<{
-    input: string
-    current_interests?: string[]
-    source_context?: string
-  }>()
-
-  const currentInterests = body.current_interests || []
-  const result = parseIntent(body.input, currentInterests)
-  const candidateIntents = buildCandidateIntents(body.input, currentInterests, result.type)
-  const shouldConfirm = requiresConfirmation(result.type, candidateIntents, result.confidence)
-
-  return c.json({
-    recognizedIntent: result.type,
-    recognized_intent: result.type,
-    type: result.type,
-    candidate_intents: candidateIntents,
-    candidateIntents: candidateIntents,
-    extractedEntities: result.entities,
-    extracted_entities: result.entities,
-    entities: result.entities,
-    suggested_payload: result.entities,
-    suggestedPayload: result.entities,
-    source_context: body.source_context,
-    sourceContext: body.source_context,
-    confidence: result.confidence,
-    requires_confirmation: shouldConfirm,
-    requiresConfirmation: shouldConfirm,
-    matchedBy: result.matchedBy,
-    matched_by: result.matchedBy,
-  })
-})
-
-router.post('/execute', async (c) => {
+router.post('/message', async (c) => {
   const db = c.env.DB
   const userId = await resolveUserId(c)
 
-  const body = await c.req.json<{
-    input: string
-    current_interests?: string[]
-    draft_type?: string
-    preferred_intent?: string
-    source_context?: string
-    source_content_ref?: string
-    source_title?: string
-    auto_commit?: boolean
-    confirmed_type?: string
-    correction_from?: string
-  }>()
+  const body = await c.req.json<ChatMessageStreamRequest>()
+  const stream = createChatMessageStream({
+    db,
+    userId,
+    env: c.env,
+    body,
+  })
 
-  const currentInterests = body.current_interests || []
-  const result = parseIntent(body.input, currentInterests)
-  const candidateIntents = buildCandidateIntents(body.input, currentInterests, result.type)
-  const intentType = body.confirmed_type || body.preferred_intent || result.type
-  const entities = result.entities
-  const shouldConfirm = !body.confirmed_type && !body.preferred_intent
-    && requiresConfirmation(result.type, candidateIntents, result.confidence)
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
+})
+
+router.post('/confirm', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+
+  const body = await c.req.json<ChatConfirmRequest>()
 
   try {
-    const session = await getOrCreateActiveSession(db, userId, body.source_context || null)
-
-    await appendChatMessage(db, session.id, 'user', body.input, 'recognized', {
-      sourceContext: body.source_context,
-    })
-
-    if (shouldConfirm) {
-      const response = buildPendingConfirmationResponse({
-        actionType: intentType,
-        candidateIntents,
-        confirmedType: body.confirmed_type || undefined,
-        sourceContext: body.source_context,
-      })
-
-      await appendChatMessage(
-        db,
-        session.id,
-        'assistant',
-        `${response.successMessage}\n\n${response.resultSummary}`,
-        'pending_confirmation',
-        {
-          intentType: result.type,
-          candidateIntents,
-          confidence: result.confidence,
-          sourceContext: body.source_context || undefined,
-          matchedBy: result.matchedBy || undefined,
-          confirmedType: body.confirmed_type || undefined,
-          actionType: intentType,
-          resultSummary: response.resultSummary,
-        }
-      )
-
-      return c.json(response)
-    }
-
-    const response = await executeConfirmedChatAction({
-      db,
-      userId,
-      input: body.input,
-      intentType,
-      entities,
-      candidateIntents,
-      sourceContext: body.source_context,
-      sourceContentRef: body.source_content_ref,
-      sourceTitle: body.source_title,
-      confirmedType: body.confirmed_type || intentType,
-    })
-
-    await appendChatMessage(db, session.id, 'assistant', `${response.successMessage}\n\n${response.resultSummary || ''}`, 'executed', {
-      intentType: response.actionType,
-      candidateIntents: response.candidateIntents,
-      confidence: result.confidence,
-      sourceContext: response.sourceContext || undefined,
-      matchedBy: result.matchedBy || undefined,
-      confirmedType: response.confirmedType,
-      actionType: response.actionType,
-      resultSummary: response.resultSummary,
-      deepLink: response.deepLink,
-      nextPageLabel: response.nextPageLabel,
-      affectedEntityType: response.affectedEntity?.type,
-      affectedEntityId: response.affectedEntity?.id !== undefined ? String(response.affectedEntity.id) : undefined,
-    })
-
-    return c.json(response)
+    return c.json(await confirmChatMessage({ db, userId, body }))
   } catch (error) {
-    console.error('Chat execute error:', error)
+    console.error('Chat confirm error:', error)
     return c.json({
       success: false,
-      actionType: intentType,
-      candidateIntents: candidateIntents,
-      confirmedType: intentType,
-      successMessage: '执行失败，未写入数据库',
-      resultSummary: '请稍后重试，当前请求没有进入真实数据链路。',
+      actionType: body.confirmed_type,
+      candidateIntents: [body.confirmed_type],
+      confirmedType: body.confirmed_type,
+      successMessage: '确认执行失败',
+      resultSummary: '请稍后重试。',
     }, 500)
   }
 })
@@ -197,47 +168,10 @@ router.post('/reclassify', async (c) => {
   const db = c.env.DB
   const userId = await resolveUserId(c)
 
-  const body = await c.req.json<{
-    target_intent: string
-    correction_from: string
-    original_input?: string
-    source_context?: string
-  }>()
+  const body = await c.req.json<ChatReclassifyRequest>()
 
   try {
-    const session = await getOrCreateActiveSession(db, userId, body.source_context || null)
-
-    const currentInterests: string[] = []
-    const result = parseIntent(body.original_input || '', currentInterests)
-    const intentType = body.target_intent
-    const entities = result.entities
-
-    const response = await reclassifyChatAction({
-      db,
-      userId,
-      targetIntent: intentType,
-      correctionFrom: body.correction_from,
-      originalInput: body.original_input,
-      sourceContext: body.source_context,
-      entities,
-    })
-
-    await appendChatMessage(db, session.id, 'assistant', `${response.successMessage}\n\n${response.resultSummary || ''}`, 'executed', {
-      intentType: response.actionType,
-      candidateIntents: response.candidateIntents,
-      confidence: 0.9,
-      sourceContext: response.sourceContext || undefined,
-      matchedBy: 'reclassify',
-      confirmedType: response.confirmedType,
-      actionType: response.actionType,
-      resultSummary: response.resultSummary,
-      deepLink: response.deepLink,
-      nextPageLabel: response.nextPageLabel,
-      affectedEntityType: response.affectedEntity?.type,
-      affectedEntityId: response.affectedEntity?.id !== undefined ? String(response.affectedEntity.id) : undefined,
-    })
-
-    return c.json(response)
+    return c.json(await reclassifyChatMessage({ db, userId, body }))
   } catch (error) {
     console.error('Chat reclassify error:', error)
     return c.json({
@@ -248,6 +182,27 @@ router.post('/reclassify', async (c) => {
       successMessage: '纠偏执行失败，未写入数据库',
       resultSummary: '请稍后重试，当前请求没有进入真实数据链路。',
     }, 500)
+  }
+})
+
+router.delete('/messages/:message_id', async (c) => {
+  const db = c.env.DB
+  const userId = await resolveUserId(c)
+  const messageId = parseInt(c.req.param('message_id'))
+
+  if (Number.isNaN(messageId)) {
+    return c.json({ error: '无效的消息ID' }, 400)
+  }
+
+  try {
+    const result = await deleteChatMessage(db, messageId, userId)
+    if (!result.deleted) {
+      return c.json({ error: '消息不存在或无权删除' }, 404)
+    }
+    return c.json({ success: true, sessionId: result.sessionId })
+  } catch (error) {
+    console.error('Delete chat message error:', error)
+    return c.json({ error: '删除失败' }, 500)
   }
 })
 
