@@ -185,12 +185,16 @@ async function main() {
   const consultDebugEnabled = ['1', 'true', 'yes', 'on'].includes(String(devVarsMap.SUMMARY_PROVIDER_DEBUG_FALLBACK || '').trim().toLowerCase());
   console.log(`${consultOn ? '[ok]' : '[warn]'} SUMMARY_PROVIDER_ENABLED: ${consultEnabled || 'false / 未配置'}`);
   console.log(`${consultDebugEnabled ? '[warn]' : '[ok]'} SUMMARY_PROVIDER_DEBUG_FALLBACK: ${consultDebugEnabled}`);
+  const consultTransport = String(devVarsMap.SUMMARY_PROVIDER_TRANSPORT || 'openai-compatible').trim().toLowerCase();
+  console.log(`[ok] SUMMARY_PROVIDER_TRANSPORT: ${consultTransport}`);
 
   const consultFields = [
     'SUMMARY_PROVIDER_API_URL',
-    'SUMMARY_PROVIDER_API_KEY',
     'SUMMARY_PROVIDER_MODEL',
   ];
+  if (consultTransport !== 'local') {
+    consultFields.push('SUMMARY_PROVIDER_API_KEY');
+  }
 
   if (consultOn || requireConsult) {
     for (const field of consultFields) {

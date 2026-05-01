@@ -60,9 +60,9 @@ PROVIDER_INFO: dict[APIProvider, ProviderInfo] = {
     APIProvider.DEEPSEEK: ProviderInfo(
         provider=APIProvider.DEEPSEEK,
         name="DeepSeek",
-        default_url="https://api.deepseek.com/v1/chat/completions",
-        default_model="deepseek-chat",
-        models=["deepseek-chat", "deepseek-coder"],
+        default_url="https://api.deepseek.com/chat/completions",
+        default_model="deepseek-v4-pro",
+        models=["deepseek-v4-pro", "deepseek-chat", "deepseek-coder"],
         description="DeepSeek AI - 高性价比中文AI模型"
     ),
     APIProvider.OPENAI: ProviderInfo(

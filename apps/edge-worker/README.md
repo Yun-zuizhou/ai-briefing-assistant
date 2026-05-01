@@ -32,11 +32,14 @@
 - `SUMMARY_PROVIDER_API_URL`
 - `SUMMARY_PROVIDER_API_KEY`
 - `SUMMARY_PROVIDER_MODEL`
- - `SUMMARY_PROVIDER_DEBUG_FALLBACK`
+- `SUMMARY_PROVIDER_TRANSPORT`
+- `SUMMARY_PROVIDER_DEBUG_FALLBACK`
+- `AI_KEY_ENCRYPTION_SECRET`
   - 作用：为 `POST /api/v1/content/consult` 提供最小咨询模型配置
   - 当前定位：只给“基于已生成摘要结果继续追问”的读侧咨询接口使用
   - 当前不代表 Workers 已承接摘要主执行器；阶段十六首版的摘要主执行仍以 Python 脚本链为准
   - `SUMMARY_PROVIDER_DEBUG_FALLBACK=true` 仅用于本地/联调环境，在 provider 未配置时生成明确标记的调试回答，不得作为正式结果口径
+  - `AI_KEY_ENCRYPTION_SECRET` 用于加密 D1 中用户级 AI API Key；生产环境应通过 Workers secret 设置，不要写入前端或提交到仓库
 
 ## 生产配置
 

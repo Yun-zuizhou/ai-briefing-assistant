@@ -61,8 +61,8 @@ class Settings(BaseSettings):
     AI_PROVIDER: str = "deepseek"
     
     DEEPSEEK_API_KEY: str = ""
-    DEEPSEEK_API_URL: str = "https://api.deepseek.com/v1/chat/completions"
-    DEEPSEEK_MODEL: str = "deepseek-chat"
+    DEEPSEEK_API_URL: str = "https://api.deepseek.com/chat/completions"
+    DEEPSEEK_MODEL: str = "deepseek-v4-pro"
     
     OPENAI_API_KEY: str = ""
     OPENAI_API_URL: str = "https://api.openai.com/v1/chat/completions"
@@ -96,6 +96,7 @@ class Settings(BaseSettings):
     AI_TEMPERATURE: float = 0.7
     AI_TIMEOUT: int = 30
     AI_DIGEST_DEBUG_FALLBACK: bool = False
+    AI_KEY_ENCRYPTION_SECRET: str = ""
     
     model_config = SettingsConfigDict(
         env_file=".env",

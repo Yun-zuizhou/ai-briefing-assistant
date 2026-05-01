@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    "./page-data": "./src/page-data.ts"
+    "./page-data": "./src/page-data.ts",
+    "./page-data/*": "./src/page-data/*.ts"
   }
 }

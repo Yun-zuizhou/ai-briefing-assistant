@@ -28,7 +28,7 @@ def split_sql_statements(text: str) -> list[str]:
         if not stripped or stripped.startswith("--"):
             continue
         current.append(line)
-        if stripped.endswith(";"):
+        if sqlite3.complete_statement("\n".join(current)):
             statement = "\n".join(current).strip()
             if statement:
                 statements.append(statement)
@@ -132,7 +132,11 @@ def main() -> None:
     parser.add_argument("--mark-all-applied", action="store_true", help="Mark local migrations as applied without executing SQL.")
     args = parser.parse_args()
 
-    migration_files = sorted(MIGRATIONS_DIR.glob("*.sql"))
+    migration_files = sorted(
+        path
+        for path in MIGRATIONS_DIR.glob("*.sql")
+        if path.name[:4].isdigit()
+    )
     if not migration_files:
         raise RuntimeError("No D1 migration files were found.")
 

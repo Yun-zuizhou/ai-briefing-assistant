@@ -23,6 +23,7 @@ def _bootstrap_python_path() -> None:
 _bootstrap_python_path()
 
 from app.config import settings
+from app.services.ai_key_crypto import resolve_stored_ai_api_key
 from app.services.ai_service import AIService
 from app.services.d1_client import D1Client
 from app.services.directed_digest import (
@@ -102,7 +103,7 @@ def _build_debug_summary_payload(source_payload: dict[str, Any], prompt_version:
 def _resolve_task_provider_config(client: D1Client, user_id: int) -> tuple[dict[str, str], str]:
     rows = client.query(
         """
-        SELECT ai_provider, ai_api_key
+        SELECT ai_provider, ai_api_key, ai_api_key_encrypted, ai_api_key_encryption_version
         FROM user_settings
         WHERE user_id = ?
         LIMIT 1
@@ -116,7 +117,7 @@ def _resolve_task_provider_config(client: D1Client, user_id: int) -> tuple[dict[
             return (
                 settings.get_provider_config(
                     provider_name,
-                    api_key_override=str(rows[0].get("ai_api_key") or "").strip(),
+                    api_key_override=resolve_stored_ai_api_key(rows[0]),
                 ),
                 "user",
             )

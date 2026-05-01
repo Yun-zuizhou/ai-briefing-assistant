@@ -40,6 +40,7 @@
     "db:d1:apply-seed-hot-topics": "python tools/scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-hot-topics",
     "db:d1:apply-seed-opportunities": "python tools/scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-opportunities",
     "db:d1:apply-seed-derived": "python tools/scripts/apply_d1_remote.py --with-seed --seed-only --seed-scope content-derived",
+    "db:d1:check-today-demo": "python tools/scripts/check_today_semantic_demo.py",
     "db:d1:verify-mainline": "python tools/scripts/verify_d1_behavior_mainline.py",
     "db:d1:audit": "python tools/scripts/audit_d1_anchor_tables.py",
     "db:d1:rebuild:reports:plan": "python tools/scripts/rebuild_anchor_tables.py --table reports --emit-sql infra/cloudflare/d1/rebuild/reports.anchor.sql",
@@ -49,11 +50,16 @@
     "pipeline:summarize:debug": "python tools/scripts/run_summary_executor.py --debug-fallback",
     "preflight:ai-digest": "node tools/scripts/preflight-ai-digest.mjs",
     "sync:ai-digest-provider": "node tools/scripts/sync-ai-digest-provider.mjs",
+    "generate:template": "node tools/scripts/generate-template.mjs",
+    "governance:check": "node tools/scripts/check-governance.mjs",
+    "test:ui-actions": "node tools/scripts/check-ui-action-contracts.mjs",
+    "check:formal": "node tools/scripts/check.mjs",
+    "check:legacy-python": "node tools/scripts/check-legacy-python.mjs",
     "check": "node tools/scripts/check.mjs",
     "check:proof": "node tools/scripts/check-proof.mjs",
     "check:proof:strict": "node tools/scripts/check-proof.mjs --with-workers-standalone",
     "check:stage": "node tools/scripts/check.mjs",
-    "check:full": "node tools/scripts/check.mjs",
+    "check:full": "node tools/scripts/check.mjs --with-legacy-python",
     "check:workers": "node tools/scripts/test-workers.mjs",
     "task:init": "npm run setup",
     "task:start": "npm run dev",
@@ -67,6 +73,7 @@
     "task:verify": "npm run check",
     "task:verify:proof": "npm run check:proof",
     "task:verify:workers": "npm run check:workers",
+    "task:verify:legacy-python": "npm run check:legacy-python",
     "task:verify:e2e": "npm run test:e2e:workers",
     "task:access:d1": "npm run db:d1:bootstrap",
     "task:access:workers": "npm run preflight:workers-config",
@@ -74,6 +81,9 @@
     "task:access:consult": "npm run sync:ai-digest-provider",
     "task:data:prepare": "npm run db:d1:prepare",
     "task:data:sync-demo": "npm run demo:sync"
+  },
+  "bin": {
+    "ai-briefing": "tools/cli.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1"

@@ -34,48 +34,56 @@ function providerFields(provider) {
         apiKeyField: 'DEEPSEEK_API_KEY',
         apiUrlField: 'DEEPSEEK_API_URL',
         modelField: 'DEEPSEEK_MODEL',
+        transport: 'openai-compatible',
       };
     case 'openai':
       return {
         apiKeyField: 'OPENAI_API_KEY',
         apiUrlField: 'OPENAI_API_URL',
         modelField: 'OPENAI_MODEL',
+        transport: 'openai-compatible',
       };
     case 'nvidia':
       return {
         apiKeyField: 'NVIDIA_API_KEY',
         apiUrlField: 'NVIDIA_API_URL',
         modelField: 'NVIDIA_MODEL',
+        transport: 'openai-compatible',
       };
     case 'anthropic':
       return {
         apiKeyField: 'ANTHROPIC_API_KEY',
         apiUrlField: 'ANTHROPIC_API_URL',
         modelField: 'ANTHROPIC_MODEL',
+        transport: 'anthropic',
       };
     case 'gemini':
       return {
         apiKeyField: 'GEMINI_API_KEY',
         apiUrlField: 'GEMINI_API_URL',
         modelField: 'GEMINI_MODEL',
+        transport: 'gemini',
       };
     case 'zhipu':
       return {
         apiKeyField: 'ZHIPU_API_KEY',
         apiUrlField: 'ZHIPU_API_URL',
         modelField: 'ZHIPU_MODEL',
+        transport: 'openai-compatible',
       };
     case 'qwen':
       return {
         apiKeyField: 'QWEN_API_KEY',
         apiUrlField: 'QWEN_API_URL',
         modelField: 'QWEN_MODEL',
+        transport: 'qwen',
       };
     case 'local':
       return {
         apiKeyField: 'LOCAL_API_KEY',
         apiUrlField: 'LOCAL_API_URL',
         modelField: 'LOCAL_MODEL',
+        transport: 'local',
       };
     default:
       return null;
@@ -126,6 +134,7 @@ function main() {
     SUMMARY_PROVIDER_API_URL: apiUrl,
     SUMMARY_PROVIDER_API_KEY: provider === 'local' ? '' : apiKey,
     SUMMARY_PROVIDER_MODEL: model,
+    SUMMARY_PROVIDER_TRANSPORT: fields.transport,
   };
 
   const header = [
@@ -146,6 +155,7 @@ function main() {
     `SUMMARY_PROVIDER_API_URL=${nextMap.SUMMARY_PROVIDER_API_URL || ''}`,
     `SUMMARY_PROVIDER_API_KEY=${nextMap.SUMMARY_PROVIDER_API_KEY || ''}`,
     `SUMMARY_PROVIDER_MODEL=${nextMap.SUMMARY_PROVIDER_MODEL || ''}`,
+    `SUMMARY_PROVIDER_TRANSPORT=${nextMap.SUMMARY_PROVIDER_TRANSPORT || 'openai-compatible'}`,
   ];
 
   fs.writeFileSync(devVarsPath, `${lines.join('\n')}\n`, 'utf8');
