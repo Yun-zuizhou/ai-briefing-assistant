@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import ContentListCard from './ContentListCard';
 import { Button } from '../ui';
+import { PaperButton, StatusBadge } from '../decor';
 
 export function TodayErrorState({ message }: { message: string }) {
   return (
@@ -86,39 +87,24 @@ export function TodayLeadCard({
     <div className="today-lead-card">
       <div className="today-lead-topline">
         <span className="hero-kicker">{kicker}</span>
-        <span className="hero-meta">{loading ? '同步中' : '头版重点'}</span>
+        <StatusBadge label={loading ? '同步中' : '头版重点'} tone={loading ? 'pending' : 'neutral'} />
       </div>
       <h2 className="today-lead-title">{title}</h2>
-      <p className="today-lead-summary">{summary}</p>
+      {summary ? <p className="today-lead-summary">{summary}</p> : null}
       <div className="today-lead-meta-row">
         {sourceLabel ? <span>{sourceLabel}</span> : null}
         {relevanceLabel ? <span>{relevanceLabel}</span> : null}
       </div>
       <div className="today-lead-actions">
-        <Button
-          type="button"
-          variant="unstyled"
-          onClick={onPrimaryAction}
-          className="action-chip primary"
-        >
+        <PaperButton active onClick={onPrimaryAction}>
           {primaryActionLabel}
-        </Button>
-        <Button
-          type="button"
-          variant="unstyled"
-          onClick={onAsk}
-          className="action-chip"
-        >
+        </PaperButton>
+        <PaperButton onClick={onAsk}>
           继续追问
-        </Button>
-        <Button
-          type="button"
-          variant="unstyled"
-          onClick={onSecondaryAction}
-          className="action-chip"
-        >
+        </PaperButton>
+        <PaperButton onClick={onSecondaryAction}>
           {secondaryActionLabel}
-        </Button>
+        </PaperButton>
       </div>
     </div>
   );

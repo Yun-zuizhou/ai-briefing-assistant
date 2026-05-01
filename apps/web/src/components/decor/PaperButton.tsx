@@ -8,7 +8,7 @@ export function PaperButton({
   className = '',
 }: {
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   active?: boolean;
   muted?: boolean;
   className?: string;

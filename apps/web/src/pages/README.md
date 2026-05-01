@@ -57,7 +57,7 @@ into this reading contract before JSX renders it.
 - Data contract: `TodayPageData` from `packages/contracts/src/page-data/dashboard.ts`.
 - Backend owner: `apps/edge-worker/src/services/dashboard`.
 - Frontend API: `apiService.getTodayPageData()`, implemented in `services/apiDomains/dashboard.ts`.
-- Component owner: `components/business` Today exports and `components/layout`.
+- Component owner: `components/business` Today exports, `components/today` TodayEditorialShell, and `components/decor`.
 - Style owner: `styles/today-page.css`.
 - Non-goals: todo lifecycle management, action planning, content ranking internals, AI briefing generation internals, preview decor experiments, global shell ownership.
 

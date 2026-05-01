@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useAppContext } from '../context/useAppContext';
 import { apiService } from '../services/api';
 import type { TodayPageData } from '../types/page-data';
 import { normalizeArticleState } from '../utils/articleDisplay';
@@ -87,7 +88,7 @@ export interface TodayInformationFlow {
   extensionSlots: NonNullable<TodayPageData['extensionSlots']>;
 }
 
-const TODAY_INFORMATION_BOUNDARIES = {
+export const TODAY_INFORMATION_BOUNDARIES = {
   showInMainFlow: ['overview', 'headline', 'groupedReports'],
   showInAuxiliaryFlow: ['knowledgeItems', 'quickNoteEntry', 'conversationEntry', 'actionItems'],
   keepOutOfReadingFlow: [
@@ -110,15 +111,35 @@ export function resolveLeadArticleContentType(contentRef?: string): LeadArticleC
   return null;
 }
 
+function isPlaceholderSourceUrl(url?: string | null): boolean {
+  if (!url) return false;
+  try {
+    return new URL(url).hostname === 'example.com';
+  } catch {
+    return false;
+  }
+}
+
 export function useTodayPageLogic() {
   const navigate = useNavigate();
+  const { authResolved, user } = useAppContext();
   const [pageData, setPageData] = useState<TodayPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!authResolved) {
+      return;
+    }
+
+    if (!user.isLoggedIn) {
+      setLoading(false);
+      return;
+    }
+
     const fetchPageData = async () => {
       try {
+        setLoading(true);
         setError(null);
         const response = await apiService.getTodayPageData();
         if (response.error) {
@@ -133,16 +154,17 @@ export function useTodayPageLogic() {
     };
 
     void fetchPageData();
-  }, []);
+  }, [authResolved, user.isLoggedIn]);
 
   const shouldShowContentSections = Boolean(pageData);
   const extensionSlots = pageData?.extensionSlots ?? [];
   const leadItem = pageData?.leadItem?.itemType === 'opportunity' ? null : pageData?.leadItem ?? null;
   const leadKnowledge = pageData?.worthKnowing[0] ?? null;
   const leadTitle = leadItem?.title ?? leadKnowledge?.title ?? '今日简报正在整理头版摘要';
-  const leadSummary = leadItem?.summary
+  const leadSummary = pageData?.dailyAngle
+    ?? leadItem?.summary
     ?? leadKnowledge?.summary
-    ?? buildReadableSummary(pageData);
+    ?? '';
   const readableSummary = buildReadableSummary(pageData);
   const groupedReports: TodayReadingGroup[] = (pageData?.recommendedForYou.slice(0, 2) ?? [])
     .map((group) => ({
@@ -159,7 +181,10 @@ export function useTodayPageLogic() {
       })),
     }))
     .filter((group) => group.items.length > 0);
-  const visibleKnowledgeItems = (pageData?.worthKnowing.slice(0, 3) ?? []).map((item, index) => ({
+  const knowledgeForSidebar = leadItem
+    ? (pageData?.worthKnowing ?? [])
+    : (pageData?.worthKnowing ?? []).filter((item) => item.id !== leadKnowledge?.id);
+  const visibleKnowledgeItems = knowledgeForSidebar.slice(0, 3).map((item, index) => ({
     ...item,
     featured: index === 0,
   }));
@@ -171,7 +196,7 @@ export function useTodayPageLogic() {
     auxiliary: {
       actionItems: visibleActionItems,
       hasActionItems: (pageData?.worthActing.length ?? 0) > 0,
-      hasKnowledgeItems: (pageData?.worthKnowing.length ?? 0) > 0,
+      hasKnowledgeItems: knowledgeForSidebar.length > 0,
       knowledgeItems: visibleKnowledgeItems,
     },
     groupedReports,
@@ -199,6 +224,7 @@ export function useTodayPageLogic() {
           title: item.title,
           source: item.sourceName,
           url: item.sourceUrl,
+          isPlaceholderSource: isPlaceholderSourceUrl(item.sourceUrl),
           summary: item.summary,
           category: item.categoryLabels?.[0],
           contentType: item.contentType,
@@ -218,6 +244,7 @@ export function useTodayPageLogic() {
           title: item.title,
           source: item.sourceName,
           url: item.sourceUrl,
+          isPlaceholderSource: isPlaceholderSourceUrl(item.sourceUrl),
           summary: item.summary,
           contentType: item.contentType,
         }),
@@ -317,10 +344,6 @@ export function useTodayPageLogic() {
   }, [navigate]);
 
   const handleExtensionSlotClick = useCallback((slot: NonNullable<TodayPageData['extensionSlots']>[number]) => {
-    if (slot.deepLink) {
-      navigate(slot.deepLink);
-      return;
-    }
     switch (slot.slotType) {
       case 'ask':
         handleAskAboutBriefing();
@@ -329,10 +352,10 @@ export function useTodayPageLogic() {
         handleQuickNote();
         break;
       case 'todo':
-        navigate('/todo');
+        navigate(slot.deepLink || '/todo');
         break;
       case 'review':
-        navigate('/history-brief');
+        navigate(slot.deepLink || '/history-brief');
         break;
     }
   }, [handleAskAboutBriefing, handleQuickNote, navigate]);

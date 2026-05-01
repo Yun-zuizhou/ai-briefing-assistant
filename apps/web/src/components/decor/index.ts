@@ -6,4 +6,5 @@ export type { EditorialIconName } from './EditorialIcon';
 export type { EditorialMastheadTransitionState, EditorialMastheadVariant } from './EditorialMasthead';
 export { OrnamentDivider } from './OrnamentDivider';
 export { PaperButton } from './PaperButton';
+export { SectionHeader } from './SectionHeader';
 export { StatusBadge } from './StatusBadge';
