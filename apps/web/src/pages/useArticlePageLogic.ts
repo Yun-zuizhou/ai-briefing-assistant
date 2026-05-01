@@ -13,6 +13,15 @@ export const ARTICLE_READING_SIZE_CLASS: Record<ArticleFontSize, string> = {
   large: 'article-reading-large',
 };
 
+function isPlaceholderSourceUrl(url?: string | null): boolean {
+  if (!url) return false;
+  try {
+    return new URL(url).hostname === 'example.com';
+  } catch {
+    return false;
+  }
+}
+
 export function useArticlePageLogic() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,9 +44,9 @@ export function useArticlePageLogic() {
   useEffect(() => {
     if (article) {
       setResolvedArticle(normalizeArticleState(article));
-      return;
     }
-    if (!contentRefFromQuery) {
+    const contentRef = article?.contentRef || contentRefFromQuery;
+    if (!contentRef) {
       setResolvedArticle(null);
       return;
     }
@@ -46,7 +55,7 @@ export function useArticlePageLogic() {
       try {
         setLoadingDetail(true);
         setActionError(null);
-        const response = await apiService.getContentDetailByRef(contentRefFromQuery);
+        const response = await apiService.getContentDetailByRef(contentRef);
         const detail = response.data;
         if (!detail) {
           throw new Error(response.error || '内容详情加载失败');
@@ -57,10 +66,12 @@ export function useArticlePageLogic() {
           title: detail.title,
           source: detail.sourceName,
           url: detail.sourceUrl,
+          isPlaceholderSource: isPlaceholderSourceUrl(detail.sourceUrl),
           summary: detail.summary ?? null,
           content: detail.content ?? null,
           category: detail.categoryLabels[0],
           contentType: detail.contentType,
+          contentRole: detail.contentRole,
           author: detail.author,
           publishedAt: detail.publishedAt,
           tags: detail.tags,
@@ -125,13 +136,12 @@ export function useArticlePageLogic() {
     if (!activeArticle) return [];
 
     const points: string[] = [];
-    const summarySegments = String(activeArticle.summary || '')
-      .split(/[。！？；\n]/)
-      .map((segment) => segment.trim())
-      .filter(Boolean);
+    if (activeArticle.category) {
+      points.push(`阅读定位：这是一条关于「${activeArticle.category}」的线索，适合先核对来源再决定是否收藏。`);
+    }
 
-    for (const segment of summarySegments.slice(0, 2)) {
-      points.push(segment);
+    if (activeArticle.source) {
+      points.push(`来源提示：来自 ${activeArticle.source}，建议打开原文确认细节和发布时间。`);
     }
 
     if (activeArticle.detailState === 'partial' && activeArticle.detailStateReason) {
@@ -144,6 +154,10 @@ export function useArticlePageLogic() {
 
     if (activeArticle.relatedItems && activeArticle.relatedItems.length > 0) {
       points.push(`可继续延伸查看 ${activeArticle.relatedItems.length} 条相关推荐。`);
+    }
+
+    if (points.length === 0 && activeArticle.summary) {
+      points.push('这篇内容已有摘要可读，AI 区域只保留阅读建议，避免重复正文摘要。');
     }
 
     return Array.from(new Set(points)).slice(0, 4);
@@ -263,6 +277,7 @@ export function useArticlePageLogic() {
             title: item.title,
             source: item.sourceName,
             url: item.sourceUrl,
+            isPlaceholderSource: isPlaceholderSourceUrl(item.sourceUrl),
             summary: item.summary ?? null,
             contentType: item.contentType,
           }),

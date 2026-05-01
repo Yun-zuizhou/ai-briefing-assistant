@@ -8,6 +8,7 @@ import {
   type HotTopic,
   type Opportunity,
 } from '../content'
+import type { ArticleRow } from '../content'
 import type {
   RecommendedContentItem,
   RecommendationItem,
@@ -28,8 +29,26 @@ function parseJsonArray(str: string | null): string[] {
 function buildRecommendedContentItem(
   topic: HotTopic,
   matchScore: number,
-  rankingScore: number
+  rankingScore: number,
+  articleByTopicSourceUrl: Map<string, ArticleRow> = new Map()
 ): RecommendedContentItem {
+  const article = articleByTopicSourceUrl.get(topic.source_url)
+  if (article) {
+    return {
+      contentRef: `article:${article.id}`,
+      id: article.id,
+      contentType: 'article',
+      title: article.title,
+      summary: article.summary || undefined,
+      sourceName: article.source_name || topic.source,
+      sourceUrl: article.source_url || undefined,
+      qualityScore: Number(article.quality_score || topic.quality_score),
+      matchScore,
+      rankingScore,
+      processingStage: 'ranked',
+    }
+  }
+
   return {
     contentRef: `hot_topic:${topic.id}`,
     id: topic.id,
@@ -48,7 +67,8 @@ function buildRecommendedContentItem(
 export function buildRecommendations(
   interests: string[],
   hotTopics: HotTopic[],
-  _opportunities: Opportunity[]
+  _opportunities: Opportunity[],
+  articleByTopicSourceUrl: Map<string, ArticleRow> = new Map()
 ): RecommendationItem[] {
   const recommendations: RecommendationItem[] = []
 
@@ -63,7 +83,7 @@ export function buildRecommendations(
     const topItems: RecommendedContentItem[] = []
 
     for (const match of matchedTopics.slice(0, 2)) {
-      topItems.push(buildRecommendedContentItem(match.item, match.matchScore, match.rankingScore))
+      topItems.push(buildRecommendedContentItem(match.item, match.matchScore, match.rankingScore, articleByTopicSourceUrl))
     }
 
     if (topItems.length > 0) {
@@ -96,7 +116,8 @@ export function buildRecommendations(
         buildRecommendedContentItem(
           topic,
           0,
-          Math.round(topic.quality_score * 10 + topic.hot_value * 0.1)
+          Math.round(topic.quality_score * 10 + topic.hot_value * 0.1),
+          articleByTopicSourceUrl
         )
       ),
     },
@@ -105,7 +126,8 @@ export function buildRecommendations(
 
 export function buildWorthKnowing(
   hotTopics: HotTopic[],
-  interests: string[]
+  interests: string[],
+  articleByTopicSourceUrl: Map<string, ArticleRow> = new Map()
 ): WorthKnowingItem[] {
   const items: WorthKnowingItem[] = []
 
@@ -121,22 +143,24 @@ export function buildWorthKnowing(
     const matchScore = matchInterestScore(values, interests)
     const rankingScore = buildWorthKnowingRankingScore(topic.quality_score, topic.hot_value, matchScore)
 
+    const article = articleByTopicSourceUrl.get(topic.source_url)
+
     items.push({
-      contentRef: `hot_topic:${topic.id}`,
-      id: topic.id,
-      contentType: 'hot_topic',
-      title: topic.title,
-      summary: topic.summary || '',
-      sourceName: topic.source,
-      sourceUrl: topic.source_url,
+      contentRef: article ? `article:${article.id}` : `hot_topic:${topic.id}`,
+      id: article?.id ?? topic.id,
+      contentType: article ? 'article' : 'hot_topic',
+      title: article?.title ?? topic.title,
+      summary: article?.summary || topic.summary || '',
+      sourceName: article?.source_name || topic.source,
+      sourceUrl: article?.source_url || topic.source_url,
       categoryLabels: parseJsonArray(topic.categories),
       relevanceReason: reason,
-      publishedAt: topic.published_at || undefined,
+      publishedAt: article?.publish_time || topic.published_at || undefined,
       hotScore: topic.hot_value,
-      qualityScore: topic.quality_score,
+      qualityScore: Number(article?.quality_score || topic.quality_score),
       matchScore,
       rankingScore,
-      processingStage: 'partial',
+      processingStage: article ? 'ranked' : 'partial',
     })
   }
 

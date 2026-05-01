@@ -64,11 +64,9 @@ export function ArticleMainContent({
       <ArticleHero activeArticle={activeArticle} loadingDetail={loadingDetail} readingProgress={readingProgress} />
       <ArticlePartialNote activeArticle={activeArticle} />
       <ArticleActionRow
-        activeArticle={activeArticle}
         isCollected={isCollected}
         onAsk={onAsk}
         onCollect={onCollect}
-        onOpenOriginal={onOpenOriginal}
         onShare={onShare}
       />
       <ArticleFontControls fontSize={fontSize} onFontSizeChange={onFontSizeChange} />
@@ -80,6 +78,7 @@ export function ArticleMainContent({
       <ArticleBodySections
         activeArticle={activeArticle}
         onCreateTodo={onCreateTodo}
+        onOpenOriginal={onOpenOriginal}
         onRelatedClick={onRelatedClick}
         readingSizeClass={readingSizeClass}
       />

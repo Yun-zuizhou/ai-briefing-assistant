@@ -184,10 +184,12 @@
 .article-ai-card {
   margin-bottom: 14px;
   padding: 14px;
-  background: linear-gradient(180deg, rgba(245, 242, 232, 0.95) 0%, rgba(237, 233, 220, 0.88) 100%);
-  border: 1px solid rgba(143, 130, 105, 0.85);
+  background:
+    linear-gradient(135deg, rgba(255, 252, 244, 0.94), rgba(237, 233, 220, 0.78));
+  border: 1px solid rgba(139, 90, 43, 0.42);
   border-radius: 12px;
   position: relative;
+  box-shadow: inset 3px 0 0 rgba(166, 61, 47, 0.28);
 }
 
 .article-ai-frame {
@@ -214,7 +216,7 @@
 }
 
 .article-ai-label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--accent);
 }
@@ -225,7 +227,7 @@
 }
 
 .article-ai-point {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink);
   line-height: 1.65;
   padding-left: 12px;
@@ -235,6 +237,7 @@
 
 .article-opportunity-card,
 .article-section-card,
+.article-source-link-card,
 .article-related-card,
 .article-footer-note {
   position: relative;
@@ -246,6 +249,7 @@
 }
 
 .article-opportunity-card,
+.article-source-link-card,
 .article-related-card,
 .article-footer-note {
   background: linear-gradient(180deg, rgba(245, 242, 232, 0.94) 0%, rgba(237, 233, 220, 0.83) 100%);
@@ -253,6 +257,7 @@
 
 .article-opportunity-card::after,
 .article-section-card::after,
+.article-source-link-card::after,
 .article-related-card::after,
 .article-footer-note::after {
   content: '';
@@ -269,6 +274,14 @@
     transparent 8px
   );
   pointer-events: none;
+}
+
+.article-reading-card {
+  padding: 18px 18px 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.98) 0%, rgba(248, 244, 234, 0.96) 100%);
+  border-color: rgba(143, 130, 105, 0.78);
+  box-shadow: 0 12px 26px rgba(44, 36, 22, 0.08);
 }
 
 .article-block-title {
@@ -307,8 +320,28 @@
   font-family: var(--font-article-title-cn);
   color: var(--ink-reading);
   font-weight: 500;
-  line-height: 1.9;
+  line-height: 2;
   white-space: pre-wrap;
+}
+
+.article-reading-card .article-content-text {
+  margin-top: 4px;
+}
+
+.article-source-link-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.article-source-link-card .article-block-desc {
+  margin-bottom: 0;
+}
+
+.article-source-link-btn {
+  min-width: 118px;
+  white-space: nowrap;
 }
 
 .article-opportunity-btn {
@@ -437,5 +470,17 @@
   .article-action-btn {
     flex: 1 1 calc(50% - 4px);
     min-width: 0;
+  }
+
+  .article-reading-card {
+    padding: 16px;
+  }
+
+  .article-source-link-card {
+    grid-template-columns: 1fr;
+  }
+
+  .article-source-link-btn {
+    width: 100%;
   }
 }

@@ -42,6 +42,7 @@ vi.mock('../src/utils/auth', async () => {
   const { resolveSessionUserFromCookie } = await import('./helpers/session-auth')
   return {
     resolveSessionUser: vi.fn(resolveSessionUserFromCookie),
+    resolveDevelopmentSessionUser: vi.fn(async () => null),
   }
 })
 
@@ -124,6 +125,7 @@ describe('workers content routes', () => {
     expect(response.status).toBe(200)
     const payload = await response.json()
     expect(payload.contentType).toBe('article')
+    expect(payload.contentRole).toBe('original')
     expect(payload.content).toBeNull()
     expect(payload.detailState).toBe('partial')
     expect(payload.missingFields).toContain('content')
@@ -175,12 +177,12 @@ describe('workers content routes', () => {
     const app = buildApp()
 
     const cases = [
-      ['hot_topic:8', 'hot_topic'],
-      ['article:12', 'article'],
-      ['opportunity:3', 'opportunity'],
+      ['hot_topic:8', 'hot_topic', 'source_digest'],
+      ['article:12', 'article', 'original'],
+      ['opportunity:3', 'opportunity', 'opportunity_detail'],
     ] as const
 
-    for (const [contentRef, contentType] of cases) {
+    for (const [contentRef, contentType, contentRole] of cases) {
       const response = await app.request(
         `/api/v1/content/by-ref?content_ref=${encodeURIComponent(contentRef)}`,
         {},
@@ -191,6 +193,7 @@ describe('workers content routes', () => {
       expect(payload).toMatchObject({
         contentRef,
         contentType,
+        contentRole,
       })
     }
   })

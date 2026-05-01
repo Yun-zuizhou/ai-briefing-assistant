@@ -1,21 +1,17 @@
-import { Bookmark, ExternalLink, MessageSquare, Share2 } from 'lucide-react';
+import { Bookmark, MessageSquare, Share2 } from 'lucide-react';
 
 import { Button } from '../../ui';
-import type { ArticleFontSize, ArticleState } from '../../../types/article';
+import type { ArticleFontSize } from '../../../types/article';
 
 export function ArticleActionRow({
-  activeArticle,
   isCollected,
   onAsk,
   onCollect,
-  onOpenOriginal,
   onShare,
 }: {
-  activeArticle: ArticleState;
   isCollected: boolean;
   onAsk: () => void;
   onCollect: () => void;
-  onOpenOriginal: () => void;
   onShare: () => void;
 }) {
   return (
@@ -32,12 +28,6 @@ export function ArticleActionRow({
         <MessageSquare size={16} />
         追问
       </Button>
-      {activeArticle.url ? (
-        <Button onClick={onOpenOriginal} variant="primary" className="article-action-btn">
-          <ExternalLink size={16} />
-          原文
-        </Button>
-      ) : null}
     </div>
   );
 }

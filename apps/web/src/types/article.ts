@@ -25,10 +25,12 @@ export interface ArticleStateInput {
   title: string;
   source?: string;
   url?: string;
+  isPlaceholderSource?: boolean;
   summary?: string | null;
   content?: string | null;
   category?: string;
   contentType?: string;
+  contentRole?: 'original' | 'source_digest' | 'opportunity_detail' | 'body';
   display?: ArticleDisplayMeta;
   author?: string;
   publishedAt?: string;

@@ -6,6 +6,7 @@ export interface HotTopic {
   id: number
   title: string
   summary: string | null
+  content: string | null
   source: string
   source_url: string
   categories: string
@@ -27,6 +28,7 @@ export interface Opportunity {
   status: string
   source: string
   source_url: string
+  content: string | null
   summary: string | null
   reward: string | null
   location: string | null
@@ -111,7 +113,7 @@ export async function listHotTopics(
   }
 
   const sql = `
-    SELECT id, title, summary, source, source_url, categories, tags, 
+    SELECT id, title, summary, content, source, source_url, categories, tags,
            hot_value, quality_score, published_at
     FROM hot_topics
     ORDER BY hot_value DESC, quality_score DESC
@@ -125,7 +127,7 @@ export async function listOpportunities(
   limit: number = 6
 ): Promise<Opportunity[]> {
   const sql = `
-    SELECT id, title, type, status, source, source_url, summary, 
+    SELECT id, title, type, status, source, source_url, content, summary,
            reward, location, is_remote, deadline, tags, quality_score
     FROM opportunities
     WHERE lower(status) = 'active'
@@ -154,7 +156,7 @@ export async function getHotTopicById(
   id: number
 ): Promise<HotTopic | null> {
   const sql = `
-    SELECT id, title, summary, source, source_url, categories, tags, 
+    SELECT id, title, summary, content, source, source_url, categories, tags,
            hot_value, quality_score, published_at
     FROM hot_topics
     WHERE id = ?
@@ -187,6 +189,28 @@ export async function getArticleById(
       WHERE id = ?
     `,
     [id]
+  )
+}
+
+export async function listArticlesBySourceUrls(
+  db: D1Database,
+  sourceUrls: string[]
+): Promise<ArticleRow[]> {
+  const normalizedUrls = Array.from(new Set(
+    sourceUrls.map((url) => String(url || '').trim()).filter(Boolean)
+  ))
+  if (normalizedUrls.length === 0) return []
+
+  const placeholders = normalizedUrls.map(() => '?').join(',')
+  return queryAll<ArticleRow>(
+    db,
+    `
+      SELECT id, title, summary, content, source_name, source_url, author, category, tags, publish_time, quality_score
+      FROM rss_articles
+      WHERE source_url IN (${placeholders})
+      ORDER BY datetime(publish_time) DESC, id DESC
+    `,
+    normalizedUrls
   )
 }
 

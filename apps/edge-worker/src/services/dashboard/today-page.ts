@@ -5,6 +5,7 @@ import {
   listHotTopics,
   listOpportunities,
   getUserInterests,
+  listArticlesBySourceUrls,
 } from '../content'
 import type { TodayPageData } from '../../types/page-data'
 import {
@@ -116,8 +117,17 @@ export async function loadTodayPageData(params: LoadTodayPageDataParams): Promis
   ])
 
   const interests = userInterests
-  const recommendedForYou = buildRecommendations(interests, hotTopics, opportunities)
-  const worthKnowing = buildWorthKnowing(hotTopics, interests)
+  const topicArticleUrls = hotTopics
+    .map((topic) => topic.source_url ? `${topic.source_url.replace(/\/$/, '')}/article` : '')
+    .filter(Boolean)
+  const linkedArticles = await listArticlesBySourceUrls(params.db, topicArticleUrls)
+  const articleByTopicSourceUrl = new Map(
+    linkedArticles
+      .filter((article) => article.source_url)
+      .map((article) => [String(article.source_url).replace(/\/article\/?$/, ''), article])
+  )
+  const recommendedForYou = buildRecommendations(interests, hotTopics, opportunities, articleByTopicSourceUrl)
+  const worthKnowing = buildWorthKnowing(hotTopics, interests, articleByTopicSourceUrl)
   const worthActing = buildWorthActing(opportunities, interests)
   let latestBriefing = initialLatestBriefing
   let briefingPayload = parseBriefingPayload(latestBriefing?.payload ?? null)

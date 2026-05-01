@@ -77,7 +77,7 @@ export function buildHotTopicDetail(params: {
   relatedItems: UnifiedContentDetailData['relatedItems']
 }): UnifiedContentDetailData {
   const detailState = buildDetailState({
-    hasPrimaryContent: Boolean(params.topic.summary?.trim()),
+    hasPrimaryContent: Boolean(params.topic.content?.trim() || params.topic.summary?.trim()),
     hasSource: Boolean(params.topic.source_url || params.topic.source),
     relatedItems: params.relatedItems,
   })
@@ -85,9 +85,11 @@ export function buildHotTopicDetail(params: {
   return {
     contentRef: params.contentRef,
     contentType: 'hot_topic',
+    contentRole: 'source_digest',
     id: params.topic.id,
     title: params.topic.title,
     summary: params.topic.summary,
+    content: params.topic.content || null,
     sourceName: params.topic.source,
     sourceUrl: params.topic.source_url,
     categoryLabels: parseJsonArray(params.topic.categories),
@@ -107,7 +109,7 @@ export function buildOpportunityDetail(params: {
   relatedItems: UnifiedContentDetailData['relatedItems']
 }): UnifiedContentDetailData {
   const detailState = buildDetailState({
-    hasPrimaryContent: Boolean(params.opportunity.summary?.trim()),
+    hasPrimaryContent: Boolean(params.opportunity.content?.trim() || params.opportunity.summary?.trim()),
     hasSource: Boolean(params.opportunity.source_url || params.opportunity.source),
     relatedItems: params.relatedItems,
   })
@@ -115,9 +117,11 @@ export function buildOpportunityDetail(params: {
   return {
     contentRef: params.contentRef,
     contentType: 'opportunity',
+    contentRole: 'opportunity_detail',
     id: params.opportunity.id,
     title: params.opportunity.title,
     summary: params.opportunity.summary,
+    content: params.opportunity.content || null,
     sourceName: params.opportunity.source,
     sourceUrl: params.opportunity.source_url,
     categoryLabels: parseJsonArray(params.opportunity.tags),
@@ -144,6 +148,7 @@ export function buildArticleDetail(params: {
   return {
     contentRef: params.contentRef,
     contentType: 'article',
+    contentRole: 'original',
     id: params.article.id,
     title: params.article.title,
     summary: params.article.summary,

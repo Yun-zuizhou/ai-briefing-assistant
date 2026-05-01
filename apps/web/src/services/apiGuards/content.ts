@@ -13,12 +13,14 @@ import {
 } from '../apiValidation';
 
 const CONTENT_TYPES = new Set(['hot_topic', 'article', 'opportunity']);
+const CONTENT_ROLES = new Set(['original', 'source_digest', 'opportunity_detail', 'body']);
 const DETAIL_STATES = new Set(['formal', 'partial']);
 
 function isRelatedItem(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return isString(value.contentRef)
     && isEnumValue(value.contentType, CONTENT_TYPES)
+    && isEnumValue(value.contentRole, CONTENT_ROLES)
     && isStringOrNumber(value.id)
     && isString(value.title)
     && isOptionalString(value.summary)

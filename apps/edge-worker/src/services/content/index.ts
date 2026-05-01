@@ -31,6 +31,7 @@ export {
   getUserInterests,
   getVirtualInterests,
   listDailyDigestResults,
+  listArticlesBySourceUrls,
   listHotTopics,
   listOpportunities,
   listRelatedItemsForArticle,

@@ -30,6 +30,7 @@ export interface OpportunityListItem {
 export interface UnifiedContentDetailData {
   contentRef: string
   contentType: 'hot_topic' | 'article' | 'opportunity'
+  contentRole: 'original' | 'source_digest' | 'opportunity_detail' | 'body'
   id: string | number
   title: string
   summary?: string | null
