@@ -132,6 +132,28 @@ describe('workers todos routes', () => {
     expect(wroteExecutionResult).toBe(true)
   })
 
+  it('returns 400 when related_type requires a missing related_id', async () => {
+    const app = buildApp()
+
+    const response = await app.request(
+      '/api/v1/todos',
+      withSession({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          content: '错误待办',
+          related_type: 'opportunity',
+        }),
+      }),
+      mockEnv()
+    )
+
+    expect(response.status).toBe(400)
+    const payload = await response.json()
+    expect(payload.error).toContain('related_type/related_id 缺少有效 id')
+    expect(dbMocks.execute).not.toHaveBeenCalled()
+  })
+
   it('returns 403 when completing another user\'s todo', async () => {
     dbMocks.queryOne.mockImplementation(async (_db, sql: string) => {
       const text = String(sql)

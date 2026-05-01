@@ -112,6 +112,28 @@ describe('workers notes routes', () => {
     )
   })
 
+  it('returns 400 when source_type is outside the registered enum', async () => {
+    const app = buildApp()
+
+    const response = await app.request(
+      '/api/v1/notes',
+      withSession({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          content: '错误来源',
+          source_type: 'unknown',
+        }),
+      }),
+      mockEnv()
+    )
+
+    expect(response.status).toBe(400)
+    const payload = await response.json()
+    expect(payload.error).toContain('source_type/source_id 类型无效')
+    expect(dbMocks.execute).not.toHaveBeenCalled()
+  })
+
   it('updates note content and tags using existing source metadata', async () => {
     dbMocks.queryOne
       .mockResolvedValueOnce({

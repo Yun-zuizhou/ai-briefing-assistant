@@ -173,10 +173,34 @@ vi.mock('../src/utils/auth', () => ({
 
 vi.mock('../src/services/content', async () => {
   const actual = await vi.importActual<typeof import('../src/services/content')>('../src/services/content')
+  const matchesInterest = (item: { title: string; summary: string | null; categories: string; tags: string }, interest: string) => {
+    const haystack = [item.title, item.summary || '', item.categories, item.tags].join(' ')
+    return haystack.includes(interest)
+  }
+  const rankHotTopics = (
+    items: typeof flowState.get extends () => infer State ? State extends { hotTopics: infer HotTopics } ? HotTopics : never : never,
+    interests: string[],
+  ) => [...items].sort((a, b) => {
+    const aMatch = interests.some((interest) => matchesInterest(a, interest)) ? 1 : 0
+    const bMatch = interests.some((interest) => matchesInterest(b, interest)) ? 1 : 0
+    const aScore = aMatch * 1000 + a.quality_score * 100 + a.hot_value * 0.1
+    const bScore = bMatch * 1000 + b.quality_score * 100 + b.hot_value * 0.1
+    return bMatch - aMatch || bScore - aScore || String(b.published_at).localeCompare(String(a.published_at)) || b.id - a.id
+  })
 
   return {
     ...actual,
-    listHotTopics: vi.fn(async (_db, limit = 8) => flowState.get().hotTopics.slice(0, limit)),
+    listHotTopics: vi.fn(async (_db, optionsOrLimit = 8) => {
+      const options = typeof optionsOrLimit === 'number'
+        ? { limit: optionsOrLimit, interests: [] as string[] }
+        : optionsOrLimit
+      const limit = options.limit ?? 8
+      const interests = options.interests ?? []
+      const topics = interests.length > 0
+        ? rankHotTopics(flowState.get().hotTopics, interests)
+        : flowState.get().hotTopics
+      return topics.slice(0, limit)
+    }),
     listOpportunities: vi.fn(async (_db, limit = 6) =>
       flowState.get().opportunities.filter((item) => String(item.status).toLowerCase() === 'active').slice(0, limit)
     ),

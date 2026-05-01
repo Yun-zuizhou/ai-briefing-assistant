@@ -39,6 +39,7 @@ function mockEnv() {
     DB: {} as D1Database,
     ENVIRONMENT: 'test',
     INTERNAL_API_TOKEN: TEST_INTERNAL_TOKEN,
+    AI_KEY_ENCRYPTION_SECRET: 'test-encryption-secret',
   }
 }
 
@@ -90,6 +91,269 @@ describe('workers system routes', () => {
     expect(payload).toContain('Authentication required')
   })
 
+  it('returns llm invocation stats for the current user without sensitive fields', async () => {
+    dbMocks.queryAll
+      .mockResolvedValueOnce([
+        {
+          total: 4,
+          success: 3,
+          error: 1,
+          avg_duration_ms: 1234.4,
+          avg_input_chars: 300.2,
+          avg_output_chars: 120.8,
+          avg_prompt_tokens: 90.1,
+          avg_completion_tokens: 30.6,
+          avg_total_tokens: 120.7,
+          total_tokens: 480,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          feature: 'annual_report_blocks_generation',
+          total: 2,
+          success: 1,
+          error: 1,
+          avg_duration_ms: 2000.2,
+          avg_total_tokens: 160.4,
+          total_tokens: 320,
+          last_invoked_at: '2026-04-29 18:55:19',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          provider_name: 'deepseek',
+          model_name: 'deepseek-v4-pro',
+          transport: 'openai-compatible',
+          total: 2,
+          success: 1,
+          error: 1,
+          avg_duration_ms: 2000.2,
+          total_tokens: 320,
+          last_invoked_at: '2026-04-29 18:55:19',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          error_code: 'invalid_model_output',
+          total: 1,
+          last_occurred_at: '2026-04-29 18:52:53',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 77,
+          feature: 'annual_report_blocks_generation',
+          request_ref: 'annual_report:2026',
+          provider_name: 'deepseek',
+          model_name: 'deepseek-v4-pro',
+          duration_ms: 2100,
+          total_tokens: 120,
+          error_code: 'invalid_model_output',
+          error_message: 'Annual report output failed validation',
+          created_at: '2026-04-29 18:52:53',
+        },
+      ])
+
+    const app = buildApp()
+    const response = await app.request('/api/v1/system/llm-invocations/stats?window=24h&limit=5', withSession(), mockEnv())
+    expect(response.status).toBe(200)
+
+    const payload = await response.json()
+    expect(payload).toMatchObject({
+      userId: 1,
+      windowLabel: '24h',
+      windowHours: 24,
+      windowDays: 1,
+      totals: {
+        total: 4,
+        success: 3,
+        error: 1,
+        successRate: 75,
+        avgDurationMs: 1234,
+        totalTokens: 480,
+      },
+      byFeature: [
+        {
+          feature: 'annual_report_blocks_generation',
+          total: 2,
+          successRate: 50,
+          avgDurationMs: 2000,
+        },
+      ],
+      byModel: [
+        {
+          providerName: 'deepseek',
+          modelName: 'deepseek-v4-pro',
+          transport: 'openai-compatible',
+        },
+      ],
+      errors: [
+        {
+          errorCode: 'invalid_model_output',
+          total: 1,
+        },
+      ],
+      recentErrors: [
+        {
+          invocationId: 77,
+          feature: 'annual_report_blocks_generation',
+          requestRef: 'annual_report:2026',
+          providerName: 'deepseek',
+          modelName: 'deepseek-v4-pro',
+          errorCode: 'invalid_model_output',
+          errorMessage: 'Annual report output failed validation',
+          createdAt: '2026-04-29 18:52:53',
+        },
+      ],
+    })
+    expect(JSON.stringify(payload)).not.toContain('metadata_json')
+    expect(JSON.stringify(payload)).not.toContain('prompt')
+
+    const firstCallParams = dbMocks.queryAll.mock.calls[0][2] as unknown[]
+    expect(firstCallParams).toEqual([1, '-24 hours'])
+    const featureCallParams = dbMocks.queryAll.mock.calls[1][2] as unknown[]
+    expect(featureCallParams).toEqual([1, '-24 hours', 5])
+  })
+
+  it('rejects llm invocation stats for non-superusers in production', async () => {
+    dbMocks.queryOne.mockResolvedValueOnce({ is_superuser: 0 })
+
+    const app = buildApp()
+    const response = await app.request(
+      '/api/v1/system/llm-invocations/stats',
+      withSession(),
+      {
+        DB: {} as D1Database,
+        ENVIRONMENT: 'production',
+        INTERNAL_API_TOKEN: TEST_INTERNAL_TOKEN,
+      }
+    )
+
+    expect(response.status).toBe(403)
+    const payload = await response.json()
+    expect(payload.error).toContain('无权访问')
+    expect(dbMocks.queryAll).not.toHaveBeenCalled()
+  })
+
+  it('allows llm invocation stats for superusers in production', async () => {
+    dbMocks.queryOne.mockResolvedValueOnce({ is_superuser: 1 })
+    dbMocks.queryAll
+      .mockResolvedValueOnce([{ total: 1, success: 1, error: 0, total_tokens: 20 }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+
+    const app = buildApp()
+    const response = await app.request(
+      '/api/v1/system/llm-invocations/stats',
+      withSession(),
+      {
+        DB: {} as D1Database,
+        ENVIRONMENT: 'production',
+        INTERNAL_API_TOKEN: TEST_INTERNAL_TOKEN,
+      }
+    )
+
+    expect(response.status).toBe(200)
+    const payload = await response.json()
+    expect(payload.totals).toMatchObject({
+      total: 1,
+      success: 1,
+      error: 0,
+      successRate: 100,
+    })
+  })
+
+  it('returns briefing dispatch stats with recent cron samples', async () => {
+    dbMocks.queryAll
+      .mockResolvedValueOnce([
+        {
+          total: 3,
+          success: 1,
+          skipped: 1,
+          error: 1,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          status: 'success',
+          total: 1,
+          last_occurred_at: '2026-04-30 08:15:10',
+        },
+        {
+          status: 'skipped',
+          total: 1,
+          last_occurred_at: '2026-04-30 08:15:11',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          trigger_source: 'worker_cron',
+          total: 3,
+          success: 1,
+          skipped: 1,
+          error: 1,
+          last_occurred_at: '2026-04-30 08:15:12',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 31,
+          schedule_id: 12,
+          briefing_type: 'morning',
+          trigger_source: 'worker_cron',
+          scheduled_for: '08:00',
+          status: 'error',
+          summary: 'Worker Cron 生成今日 AI 简报失败',
+          created_at: '2026-04-30 08:15:12',
+        },
+      ])
+
+    const app = buildApp()
+    const response = await app.request('/api/v1/system/briefing-dispatches/stats?window=24h&limit=5', withSession(), mockEnv())
+    expect(response.status).toBe(200)
+
+    const payload = await response.json()
+    expect(payload).toMatchObject({
+      userId: 1,
+      windowLabel: '24h',
+      windowHours: 24,
+      totals: {
+        total: 3,
+        success: 1,
+        skipped: 1,
+        error: 1,
+      },
+      byTrigger: [
+        {
+          triggerSource: 'worker_cron',
+          total: 3,
+          success: 1,
+          skipped: 1,
+          error: 1,
+        },
+      ],
+      recentDispatches: [
+        {
+          id: 31,
+          scheduleId: 12,
+          briefingType: 'morning',
+          triggerSource: 'worker_cron',
+          scheduledFor: '08:00',
+          status: 'error',
+          summary: 'Worker Cron 生成今日 AI 简报失败',
+          createdAt: '2026-04-30 08:15:12',
+        },
+      ],
+    })
+
+    const firstCallParams = dbMocks.queryAll.mock.calls[0][2] as unknown[]
+    expect(firstCallParams).toEqual([1, '-24 hours'])
+    const sampleCallParams = dbMocks.queryAll.mock.calls[3][2] as unknown[]
+    expect(sampleCallParams).toEqual([1, '-24 hours', 5])
+  })
+
   it('rejects ingestion-runs when internal executor token is missing', async () => {
     const app = buildApp()
     const response = await app.request(
@@ -128,6 +392,119 @@ describe('workers system routes', () => {
     expect(response.status).toBe(200)
     const payload = await response.json()
     expect(payload).toMatchObject({ id: 21, success: true })
+  })
+
+  it('dry-runs legacy ai provider key migration without exposing plaintext', async () => {
+    dbMocks.queryAll.mockResolvedValue([
+      {
+        id: 1,
+        user_id: 1,
+        ai_provider: 'deepseek',
+        ai_api_key: 'sk-legacy-secret',
+        ai_api_key_encrypted: null,
+        ai_api_key_encryption_version: null,
+      },
+    ])
+    const app = buildApp()
+    const response = await app.request(
+      '/api/v1/system/ai-provider-keys/migrate-legacy',
+      withInternalToken({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ dry_run: true }),
+      }),
+      mockEnv()
+    )
+
+    expect(response.status).toBe(200)
+    const payload = await response.json()
+    expect(payload).toMatchObject({
+      success: true,
+      dryRun: true,
+      scanned: 1,
+      migrated: 0,
+    })
+    expect(JSON.stringify(payload)).not.toContain('sk-legacy-secret')
+    expect(dbMocks.execute).not.toHaveBeenCalled()
+  })
+
+  it('migrates legacy plaintext ai provider keys to encrypted storage and clears plaintext', async () => {
+    dbMocks.queryAll.mockResolvedValue([
+      {
+        id: 1,
+        user_id: 1,
+        ai_provider: 'deepseek',
+        ai_api_key: 'sk-legacy-secret',
+        ai_api_key_encrypted: null,
+        ai_api_key_encryption_version: null,
+      },
+    ])
+    const app = buildApp()
+    const response = await app.request(
+      '/api/v1/system/ai-provider-keys/migrate-legacy',
+      withInternalToken({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ limit: 10 }),
+      }),
+      mockEnv()
+    )
+
+    expect(response.status).toBe(200)
+    const payload = await response.json()
+    expect(payload).toMatchObject({
+      success: true,
+      dryRun: false,
+      scanned: 1,
+      migrated: 1,
+      clearedPlaintextOnly: 0,
+      failed: 0,
+    })
+
+    const updateCall = dbMocks.execute.mock.calls.find((args) =>
+      String(args[1]).includes('ai_api_key_encrypted = ?')
+    )
+    expect(updateCall).toBeTruthy()
+    const params = updateCall?.[2] as unknown[]
+    expect(String(params[0])).not.toContain('sk-legacy-secret')
+    expect(params[1]).toBe('aes-gcm-v1')
+    expect(params[2]).toBe(1)
+  })
+
+  it('returns 503 when legacy plaintext keys need encryption but encryption secret is missing', async () => {
+    dbMocks.queryAll.mockResolvedValue([
+      {
+        id: 1,
+        user_id: 1,
+        ai_provider: 'deepseek',
+        ai_api_key: 'sk-legacy-secret',
+        ai_api_key_encrypted: null,
+        ai_api_key_encryption_version: null,
+      },
+    ])
+    const app = buildApp()
+    const response = await app.request(
+      '/api/v1/system/ai-provider-keys/migrate-legacy',
+      withInternalToken({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ limit: 10 }),
+      }),
+      {
+        DB: {} as D1Database,
+        ENVIRONMENT: 'test',
+        INTERNAL_API_TOKEN: TEST_INTERNAL_TOKEN,
+      }
+    )
+
+    expect(response.status).toBe(503)
+    const payload = await response.json()
+    expect(payload).toMatchObject({
+      success: false,
+      scanned: 1,
+      skippedMissingSecret: 1,
+    })
+    expect(dbMocks.execute).not.toHaveBeenCalled()
   })
 
   it('rejects ai-processing-runs when internal executor token is invalid', async () => {

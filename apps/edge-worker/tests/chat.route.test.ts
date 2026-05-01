@@ -41,6 +41,21 @@ function mockEnv() {
   }
 }
 
+function readSseEvents(text: string) {
+  return text
+    .split('\n\n')
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      const event = block.match(/^event:\s*(.+)$/m)?.[1] ?? 'message'
+      const dataText = block.match(/^data:\s*(.+)$/m)?.[1] ?? '{}'
+      return {
+        event,
+        data: JSON.parse(dataText),
+      }
+    })
+}
+
 describe('workers chat routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -61,11 +76,11 @@ describe('workers chat routes', () => {
     })
   })
 
-  it('executes add_interest and writes interest rows', async () => {
+  it('executes add_interest through the message stream and writes interest rows', async () => {
     const app = buildApp()
 
     const response = await app.request(
-      '/api/v1/chat/execute',
+      '/api/v1/chat/message',
       withSession({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -79,10 +94,11 @@ describe('workers chat routes', () => {
     )
 
     expect(response.status).toBe(200)
-    const payload = await response.json()
-    expect(payload.success).toBe(true)
-    expect(payload.actionType).toBe('add_interest')
-    expect(payload.deepLink).toBe('/today')
+    const events = readSseEvents(await response.text())
+    const resultEvent = events.find((item) => item.event === 'execution_result')
+    expect(resultEvent?.data.success).toBe(true)
+    expect(resultEvent?.data.actionType).toBe('add_interest')
+    expect(resultEvent?.data.deepLink).toBe('/today')
 
     const wroteInterest = dbMocks.execute.mock.calls.some((args) =>
       String(args[1]).includes('INSERT OR REPLACE INTO user_interests')
@@ -90,12 +106,70 @@ describe('workers chat routes', () => {
     expect(wroteInterest).toBe(true)
   })
 
-  it('returns 500 when execute persistence fails', async () => {
+  it('requires confirmation before writing system configuration from chat', async () => {
+    const app = buildApp()
+
+    const response = await app.request(
+      '/api/v1/chat/message',
+      withSession({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          input: '我想关注 AI 和远程工作',
+          current_interests: ['写作'],
+        }),
+      }),
+      mockEnv()
+    )
+
+    expect(response.status).toBe(200)
+    const events = readSseEvents(await response.text())
+    expect(events.some((item) => item.event === 'pending_confirmation')).toBe(true)
+    expect(events.some((item) => item.event === 'execution_result')).toBe(false)
+
+    const wroteInterest = dbMocks.execute.mock.calls.some((args) =>
+      String(args[1]).includes('INSERT OR REPLACE INTO user_interests')
+    )
+    expect(wroteInterest).toBe(false)
+  })
+
+  it('confirms system configuration and returns a success verification link', async () => {
+    const app = buildApp()
+
+    const response = await app.request(
+      '/api/v1/chat/confirm',
+      withSession({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          user_message: '以后每天早上 8 点发简报',
+          confirmed_type: 'set_push_time',
+        }),
+      }),
+      mockEnv()
+    )
+
+    expect(response.status).toBe(200)
+    const payload = await response.json()
+    expect(payload.success).toBe(true)
+    expect(payload.actionType).toBe('set_push_time')
+    expect(payload.successMessage).toContain('已配置简报推送时间')
+    expect(payload.resultSummary).toContain('配置成功')
+    expect(payload.deepLink).toBe('/notification-settings')
+    expect(payload.nextPageLabel).toBe('查看通知设置')
+
+    const wroteSettings = dbMocks.execute.mock.calls.some((args) =>
+      String(args[1]).includes('UPDATE user_settings SET morning_brief_time')
+    )
+    expect(wroteSettings).toBe(true)
+  })
+
+  it('emits an SSE error when message persistence fails', async () => {
     const app = buildApp()
     dbMocks.queryOne.mockRejectedValueOnce(new Error('db unavailable'))
 
     const response = await app.request(
-      '/api/v1/chat/execute',
+      '/api/v1/chat/message',
       withSession({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -107,11 +181,10 @@ describe('workers chat routes', () => {
       mockEnv()
     )
 
-    expect(response.status).toBe(500)
-    const payload = await response.json()
-    expect(payload.success).toBe(false)
-    expect(payload.successMessage).toContain('执行失败')
-    expect(payload.resultSummary).toContain('没有进入真实数据链路')
+    expect(response.status).toBe(200)
+    const events = readSseEvents(await response.text())
+    const errorEvent = events.find((item) => item.event === 'error')
+    expect(errorEvent?.data.message).toContain('db unavailable')
   })
 
   it('returns 500 when reclassify persistence fails', async () => {

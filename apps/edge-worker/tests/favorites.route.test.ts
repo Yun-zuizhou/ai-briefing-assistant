@@ -121,6 +121,28 @@ describe('workers favorites routes', () => {
     )
   })
 
+  it('returns 400 when content_ref points to a non-content entity', async () => {
+    const app = buildApp()
+
+    const response = await app.request(
+      '/api/v1/favorites',
+      withSession({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          content_ref: 'note:8',
+          item_title: '错误收藏',
+        }),
+      }),
+      mockEnv()
+    )
+
+    expect(response.status).toBe(400)
+    const payload = await response.json()
+    expect(payload.error).toContain('content_ref 类型无效')
+    expect(dbMocks.execute).not.toHaveBeenCalled()
+  })
+
   it('returns existing favorite instead of inserting duplicate records', async () => {
     dbMocks.queryOne.mockResolvedValue({
       id: 5,

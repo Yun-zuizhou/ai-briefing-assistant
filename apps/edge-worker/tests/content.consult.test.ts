@@ -1,6 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
-import { consultDigestResult, DigestConsultProviderError } from '../src/services/content'
+import {
+  buildConsultMessages,
+  consultDigestResult,
+  DigestConsultProviderError,
+  parseConsultPayload,
+} from '../src/services/content'
 
 const digestResult = {
   id: 1,
@@ -27,6 +32,85 @@ const digestResult = {
 }
 
 describe('content consult service', () => {
+  it('builds evidence-first prompt with user interests but without treating interests as evidence', () => {
+    const messages = buildConsultMessages({
+      digestResult,
+      question: '这和我关注的 AI 产品经理有什么关系？',
+      userInterests: ['AI', '产品经理'],
+    })
+
+    expect(messages).toHaveLength(2)
+    expect(messages[0].content).toContain('只返回严格 JSON')
+    expect(messages[0].content).toContain('不能把用户关注领域当 evidence')
+    expect(messages[0].content).toContain('当前材料不足以判断')
+    expect(messages[1].content).toContain('"user_interests": [')
+    expect(messages[1].content).toContain('产品经理')
+    expect(messages[1].content).not.toContain('API Key')
+  })
+
+  it('normalizes consult json output and adds uncertainty when evidence is missing', () => {
+    const parsed = parseConsultPayload(JSON.stringify({
+      answer: '当前材料不足以判断岗位影响，但可以先关注原文更新。',
+      evidence: [],
+      uncertainties: [],
+      suggested_next_actions: ['继续阅读原文', '记录一个跟进问题'],
+    }))
+
+    expect(parsed.answer).toContain('当前材料不足以判断')
+    expect(parsed.evidence[0]).toContain('没有给出可核验证据')
+    expect(parsed.uncertainties[0]).toContain('缺少 evidence')
+    expect(parsed.suggested_next_actions).toEqual(['继续阅读原文', '记录一个跟进问题'])
+  })
+
+  it('rejects malformed consult output', () => {
+    expect(() => parseConsultPayload('not json')).toThrow(DigestConsultProviderError)
+    expect(() => parseConsultPayload(JSON.stringify({ evidence: ['证据'] }))).toThrow(DigestConsultProviderError)
+  })
+
+  it('calls provider with user interests and validated evidence output', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  answer: '这条内容与 AI 产品经理相关，因为它展示了模型能力更新方向。',
+                  evidence: ['摘要提到“模型更新”。', '引用来自原文。'],
+                  uncertainties: ['当前材料没有给出具体岗位需求变化。'],
+                  suggested_next_actions: ['继续阅读原文', '记录一个跟进问题'],
+                }),
+              },
+            },
+          ],
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } }
+      )
+    )
+
+    const result = await consultDigestResult({
+      bindings: {
+        ENVIRONMENT: 'test',
+        SUMMARY_PROVIDER_ENABLED: 'true',
+        SUMMARY_PROVIDER_API_URL: 'https://api.deepseek.com/chat/completions',
+        SUMMARY_PROVIDER_API_KEY: 'sk-test-provider',
+        SUMMARY_PROVIDER_MODEL: 'deepseek-v4-flash',
+        SUMMARY_PROVIDER_TRANSPORT: 'openai-compatible',
+      },
+      digestResult,
+      question: '这和我关注的 AI 产品经理有什么关系？',
+      userInterests: ['AI', '产品经理'],
+    })
+
+    expect(result.answer).toContain('AI 产品经理')
+    expect(result.evidence).toHaveLength(2)
+    expect(result.uncertainties[0]).toContain('岗位需求')
+    const requestBody = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit)?.body || '{}'))
+    expect(JSON.stringify(requestBody.messages)).toContain('产品经理')
+
+    fetchMock.mockRestore()
+  })
+
   it('returns debug fallback answer when enabled in non-production env', async () => {
     const result = await consultDigestResult({
       bindings: {

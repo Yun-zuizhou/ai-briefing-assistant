@@ -6,6 +6,7 @@ const contentStoreMocks = vi.hoisted(() => ({
   getHotTopicById: vi.fn(),
   getOpportunityById: vi.fn(),
   getDailyDigestResultByRef: vi.fn(),
+  getUserInterests: vi.fn(),
   listHotTopics: vi.fn(),
   listOpportunities: vi.fn(),
   listDailyDigestResults: vi.fn(),
@@ -22,6 +23,7 @@ vi.mock('../src/services/content', async () => {
   return {
     ...actual,
     getDailyDigestResultByRef: contentStoreMocks.getDailyDigestResultByRef,
+    getUserInterests: contentStoreMocks.getUserInterests,
     getHotTopicById: contentStoreMocks.getHotTopicById,
     getOpportunityById: contentStoreMocks.getOpportunityById,
     listHotTopics: contentStoreMocks.listHotTopics,
@@ -73,6 +75,7 @@ describe('workers content routes', () => {
     contentStoreMocks.getHotTopicById.mockResolvedValue(null)
     contentStoreMocks.getOpportunityById.mockResolvedValue(null)
     contentStoreMocks.getDailyDigestResultByRef.mockResolvedValue(null)
+    contentStoreMocks.getUserInterests.mockResolvedValue(['AI', '产品经理'])
     contentStoreMocks.listDailyDigestResults.mockResolvedValue([])
     contentStoreMocks.consultDigestResult.mockResolvedValue({
       answer: '默认咨询回答',
@@ -128,6 +131,70 @@ describe('workers content routes', () => {
     expect(payload.categoryLabels).toEqual(['AI'])
   })
 
+  it('resolves every canonical content_ref type through content detail route', async () => {
+    contentStoreMocks.getHotTopicById.mockResolvedValue({
+      id: 8,
+      title: 'AI 热点',
+      summary: '热点摘要',
+      source: 'RSS',
+      source_url: 'https://example.com/hot/8',
+      categories: '["AI"]',
+      tags: '["AI"]',
+      hot_value: 100,
+      quality_score: 9,
+      published_at: '2026-05-01 08:00:00',
+    })
+    contentStoreMocks.getOpportunityById.mockResolvedValue({
+      id: 3,
+      title: '远程机会',
+      type: 'job',
+      status: 'ACTIVE',
+      source: 'Remote',
+      source_url: 'https://example.com/opportunity/3',
+      summary: '机会摘要',
+      reward: null,
+      location: 'remote',
+      is_remote: 1,
+      deadline: null,
+      tags: '["远程工作"]',
+      quality_score: 8,
+    })
+    dbMocks.queryOne.mockResolvedValue({
+      id: 12,
+      title: '原文文章',
+      summary: '文章摘要',
+      content: '文章正文',
+      source_name: 'Blog',
+      source_url: 'https://example.com/article/12',
+      author: '作者A',
+      category: 'AI',
+      tags: '["AI"]',
+      publish_time: '2026-05-01 09:00:00',
+      quality_score: 8.5,
+    })
+    const app = buildApp()
+
+    const cases = [
+      ['hot_topic:8', 'hot_topic'],
+      ['article:12', 'article'],
+      ['opportunity:3', 'opportunity'],
+    ] as const
+
+    for (const [contentRef, contentType] of cases) {
+      const response = await app.request(
+        `/api/v1/content/by-ref?content_ref=${encodeURIComponent(contentRef)}`,
+        {},
+        mockEnv()
+      )
+      expect(response.status).toBe(200)
+      const payload = await response.json()
+      expect(payload).toMatchObject({
+        contentRef,
+        contentType,
+      })
+    }
+  })
+
   it('returns 400 when content_ref is missing or unsupported', async () => {
     const app = buildApp()
 
@@ -137,7 +204,7 @@ describe('workers content routes', () => {
     const unsupportedResponse = await app.request('/api/v1/content/by-ref?content_ref=note:1', {}, mockEnv())
     expect(unsupportedResponse.status).toBe(400)
     const payload = await unsupportedResponse.json()
-    expect(payload.error).toContain('Unsupported content type')
+    expect(payload.error).toContain('content_ref 类型无效')
   })
 
   it('returns daily digest list for authenticated user', async () => {
@@ -340,5 +407,10 @@ describe('workers content routes', () => {
       providerName: 'summary-provider',
       modelName: 'gpt-4o-mini',
     })
+    expect(contentStoreMocks.consultDigestResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userInterests: ['AI', '产品经理'],
+      })
+    )
   })
 })

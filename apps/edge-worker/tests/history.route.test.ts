@@ -123,7 +123,7 @@ describe('workers history routes', () => {
     )
   })
 
-  it('returns 500 when content_ref format is invalid', async () => {
+  it('returns 400 when content_ref format is invalid', async () => {
     const app = buildApp()
     const response = await app.request(
       '/api/v1/history',
@@ -139,8 +139,9 @@ describe('workers history routes', () => {
       mockEnv()
     )
 
-    expect(response.status).toBe(500)
+    expect(response.status).toBe(400)
     const payload = await response.json()
-    expect(payload.error).toContain('Failed to create history')
+    expect(payload.error).toContain('content_ref 格式无效')
+    expect(dbMocks.execute).not.toHaveBeenCalled()
   })
 })

@@ -38,7 +38,7 @@ vi.mock('../src/services/content', async () => {
   }
 })
 
-import app from '../src/index'
+import { app } from '../src/index'
 
 function mockEnv() {
   return {
