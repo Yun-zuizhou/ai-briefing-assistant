@@ -38,10 +38,7 @@ prototype-vintage-backup/node_modules/
 _archive_workspace/
 
 # 运行产物
-var/local/
-var/logs/
-var/tmp/
-var/*.log
+var/
 
 # 环境变量文件
 .env

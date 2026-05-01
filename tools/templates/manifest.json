@@ -1,0 +1,135 @@
+{
+  "replacementTokens": {
+    "__Feature__": "PascalCase feature or page name, for example Growth",
+    "__feature__": "kebab-case or lower camel feature prefix, for example growth",
+    "__Domain__": "PascalCase backend/API domain name",
+    "__domain__": "kebab-case or lower camel domain prefix",
+    "__RouteBase__": "route path segment, for example /growth"
+  },
+  "sets": [
+    {
+      "id": "page",
+      "description": "Managed frontend page, interaction hook, and page-owned stylesheet.",
+      "requiredTokens": ["__Feature__", "__feature__"],
+      "files": [
+        {
+          "template": "page/Page.template.tsx",
+          "output": "apps/web/src/pages/__Feature__Page.tsx"
+        },
+        {
+          "template": "page/usePageLogic.template.ts",
+          "output": "apps/web/src/pages/use__Feature__PageLogic.ts"
+        },
+        {
+          "template": "page/PageStyle.template.css",
+          "output": "apps/web/src/styles/__feature__-page.css"
+        }
+      ]
+    },
+    {
+      "id": "mutation-page",
+      "description": "Managed frontend page with local filters, write actions, reload flow, and page-owned stylesheet.",
+      "requiredTokens": ["__Feature__", "__feature__"],
+      "files": [
+        {
+          "template": "mutation-page/MutationPage.template.tsx",
+          "output": "apps/web/src/pages/__Feature__Page.tsx"
+        },
+        {
+          "template": "mutation-page/useMutationPageLogic.template.ts",
+          "output": "apps/web/src/pages/use__Feature__PageLogic.ts"
+        },
+        {
+          "template": "mutation-page/MutationPageStyle.template.css",
+          "output": "apps/web/src/styles/__feature__-page.css"
+        }
+      ]
+    },
+    {
+      "id": "information-page",
+      "description": "Managed information-dense page with overview, primary story, grouped reading flow, and auxiliary entries.",
+      "requiredTokens": ["__Feature__", "__feature__"],
+      "files": [
+        {
+          "template": "information-page/InformationPage.template.tsx",
+          "output": "apps/web/src/pages/__Feature__Page.tsx"
+        },
+        {
+          "template": "information-page/useInformationPageLogic.template.ts",
+          "output": "apps/web/src/pages/use__Feature__PageLogic.ts"
+        },
+        {
+          "template": "information-page/InformationPageStyle.template.css",
+          "output": "apps/web/src/styles/__feature__-page.css"
+        }
+      ]
+    },
+    {
+      "id": "business-component",
+      "description": "Shared business widget exported through components/business.",
+      "requiredTokens": ["__Feature__", "__feature__"],
+      "files": [
+        {
+          "template": "component/BusinessComponent.template.tsx",
+          "output": "apps/web/src/components/business/__Feature__Card.tsx"
+        }
+      ]
+    },
+    {
+      "id": "ui-component",
+      "description": "Primitive UI component exported through components/ui.",
+      "requiredTokens": ["__Feature__", "__feature__"],
+      "files": [
+        {
+          "template": "component/UiComponent.template.tsx",
+          "output": "apps/web/src/components/ui/__Feature__Button.tsx"
+        }
+      ]
+    },
+    {
+      "id": "layout-component",
+      "description": "Reusable layout box exported through components/layout.",
+      "requiredTokens": ["__Feature__", "__feature__"],
+      "files": [
+        {
+          "template": "component/LayoutComponent.template.tsx",
+          "output": "apps/web/src/components/layout/__Feature__Layout.tsx"
+        }
+      ]
+    },
+    {
+      "id": "frontend-api",
+      "description": "Frontend API domain method, response guard, and shared contract.",
+      "requiredTokens": ["__Feature__", "__feature__", "__domain__"],
+      "files": [
+        {
+          "template": "api/apiDomain.template.ts",
+          "output": "apps/web/src/services/apiDomains/__domain__.ts"
+        },
+        {
+          "template": "api/apiGuard.template.ts",
+          "output": "apps/web/src/services/apiGuards/__domain__.ts"
+        },
+        {
+          "template": "api/pageContract.template.ts",
+          "output": "packages/contracts/src/page-data/__domain__.ts"
+        }
+      ]
+    },
+    {
+      "id": "worker-route-service",
+      "description": "Thin Worker route and route-facing service entrypoint.",
+      "requiredTokens": ["__Feature__", "__feature__", "__domain__", "__RouteBase__"],
+      "files": [
+        {
+          "template": "worker/route.template.ts",
+          "output": "apps/edge-worker/src/routes/__domain__.ts"
+        },
+        {
+          "template": "worker/service.template.ts",
+          "output": "apps/edge-worker/src/services/__domain__/flow.ts"
+        }
+      ]
+    }
+  ]
+}

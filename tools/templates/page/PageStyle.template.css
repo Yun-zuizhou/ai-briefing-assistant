@@ -1,0 +1,22 @@
+.__feature__-page-content {
+  min-width: 0;
+}
+
+.__feature__-state-card,
+.__feature__-primary-card {
+  min-width: 0;
+}
+
+.__feature__-muted-text,
+.__feature__-summary-text {
+  margin: 0;
+}
+
+.__feature__-muted-text {
+  color: var(--ink-muted);
+}
+
+.__feature__-summary-text {
+  color: var(--ink);
+  line-height: 1.7;
+}

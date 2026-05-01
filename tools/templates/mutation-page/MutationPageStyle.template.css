@@ -1,0 +1,24 @@
+.__feature__-page-content {
+  min-width: 0;
+}
+
+.__feature__-loading-state,
+.__feature__-error-card,
+.__feature__-primary-card,
+.__feature__-empty-card,
+.__feature__-item-card {
+  min-width: 0;
+}
+
+.__feature__-error-text,
+.__feature__-primary-kicker,
+.__feature__-primary-title,
+.__feature__-empty-text,
+.__feature__-item-title {
+  margin: 0;
+}
+
+.__feature__-filter-row,
+.__feature__-item-list {
+  min-width: 0;
+}
