@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Newspaper, MessageCircle } from 'lucide-react';
+import { Newspaper, MessageCircle, CheckSquare, TrendingUp, User } from 'lucide-react';
 import '../styles/bookish-decor.css';
 import {
   BookishSymbol,
@@ -84,9 +84,43 @@ const previewNavSections = [
   { href: '#preview-status', label: '状态' },
   { href: '#preview-principles', label: '规范' },
   { href: '#preview-candidates', label: '候选' },
+  { href: '#preview-nav', label: '导航' },
   { href: '#preview-samples', label: '样张' },
   { href: '#preview-gate', label: '门禁' },
   { href: '#preview-assets', label: '过渡' },
+] as const;
+
+const navVariantStorageKey = 'jianbao_nav_variant';
+
+const navVariants = [
+  {
+    id: 'ink',
+    name: '墨色基准',
+    note: '保留现状，识别强但和纸面割裂。适合做对照，不建议最终选。',
+  },
+  {
+    id: 'paper',
+    name: '纸笺胶囊',
+    note: '像贴在纸边的分页签，最稳妥，和 Today / Chat 的米色纸面最融。',
+  },
+  {
+    id: 'ledger',
+    name: '账本索引',
+    note: '更像手账侧签，结构感强，适合强调“记录、待办、成长”的系统感。',
+  },
+  {
+    id: 'stamp',
+    name: '邮戳票根',
+    note: '更有记忆点，带一点票据/收据气质，适合想要更鲜明的品牌感。',
+  },
+] as const;
+
+const navPreviewItems = [
+  { icon: MessageCircle, label: '对话' },
+  { icon: Newspaper, label: '简报' },
+  { icon: CheckSquare, label: '待办' },
+  { icon: TrendingUp, label: '成长' },
+  { icon: User, label: '我的' },
 ] as const;
 
 const namingRisks = [
@@ -144,6 +178,13 @@ export default function DecorPreviewPage() {
   const [checkB, setCheckB] = useState(false);
   const [radioVal, setRadioVal] = useState('a');
   const [toggleOn, setToggleOn] = useState(false);
+  const [navVariant, setNavVariant] = useState(() => window.localStorage.getItem(navVariantStorageKey) || 'ink');
+
+  const handleNavVariantSelect = (variant: string) => {
+    window.localStorage.setItem(navVariantStorageKey, variant);
+    window.dispatchEvent(new Event('jianbao-nav-variant-change'));
+    setNavVariant(variant);
+  };
 
   useEffect(() => {
     document.documentElement.classList.add('decor-preview-scroll');
@@ -473,6 +514,44 @@ export default function DecorPreviewPage() {
         <ChipGroup options={['关注', '待办', '想法', '调整']} active={chipVal} onChange={setChipVal} />
         <div className="preview-decor-row" style={{ marginTop: 12 }}>
           <BookishChip label="独立标签" active onClick={() => {}} />
+        </div>
+      </Block>
+
+      <OrnamentDivider ornament="diamond" dashed />
+
+      <Block id="preview-nav" label="8. 主导航候选" note="点击方案后，正式底部导航会同步试用">
+        <div className="preview-nav-variant-grid">
+          {navVariants.map((variant) => (
+            <article className={`preview-nav-variant ${navVariant === variant.id ? 'is-selected' : ''}`} key={variant.id}>
+              <div className="preview-nav-variant-head">
+                <div>
+                  <span>{variant.id.toUpperCase()}</span>
+                  <strong>{variant.name}</strong>
+                </div>
+                <PaperButton
+                  active={navVariant === variant.id}
+                  onClick={() => handleNavVariantSelect(variant.id)}
+                >
+                  {navVariant === variant.id ? '试用中' : '试用'}
+                </PaperButton>
+              </div>
+              <p>{variant.note}</p>
+              <nav className={`bottom-nav bottom-nav--${variant.id} preview-nav-sample`} aria-label={`${variant.name}导航预览`}>
+                {navPreviewItems.map((item, index) => {
+                  const Icon = item.icon;
+                  const active = index === 0;
+                  return (
+                    <button className={`nav-btn ${active ? 'active' : ''}`} type="button" key={item.label}>
+                      <span className="nav-btn-icon" aria-hidden="true">
+                        <Icon size={22} strokeWidth={2.1} />
+                      </span>
+                      <span className="nav-btn-label">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </article>
+          ))}
         </div>
       </Block>
 
