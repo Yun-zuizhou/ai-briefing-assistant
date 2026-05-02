@@ -20,7 +20,6 @@ function isRelatedItem(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return isString(value.contentRef)
     && isEnumValue(value.contentType, CONTENT_TYPES)
-    && isEnumValue(value.contentRole, CONTENT_ROLES)
     && isStringOrNumber(value.id)
     && isString(value.title)
     && isOptionalString(value.summary)
@@ -33,6 +32,7 @@ export function isUnifiedContentDetailData(value: unknown): value is UnifiedCont
   if (!isRecord(value)) return false;
   return isString(value.contentRef)
     && isEnumValue(value.contentType, CONTENT_TYPES)
+    && isEnumValue(value.contentRole, CONTENT_ROLES)
     && isStringOrNumber(value.id)
     && isString(value.title)
     && isOptionalString(value.summary)
