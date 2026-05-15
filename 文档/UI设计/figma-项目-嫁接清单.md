@@ -80,20 +80,44 @@
 
 ## 4. /growth 成长
 
-| Figma 做得好的 | 级别 | 怎么做 |
-|---------------|------|--------|
-| 打卡热力图（本周 7 天勾选） | **L1** | 项目没有可视化打卡记录，加上 |
-| 用户画像区：persona 标签 + 描述 + 特质条 | **L1** | 项目的画像展示在 profile 页，但 growth 页也应该有摘要 |
-| 洞察卡片的正面/建议分类 | **L1** | 项目的 insights 展示不够结构化 |
-| 兴趣分布条形图 | **L1** | 项目的 keywords 只有标签，加上百分比分布 |
+Figma 对这个页面投入了大量设计，整体布局和信息架构明显优于项目当前版本。**整个页面的区块组织方式应该全盘采纳**，然后在每个区块中接入项目的真实数据和逻辑。
+
+### 页面整体结构（从 figma 采纳）
+
+```
+PageHeader（用户画像摘要）
+  ├── 头像 + persona 标签 + 特质进度条 + 关键词标签
+  └── Badge：优秀/良好
+
+PageContainer
+  ├── 打卡记录 InfoCard (B级)
+  │   ├── 连续天数 + 累计打卡
+  │   └── 本周 7 天勾选格
+  ├── 数据概览 Section
+  │   └── 2×2 grid：已读文章 / 完成待办 / 连续天数 / 行动转化率
+  ├── 个人洞察 Section
+  │   └── 洞察卡片列表（正面/建议分类 + Badge）
+  └── 关注领域分布 Section (B级)
+      └── 条形图列表（领域名 + 篇数 + 百分比 + 进度条）
+```
+
+### 逐区块嫁接方案
+
+| Figma 区块 | 级别 | 怎么做 | 数据从哪来 |
+|-----------|------|--------|-----------|
+| Header：头像 + persona 标签 + 特质进度条 | **L1** | 直接用。persona 标签用 `persona.personaSummary` 的前 6 字；特质条用静态预设（学习力/执行力/探索欲等），数值从 growth 数据计算 | `GrowthOverviewData.persona` + `keywords` |
+| 关键词标签区 + 管理入口 | **L1** | 直接用。keywords 渲染为 Badge，"管理"链接到 `/interest-config` | `GrowthOverviewData.keywords` |
+| 打卡记录 InfoCard（B级） | **L1** | 直接用。连续天数 + 累计打卡 + 7 天勾选格 | `ActionsOverviewData.checkedInToday` + `streakDays`（需要补一个 weekly 打卡数组） |
+| 数据概览 2×2 grid | **L1** | 直接用。数字来自真实数据 | `GrowthOverviewData` 的 stats + `ActionsOverviewData` |
+| 个人洞察卡片（正面/建议分类） | **L2** | 结构采纳，文案由项目后端生成或规则推导 | 当前数据不足，需要新增一个简单的规则引擎或 LLM 生成 |
+| 关注领域分布条形图 | **L1** | 直接用。百分比从 keywords 的 weight 计算 | `GrowthOverviewData.keywords`（需要增加 count 字段或从其他数据汇总） |
 
 | 项目需要保留的 | 级别 | 为什么 |
 |---------------|------|--------|
-| 本周总述文案 | **L3** | Figma 用 mock 数据 |
-| 人格画像（详细的 persona snapshot） | **L3** | 项目有 personaSummary + personaVersion |
-| 报告入口（周报/月报/年报） | **L3** | Figma 放到了 MePage |
-| 近期历史项 | **L3** | Figma 没有 |
-| 行动快照（签到+待办统计） | **L3** | Figma 放在 TodoPage |
+| 本周总述文案 | **L3** | Figma 用 mock 数据，项目的 `weeklySummary.growthSummary` 是真实内容 |
+| 人格画像详情（personaSummary + personaVersion + updatedAt） | **L3** | 保留在 `/profile` 详情页，growth 页只放摘要 |
+| 报告入口（周报/月报/年报） | **L3** | Figma 挪到了 MePage，但 growth 页底部放报告入口更合理——读完成长数据直接看报告 |
+| 近期历史项 | **L3** | Figma 没有，保留在 growth 页底部 |
 
 ---
 
